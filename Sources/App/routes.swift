@@ -15,8 +15,11 @@ public func routes(_ router: Router) throws {
     
     let uris = URIs(apiRoute: Constants.apiRoute)
     let giftController = GiftController()
+    let categoryController = CategoryController()
     
     router.get(uris.gifts, use: giftController.index)
     router.post(uris.gifts, use: giftController.create)
     router.delete(uris.gifts, Gift.parameter, use: giftController.delete)
+    
+    router.get(uris.categories, use: categoryController.index)
 }

@@ -16,4 +16,7 @@ class URIs {
     var gifts : String {
         return "\(apiRoute)/gifts"
     }
+    var categories : String {
+        return "\(apiRoute)/categories"
+    }
 }
