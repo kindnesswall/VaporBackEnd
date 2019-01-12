@@ -8,7 +8,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     try services.register(FluentPostgreSQLProvider())
 
     
-    let serverConfigure = NIOServerConfig.default(hostname: Constants.appInfo.dataBaseHost, port: 9090)
+    let serverConfigure = NIOServerConfig.default(hostname: Constants.appInfo.dataBaseHost, port: 8080)
     services.register(serverConfigure)
     
     /// Register routes to the router
