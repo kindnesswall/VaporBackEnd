@@ -6,9 +6,9 @@
 //
 
 import Vapor
-import FluentMySQL
+import FluentPostgreSQL
 
-final class Gift : MySQLModel {
+final class Gift : PostgreSQLModel {
     var id:Int?
     var title:String
     var address:String

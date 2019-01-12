@@ -6,11 +6,11 @@
 //
 
 
-import FluentMySQL
+import FluentPostgreSQL
 
 final class CategorySeed: Migration {
     
-    typealias Database = MySQLDatabase
+    typealias Database = PostgreSQLDatabase
     
     static let seeds = [
         Category(title:"Others"),
@@ -19,7 +19,7 @@ final class CategorySeed: Migration {
         Category(title:"Tablet")
     ]
     
-    static func prepare(on connection: MySQLConnection) -> Future<Void> {
+    static func prepare(on connection: PostgreSQLConnection) -> Future<Void> {
         
         let futures = seeds.map { seed in
             return seed.create(on: connection).map(to: Void.self) { _ in return }
@@ -27,7 +27,7 @@ final class CategorySeed: Migration {
         return Future<Void>.andAll(futures, eventLoop: connection.eventLoop)
     }
     
-    static func revert(on connection: MySQLConnection) -> Future<Void> {
+    static func revert(on connection: PostgreSQLConnection) -> Future<Void> {
         
         let futures = seeds.map { seed in
             return Category.query(on: connection).filter(\Category.title == seed.title).delete()

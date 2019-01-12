@@ -6,9 +6,9 @@
 //
 
 import Vapor
-import FluentMySQL
+import FluentPostgreSQL
 
-final class Category : MySQLModel {
+final class Category : PostgreSQLModel {
     var id:Int?
     var title:String
     
