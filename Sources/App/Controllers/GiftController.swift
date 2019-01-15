@@ -29,4 +29,10 @@ final class GiftController {
             }.transform(to: .ok)
     }
     
+    func filteredByCategory(_ req: Request) throws -> Future<[Gift]> {
+        return try req.parameters.next(Category.self).flatMap { category in
+            return try category.gifts.query(on: req).all()
+        }
+    }
+    
 }

@@ -14,6 +14,13 @@ final class Gift : PostgreSQLModel {
     var address:String
     var description:String
     var price:String
+    var categoryId:Int
+}
+
+extension Gift {
+    var category : Parent<Gift,Category> {
+        return parent(\.categoryId)
+    }
 }
 
 /// Allows `Gift` to be used as a dynamic migration.

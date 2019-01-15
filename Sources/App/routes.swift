@@ -18,6 +18,7 @@ public func routes(_ router: Router) throws {
     let categoryController = CategoryController()
     
     router.get(uris.gifts, use: giftController.index)
+    router.get(uris.gifts,Category.parameter, use: giftController.filteredByCategory)
     router.post(uris.gifts, use: giftController.create)
     router.delete(uris.gifts, Gift.parameter, use: giftController.delete)
     

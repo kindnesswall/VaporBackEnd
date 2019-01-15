@@ -18,6 +18,12 @@ final class Category : PostgreSQLModel {
     }
 }
 
+extension Category {
+    var gifts : Children<Category,Gift> {
+        return children(\.categoryId)
+    }
+}
+
 extension Category : Migration {}
 
 extension Category : Content {}
