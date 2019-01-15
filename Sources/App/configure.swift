@@ -1,12 +1,13 @@
 
 import FluentPostgreSQL
 import Vapor
+import Authentication
 
 /// Called before your application initializes.
 public func configure(_ config: inout Config, _ env: inout Environment, _ services: inout Services) throws {
     /// Register providers first
     try services.register(FluentPostgreSQLProvider())
-
+    try services.register(AuthenticationProvider())
     
     let serverConfigure = NIOServerConfig.default(hostname: Constants.appInfo.dataBaseHost, port: 8080)
     services.register(serverConfigure)
@@ -36,6 +37,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     var migrations = MigrationConfig()
     migrations.add(model: Gift.self, database: .psql)
     migrations.add(model: Category.self, database: .psql)
+    migrations.add(model: User.self, database: .psql)
     migrations.add(migration: CategorySeed.self, database: .psql)
     services.register(migrations)
 

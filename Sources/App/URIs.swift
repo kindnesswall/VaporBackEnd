@@ -19,4 +19,7 @@ class URIs {
     var categories : String {
         return "\(apiRoute)/categories"
     }
+    var users : String {
+        return "\(apiRoute)/users"
+    }
 }
