@@ -27,6 +27,6 @@ class URIs {
     }
     
     var gifts_categories : String {
-        return "\(gifts)/\(categories)"
+        return "\(apiRoute)/gifts/categories"
     }
 }
