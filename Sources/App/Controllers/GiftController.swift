@@ -17,14 +17,20 @@ final class GiftController {
     
     /// Saves a decoded `Gift` to the database.
     func create(_ req: Request) throws -> Future<Gift> {
+        let user = try req.requireAuthenticated(User.self)
         return try req.content.decode(Gift.self).flatMap { gift in
+            gift.userId = user.id
             return gift.save(on: req)
         }
     }
     
     /// Deletes a parameterized `Gift`.
     func delete(_ req: Request) throws -> Future<HTTPStatus> {
-        return try req.parameters.next(Gift.self).flatMap { gift in
+        let user = try req.requireAuthenticated(User.self)
+        return try req.parameters.next(Gift.self).flatMap { (gift) -> Future<Void> in
+            guard let userId = user.id , userId == gift.userId else {
+                throw AppErrors.unAuthorizedGift
+            }
             return gift.delete(on: req)
             }.transform(to: .ok)
     }

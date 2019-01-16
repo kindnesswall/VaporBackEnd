@@ -10,6 +10,7 @@ import FluentPostgreSQL
 
 final class Gift : PostgreSQLModel {
     var id:Int?
+    var userId:Int?
     var title:String
     var address:String
     var description:String
@@ -18,6 +19,9 @@ final class Gift : PostgreSQLModel {
 }
 
 extension Gift {
+    var user : Parent<Gift,User> {
+        return parent(\.userId)!
+    }
     var category : Parent<Gift,Category> {
         return parent(\.categoryId)
     }

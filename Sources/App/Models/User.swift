@@ -16,6 +16,12 @@ final class User : PostgreSQLModel {
     
 }
 
+extension User {
+    var gifts : Children<User,Gift> {
+        return children(\.userId)
+    }
+}
+
 extension User: TokenAuthenticatable {
     typealias TokenType = Token
 }
