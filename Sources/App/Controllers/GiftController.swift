@@ -29,7 +29,7 @@ final class GiftController {
         let user = try req.requireAuthenticated(User.self)
         return try req.parameters.next(Gift.self).flatMap { (gift) -> Future<Void> in
             guard let userId = user.id , userId == gift.userId else {
-                throw AppErrors.unAuthorizedGift
+                throw Constants.errors.unAuthorizedGift
             }
             return gift.delete(on: req)
             }.transform(to: .ok)

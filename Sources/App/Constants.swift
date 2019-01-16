@@ -10,5 +10,6 @@ import Foundation
 class Constants {
     static let apiRoute = "/api/v1"
     static let appInfo = AppInfo()
+    static let errors = ErrorConstants()
     
 }
