@@ -21,5 +21,6 @@ class AppError : Error , Debuggable {
 class ErrorConstants {
     
     let unAuthorizedGift = AppError(identifier: "unAuthorizedGift", reason: "Gift is unAuthorized for this operation")
+    let invalidPhoneNumber = AppError(identifier: "invalidPhoneNumber", reason: "The phone number is invalid")
     
 }
