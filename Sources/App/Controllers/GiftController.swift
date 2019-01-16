@@ -41,4 +41,9 @@ final class GiftController {
         }
     }
     
+    func filteredByOwner(_ req: Request) throws -> Future<[Gift]> {
+        let user = try req.requireAuthenticated(User.self)
+        return try user.gifts.query(on: req).all()
+    }
+    
 }

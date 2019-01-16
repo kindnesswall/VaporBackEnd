@@ -29,4 +29,7 @@ class URIs {
     var gifts_categories : String {
         return "\(apiRoute)/gifts/categories"
     }
+    var gifts_owner : String {
+        return "\(apiRoute)/gifts/owner"
+    }
 }
