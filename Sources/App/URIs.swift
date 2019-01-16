@@ -19,7 +19,14 @@ class URIs {
     var categories : String {
         return "\(apiRoute)/categories"
     }
-    var users : String {
-        return "\(apiRoute)/users"
+    var register : String {
+        return "\(apiRoute)/register"
+    }
+    var login : String {
+        return "\(apiRoute)/login"
+    }
+    
+    var gifts_categories : String {
+        return "\(gifts)/\(categories)"
     }
 }

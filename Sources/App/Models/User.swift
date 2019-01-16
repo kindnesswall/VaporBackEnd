@@ -16,6 +16,10 @@ final class User : PostgreSQLModel {
     
 }
 
+extension User: TokenAuthenticatable {
+    typealias TokenType = Token
+}
+
 extension User: BasicAuthenticatable {
     static var usernameKey: UsernameKey {
         return \.phoneNumber
@@ -25,7 +29,6 @@ extension User: BasicAuthenticatable {
         return \User.password
     }
 }
-
 
 extension User : Migration {
     

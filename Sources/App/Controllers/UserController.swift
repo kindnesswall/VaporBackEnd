@@ -18,4 +18,10 @@ final class UserController {
             return user.save(on: req)
             }.transform(to: .ok)
     }
+    
+    func loginHandler(_ req: Request) throws -> Future<Token> {
+        let user = try req.requireAuthenticated(User.self)
+        let token = try Token.generate(for: user)
+        return token.save(on: req)
+    }
 }
