@@ -34,6 +34,8 @@ public func routes(_ router: Router) throws {
     tokenProtected.post(uris.gifts,use: giftController.create)
     tokenProtected.delete(uris.gifts,Gift.parameter, use: giftController.delete)
     
+    tokenProtected.post(uris.gifts_images, use: giftController.uploadImage)
+    
     tokenProtected.get(uris.gifts_owner, use: giftController.filteredByOwner)
     
     //Routes Categories

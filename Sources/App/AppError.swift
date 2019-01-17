@@ -22,5 +22,6 @@ class ErrorConstants {
     
     let unAuthorizedGift = AppError(identifier: "unAuthorizedGift", reason: "Gift is unAuthorized for this operation")
     let invalidPhoneNumber = AppError(identifier: "invalidPhoneNumber", reason: "The phone number is invalid")
+    let invalidUserId = AppError(identifier: "invalidUserId", reason: "User Id is invalid")
     
 }

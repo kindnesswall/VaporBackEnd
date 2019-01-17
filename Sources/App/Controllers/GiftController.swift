@@ -46,4 +46,25 @@ final class GiftController {
         return try user.gifts.query(on: req).all()
     }
     
+    func uploadImage(_ req: Request) throws -> Future<ImageOutput> {
+        
+        let user = try req.requireAuthenticated(User.self)
+        guard let userId = user.id else {
+            throw Constants.errors.invalidUserId
+        }
+        
+        return try req.content.decode(ImageInput.self).map({ (imageInput) -> ImageOutput in
+            let appDirectory = AppFileManager()
+            let imageDirectory = appDirectory.appendUserDirectory(toURL: appDirectory.appImagesDirecory, userId: userId)
+            try appDirectory.createDirectoryIfDoesNotExist(path: imageDirectory)
+            let imageAddress = imageDirectory.appendingPathComponent(imageInput.image.filename)
+            appDirectory.saveFile(path: imageAddress, data: imageInput.image.data)
+            
+            let imageOutputAddress = appDirectory.getOutputImageAddress(domainAddress: Constants.domainAddress, userId: userId, fileName: imageInput.image.filename)
+            
+            return ImageOutput(address: imageOutputAddress)
+        })
+        
+    }
+    
 }

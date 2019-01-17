@@ -11,5 +11,6 @@ class Constants {
     static let apiRoute = "/api/v1"
     static let appInfo = AppInfo()
     static let errors = ErrorConstants()
+    static let domainAddress = URL(string: "http://localhost:8080")!
     
 }
