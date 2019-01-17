@@ -54,13 +54,17 @@ final class GiftController {
         }
         
         return try req.content.decode(ImageInput.self).map({ (imageInput) -> ImageOutput in
+            
+            let imageFormat = imageInput.imageFormat ?? "jpeg"
+            let imageName = "image_\(String.getCurrentDate()).\(imageFormat)"
+            
             let appDirectory = AppFileManager()
             let imageDirectory = appDirectory.appendUserDirectory(toURL: appDirectory.appImagesDirecory, userId: userId)
             try appDirectory.createDirectoryIfDoesNotExist(path: imageDirectory)
-            let imageAddress = imageDirectory.appendingPathComponent(imageInput.imageName)
+            let imageAddress = imageDirectory.appendingPathComponent(imageName)
             appDirectory.saveFile(path: imageAddress, data: imageInput.image)
 
-            let imageOutputAddress = appDirectory.getOutputImageAddress(domainAddress: Constants.domainAddress, userId: userId, fileName: imageInput.imageName)
+            let imageOutputAddress = appDirectory.getOutputImageAddress(domainAddress: Constants.domainAddress, userId: userId, fileName: imageName)
             
             return ImageOutput(address: imageOutputAddress)
         })

@@ -9,7 +9,7 @@ import Vapor
 
 final class ImageInput: Content {
     var image:Data
-    var imageName : String
+    var imageFormat:String?
 }
 
 final class ImageOutput: Content {
