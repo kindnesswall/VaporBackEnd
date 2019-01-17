@@ -57,10 +57,10 @@ final class GiftController {
             let appDirectory = AppFileManager()
             let imageDirectory = appDirectory.appendUserDirectory(toURL: appDirectory.appImagesDirecory, userId: userId)
             try appDirectory.createDirectoryIfDoesNotExist(path: imageDirectory)
-            let imageAddress = imageDirectory.appendingPathComponent(imageInput.image.filename)
-            appDirectory.saveFile(path: imageAddress, data: imageInput.image.data)
-            
-            let imageOutputAddress = appDirectory.getOutputImageAddress(domainAddress: Constants.domainAddress, userId: userId, fileName: imageInput.image.filename)
+            let imageAddress = imageDirectory.appendingPathComponent(imageInput.imageName)
+            appDirectory.saveFile(path: imageAddress, data: imageInput.image)
+
+            let imageOutputAddress = appDirectory.getOutputImageAddress(domainAddress: Constants.domainAddress, userId: userId, fileName: imageInput.imageName)
             
             return ImageOutput(address: imageOutputAddress)
         })

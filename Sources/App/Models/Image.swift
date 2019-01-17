@@ -8,7 +8,8 @@
 import Vapor
 
 final class ImageInput: Content {
-    var image:File
+    var image:Data
+    var imageName : String
 }
 
 final class ImageOutput: Content {
