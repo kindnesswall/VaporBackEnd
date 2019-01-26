@@ -29,7 +29,7 @@ final class GiftController {
         let user = try req.requireAuthenticated(User.self)
         return try req.parameters.next(Gift.self).flatMap { (gift) -> Future<Void> in
             guard let userId = user.id , userId == gift.userId else {
-                throw Constants.errors.unAuthorizedGift
+                throw Constants.errors.unauthorizedGift
             }
             return gift.delete(on: req)
             }.transform(to: .ok)
@@ -50,7 +50,7 @@ final class GiftController {
         
         let user = try req.requireAuthenticated(User.self)
         guard let userId = user.id else {
-            throw Constants.errors.invalidUserId
+            throw Constants.errors.nilUserId
         }
         
         return try req.content.decode(ImageInput.self).map({ (imageInput) -> ImageOutput in

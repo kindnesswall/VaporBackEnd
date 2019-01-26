@@ -44,5 +44,11 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     migrations.add(migration: CategorySeed.self, database: .psql)
     
     services.register(migrations)
+    
+    // Create a new NIO websocket server
+    let wss = NIOWebSocketServer.default()
+    sockets(wss: wss)
+    // Register our server
+    services.register(wss, as: WebSocketServer.self)
 
 }

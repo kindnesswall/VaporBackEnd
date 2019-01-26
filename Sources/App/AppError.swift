@@ -20,8 +20,10 @@ class AppError : Error , Debuggable {
 
 class ErrorConstants {
     
-    let unAuthorizedGift = AppError(identifier: "unAuthorizedGift", reason: "Gift is unAuthorized for this operation")
+    let unauthorizedSocket = AppError(identifier: "unauthorizedSocket", reason: "Socket is unauthorized")
+    let unauthorizedGift = AppError(identifier: "unauthorizedGift", reason: "Gift is unauthorized for this operation")
     let invalidPhoneNumber = AppError(identifier: "invalidPhoneNumber", reason: "The phone number is invalid")
-    let invalidUserId = AppError(identifier: "invalidUserId", reason: "User Id is invalid")
+    let nilUserId = AppError(identifier: "nilUserId", reason: "User Id is nil")
+    let nilGiftId = AppError(identifier: "nilGiftId", reason: "Gift Id is nil")
     
 }
