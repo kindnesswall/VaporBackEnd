@@ -10,8 +10,10 @@ import Vapor
 
 func sockets(wss: NIOWebSocketServer){
     
+    let uris = URIs();
+    
     let socketController = SocketController()
     
-    wss.get("echo", use: socketController.echoFunction)
+    wss.get(uris.chat, use: socketController.socketConnected)
     
 }

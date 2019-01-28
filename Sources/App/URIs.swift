@@ -9,8 +9,8 @@ import Foundation
 
 class URIs {
     private let apiRoute:String
-    init(apiRoute:String) {
-        self.apiRoute=apiRoute
+    init() {
+        self.apiRoute=Constants.apiRoute
     }
     
     var gifts : String {
@@ -24,6 +24,9 @@ class URIs {
     }
     var login : String {
         return "\(apiRoute)/login"
+    }
+    var chat : String {
+        return "\(apiRoute)/chat"
     }
     
     var gifts_categories : String {

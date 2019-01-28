@@ -5,7 +5,7 @@ import Crypto
 /// Register your application's routes here.
 public func routes(_ router: Router) throws {
     
-    let uris = URIs(apiRoute: Constants.apiRoute)
+    let uris = URIs()
     
     //Controllers
     let giftController = GiftController()
