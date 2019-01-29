@@ -8,10 +8,17 @@
 import Foundation
 
 final class Message : Codable {
-    var type : MessageType
-    var textMessage: TextMessage?
+    var type: MessageType
     
-    init(textMessage: TextMessage?) {
+    var textMessage: TextMessage?
+    var controlMessage: ControlMessage?
+    
+    init(controlMessage: ControlMessage) {
+        self.type = .control
+        self.controlMessage=controlMessage
+    }
+    
+    init(textMessage: TextMessage) {
         self.type = .text
         self.textMessage=textMessage
     }
@@ -19,5 +26,5 @@ final class Message : Codable {
 
 enum MessageType : String,Codable {
     case text
-    case fetch
+    case control
 }

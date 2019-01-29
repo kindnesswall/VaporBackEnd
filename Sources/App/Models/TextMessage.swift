@@ -16,6 +16,14 @@ final class TextMessage : PostgreSQLModel {
     var receiverId:Int
 }
 
+extension TextMessage {
+    static func getTextMessages(userId:Int,req:Request)->Future<[TextMessage]> {
+        return TextMessage.query(on: req).group(.or) {
+            $0.filter(\.senderId == userId).filter(\.receiverId == userId)
+        }.all()
+    }
+}
+
 extension TextMessage : Migration {}
 extension TextMessage : Content {}
 extension TextMessage : Parameter {}
