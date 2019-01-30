@@ -17,11 +17,17 @@ final class TextMessage : PostgreSQLModel {
 }
 
 extension TextMessage {
-    static func getTextMessages(userId:Int,req:Request)->Future<[TextMessage]> {
-        return TextMessage.query(on: req).group(.or) {
+    
+    static func getTextMessages(userId:Int,req:Request,afterId:Int?)->Future<[TextMessage]> {
+        let query = TextMessage.query(on: req).group(.or) {
             $0.filter(\.senderId == userId).filter(\.receiverId == userId)
-        }.all()
+            }
+        if let afterId = afterId {
+            query.filter(\.id > afterId)
+        }
+        return query.all()
     }
+    
 }
 
 extension TextMessage : Migration {}

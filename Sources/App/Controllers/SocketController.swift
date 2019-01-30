@@ -73,7 +73,7 @@ class SocketController {
         
         switch controlMessage.type {
         case .fetch:
-            self.fetchMessages(userId: userId, ws: ws, req: req)
+            self.fetchMessages(userId: userId, ws: ws, req: req, afterId: controlMessage.fetchMessage?.afterId)
         default:
             break
         }
@@ -137,8 +137,8 @@ class SocketController {
     
     //MARK: - Fetch Messages
     
-    private func fetchMessages(userId:Int,ws:WebSocket,req:Request){
-        TextMessage.getTextMessages(userId: userId, req: req).map { textMessages in
+    private func fetchMessages(userId:Int,ws:WebSocket,req:Request,afterId:Int?){
+        TextMessage.getTextMessages(userId: userId, req: req, afterId: afterId).map { textMessages in
             for textMessage in textMessages {
                 self.sendTextMessage(sockets: [ws], textMessage: textMessage)
             }
@@ -152,3 +152,4 @@ class SocketController {
     }
     
 }
+

@@ -12,5 +12,6 @@ class Constants {
     static let appInfo = AppInfo()
     static let errors = ErrorConstants()
     static let domainAddress = URL(string: "http://localhost:8080")!
+    static let maximumRequestFetchResultsCount = 50
     
 }

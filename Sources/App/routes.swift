@@ -28,15 +28,15 @@ public func routes(_ router: Router) throws {
     
     
     //Routes Gifts
-    router.get(uris.gifts,use: giftController.index)
-    router.get(uris.gifts_categories,Category.parameter, use: giftController.filteredByCategory)
+    router.post(uris.gifts,use: giftController.index)
+    router.post(uris.gifts_categories,Category.parameter, use: giftController.filteredByCategory)
     
-    tokenProtected.post(uris.gifts,use: giftController.create)
+    tokenProtected.post(uris.gifts_register,use: giftController.create)
     tokenProtected.delete(uris.gifts,Gift.parameter, use: giftController.delete)
     
     tokenProtected.post(uris.gifts_images, use: giftController.uploadImage)
     
-    tokenProtected.get(uris.gifts_owner, use: giftController.filteredByOwner)
+    tokenProtected.post(uris.gifts_owner, use: giftController.filteredByOwner)
     
     //Routes Categories
     router.get(uris.categories, use: categoryController.index)

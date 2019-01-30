@@ -12,7 +12,34 @@ final class GiftController {
     
     /// Returns a list of all `Gift`s.
     func index(_ req: Request) throws -> Future<[Gift]> {
-        return Gift.query(on: req).all()
+        
+        return try req.content.decode(RequestRange.self).flatMap { requestRange in
+            let query = Gift.query(on: req)
+            return Gift.getGiftsWithRangeFilter(query: query, requestRange: requestRange)
+        }
+        
+    }
+    
+    func filteredByCategory(_ req: Request) throws -> Future<[Gift]> {
+        
+        return try req.parameters.next(Category.self).flatMap { category in
+            
+            return try req.content.decode(RequestRange.self).flatMap({ requestRange in
+                let query = try category.gifts.query(on: req)
+                return Gift.getGiftsWithRangeFilter(query: query, requestRange: requestRange)
+            })
+            
+        }
+    }
+    
+    func filteredByOwner(_ req: Request) throws -> Future<[Gift]> {
+        
+        return try req.content.decode(RequestRange.self).flatMap({ requestRange in
+            let user = try req.requireAuthenticated(User.self)
+            let query = try user.gifts.query(on: req)
+            return Gift.getGiftsWithRangeFilter(query: query, requestRange: requestRange)
+        })
+        
     }
     
     /// Saves a decoded `Gift` to the database.
@@ -35,16 +62,6 @@ final class GiftController {
             }.transform(to: .ok)
     }
     
-    func filteredByCategory(_ req: Request) throws -> Future<[Gift]> {
-        return try req.parameters.next(Category.self).flatMap { category in
-            return try category.gifts.query(on: req).all()
-        }
-    }
-    
-    func filteredByOwner(_ req: Request) throws -> Future<[Gift]> {
-        let user = try req.requireAuthenticated(User.self)
-        return try user.gifts.query(on: req).all()
-    }
     
     func uploadImage(_ req: Request) throws -> Future<ImageOutput> {
         

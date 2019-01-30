@@ -29,6 +29,9 @@ class URIs {
         return "\(apiRoute)/chat"
     }
     
+    var gifts_register : String {
+        return "\(apiRoute)/gifts/register"
+    }
     var gifts_categories : String {
         return "\(apiRoute)/gifts/categories"
     }

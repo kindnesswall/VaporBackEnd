@@ -27,6 +27,27 @@ extension Gift {
     }
 }
 
+extension Gift {
+    
+    static func getGiftsWithRangeFilter(query:QueryBuilder<PostgreSQLDatabase, Gift>,requestRange:RequestRange?)->Future<[Gift]>{
+        
+        if let beforeId = requestRange?.beforeId {
+            query.filter(\.id < beforeId)
+        }
+        
+        let maximumCount = Constants.maximumRequestFetchResultsCount
+        var unwrappedCount = requestRange?.count ?? maximumCount
+        
+        if unwrappedCount > maximumCount {
+            unwrappedCount = maximumCount
+        }
+        
+        return query.sort(\.id, PostgreSQLDirection.descending).range(0..<unwrappedCount).all()
+    }
+    
+    
+}
+
 /// Allows `Gift` to be used as a dynamic migration.
 extension Gift : Migration {}
 
