@@ -16,6 +16,18 @@ final class Gift : PostgreSQLModel {
     var description:String
     var price:String
     var categoryId:Int
+    var images:[String]
+    
+    var createdAt: Date?
+    var updatedAt: Date?
+    var deletedAt: Date?
+}
+
+extension Gift {
+    static let createdAtKey: TimestampKey? = \.createdAt
+    static let updatedAtKey: TimestampKey? = \.updatedAt
+    static let deletedAtKey: TimestampKey? = \.deletedAt
+    
 }
 
 extension Gift {
