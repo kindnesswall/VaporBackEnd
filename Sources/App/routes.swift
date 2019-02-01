@@ -1,6 +1,7 @@
 
 import Vapor
 import Crypto
+import Guardian
 
 /// Register your application's routes here.
 public func routes(_ router: Router) throws {
@@ -15,13 +16,15 @@ public func routes(_ router: Router) throws {
     //Middlewares
     let tokenAuthMiddleware = User.tokenAuthMiddleware()
     let guardAuthMiddleware = User.guardAuthMiddleware()
+    let guardianMiddleware = GuardianMiddleware(rate: Rate(limit: 1, interval: .minute))
     
     //Groups
     let tokenProtected = router.grouped(tokenAuthMiddleware, guardAuthMiddleware)
+    let guardianProtected = router.grouped(guardianMiddleware)
     
     
     //Routes Login
-    router.post(uris.register, use: userController.registerHandler)
+    guardianProtected.post(uris.register, use: userController.registerHandler)
     router.post(uris.login, use: userController.loginHandler)
     
     

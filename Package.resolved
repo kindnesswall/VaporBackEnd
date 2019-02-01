@@ -65,6 +65,15 @@
         }
       },
       {
+        "package": "Guardian",
+        "repositoryURL": "https://github.com/Jinxiansen/Guardian.git",
+        "state": {
+          "branch": null,
+          "revision": "09171f5c06ce277b3794a76c21bec6cefa73770b",
+          "version": "3.0.0"
+        }
+      },
+      {
         "package": "HTTP",
         "repositoryURL": "https://github.com/vapor/http.git",
         "state": {
