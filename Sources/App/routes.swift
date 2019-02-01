@@ -13,18 +13,16 @@ public func routes(_ router: Router) throws {
     let userController = UserController()
     
     //Middlewares
-    let basicAuthMiddleware = User.basicAuthMiddleware(using: BCryptDigest())
-    let guardAuthMiddleware = User.guardAuthMiddleware()
     let tokenAuthMiddleware = User.tokenAuthMiddleware()
+    let guardAuthMiddleware = User.guardAuthMiddleware()
     
     //Groups
-    let basicProtected = router.grouped(basicAuthMiddleware, guardAuthMiddleware)
     let tokenProtected = router.grouped(tokenAuthMiddleware, guardAuthMiddleware)
     
     
     //Routes Login
-    router.post(uris.register, use: userController.createHandler)
-    basicProtected.post(uris.login, use: userController.loginHandler)
+    router.post(uris.register, use: userController.registerHandler)
+    router.post(uris.login, use: userController.loginHandler)
     
     
     //Routes Gifts

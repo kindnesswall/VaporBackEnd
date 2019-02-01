@@ -18,11 +18,18 @@ class AppError : Error , Debuggable {
     }
 }
 
+class AppErrorCatch {
+    public static func printError(error:Error){
+        print(error.localizedDescription)
+    }
+}
+
 class ErrorConstants {
     
     let unauthorizedSocket = AppError(identifier: "unauthorizedSocket", reason: "Socket is unauthorized")
     let unauthorizedGift = AppError(identifier: "unauthorizedGift", reason: "Gift is unauthorized for this operation")
     let invalidPhoneNumber = AppError(identifier: "invalidPhoneNumber", reason: "The phone number is invalid")
+    let invalidActivationCode = AppError(identifier: "invalidActivationCode", reason: "The activation code is invalid")
     let nilUserId = AppError(identifier: "nilUserId", reason: "User Id is nil")
     let nilGiftId = AppError(identifier: "nilGiftId", reason: "Gift Id is nil")
     

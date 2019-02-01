@@ -12,8 +12,18 @@ import Authentication
 final class User : PostgreSQLModel {
     var id:Int?
     var phoneNumber:String
-    var password:String
+    var activationCode:String?
     
+    init(phoneNumber:String) {
+        self.phoneNumber=phoneNumber
+    }
+}
+
+extension User {
+    static func generateActivationCode() throws -> String {
+        let random = try CryptoRandom().generateData(count: 6)
+        return random.base64EncodedString()
+    }
 }
 
 extension User {
@@ -26,25 +36,7 @@ extension User: TokenAuthenticatable {
     typealias TokenType = Token
 }
 
-extension User: BasicAuthenticatable {
-    static var usernameKey: UsernameKey {
-        return \.phoneNumber
-    }
-    
-    static var passwordKey: PasswordKey {
-        return \User.password
-    }
-}
-
-extension User : Migration {
-    
-    static func prepare(on conn: PostgreSQLConnection) -> Future<Void> {
-        return Database.create(self, on: conn) { (builder) in
-            try addProperties(to: builder)
-            builder.unique(on: \.phoneNumber)
-        }
-    }
-}
+extension User : Migration {}
 
 extension User : Content {}
 

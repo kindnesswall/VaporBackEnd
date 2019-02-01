@@ -132,7 +132,7 @@ class SocketController {
             }
             self?.sendTextMessage(sockets: receiverSockets, textMessage: textMessage)
             
-            }.catch(printError)
+            }.catch(AppErrorCatch.printError)
     }
     
     //MARK: - Fetch Messages
@@ -142,13 +142,7 @@ class SocketController {
             for textMessage in textMessages {
                 self.sendTextMessage(sockets: [ws], textMessage: textMessage)
             }
-            }.catch(printError)
-    }
-    
-    //MARK: - Error Handling
-    
-    private func printError(error:Error){
-        print(error.localizedDescription)
+            }.catch(AppErrorCatch.printError)
     }
     
 }
