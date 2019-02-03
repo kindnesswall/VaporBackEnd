@@ -17,6 +17,7 @@ final class Gift : PostgreSQLModel {
     var price:String
     var categoryId:Int
     var images:[String]
+    var status:GiftStatus
     
     var createdAt: Date?
     var updatedAt: Date?
