@@ -13,6 +13,12 @@ final class User : PostgreSQLModel {
     var id:Int?
     var phoneNumber:String
     var activationCode:String?
+    var isAdmin:Bool = false
+    
+    final class Input : Codable {
+        var phoneNumber:String
+        var activationCode:String?
+    }
     
     init(phoneNumber:String) {
         self.phoneNumber=phoneNumber

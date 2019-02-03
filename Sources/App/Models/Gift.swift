@@ -11,6 +11,8 @@ import FluentPostgreSQL
 final class Gift : PostgreSQLModel {
     var id:Int?
     var userId:Int?
+    var isReviewed = false
+    
     var title:String
     var address:String
     var description:String
@@ -22,6 +24,44 @@ final class Gift : PostgreSQLModel {
     var createdAt: Date?
     var updatedAt: Date?
     var deletedAt: Date?
+    
+    
+    init(userId:Int?,gift:Gift.Input) {
+        self.userId = userId
+        
+        self.title=gift.title
+        self.address=gift.address
+        self.description=gift.description
+        self.price=gift.price
+        self.categoryId=gift.categoryId
+        self.images=gift.images
+        self.status=gift.status
+        
+        self.isReviewed = false
+    }
+    
+    func update(gift:Gift.Input) {
+        self.title=gift.title
+        self.address=gift.address
+        self.description=gift.description
+        self.price=gift.price
+        self.categoryId=gift.categoryId
+        self.images=gift.images
+        self.status=gift.status
+
+        self.isReviewed = false
+    }
+    
+    
+    final class Input : Codable {
+        var title:String
+        var address:String
+        var description:String
+        var price:String
+        var categoryId:Int
+        var images:[String]
+        var status:GiftStatus
+    }
 }
 
 extension Gift {

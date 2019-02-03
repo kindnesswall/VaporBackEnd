@@ -15,7 +15,7 @@ final class UserController {
     
     func registerHandler(_ req: Request) throws -> Future<HTTPStatus> {
         
-        return try req.content.decode(User.self).flatMap{ (inputUser)->Future<HTTPStatus> in
+        return try req.content.decode(User.Input.self).flatMap{ (inputUser)->Future<HTTPStatus> in
             
             let phoneNumber = try UserController.checkPhoneNumber(inputUser: inputUser)
             
@@ -40,7 +40,7 @@ final class UserController {
     
     func loginHandler(_ req: Request) throws -> Future<Token> {
         
-        return try req.content.decode(User.self).flatMap{ (inputUser)->Future<Token> in
+        return try req.content.decode(User.Input.self).flatMap{ (inputUser)->Future<Token> in
             
             let phoneNumber = try UserController.checkPhoneNumber(inputUser: inputUser)
 
@@ -70,7 +70,7 @@ final class UserController {
         
     }
     
-    private static func checkPhoneNumber(inputUser:User) throws -> String {
+    private static func checkPhoneNumber(inputUser:User.Input) throws -> String {
         guard inputUser.phoneNumber.isCorrectPhoneNumber(),
             let phoneNumber = inputUser.phoneNumber.castNumberToEnglish()  else {
                 throw Constants.errors.invalidPhoneNumber
