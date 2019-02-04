@@ -10,6 +10,7 @@ public func routes(_ router: Router) throws {
     
     //Controllers
     let giftController = GiftController()
+    let giftImageController = GiftImageController()
     let giftAdminController = GiftAdminController()
     let categoryController = CategoryController()
     let userController = UserController()
@@ -39,7 +40,7 @@ public func routes(_ router: Router) throws {
     tokenProtected.put(uris.gifts,Gift.parameter, use: giftController.update)
     tokenProtected.delete(uris.gifts,Gift.parameter, use: giftController.delete)
     
-    tokenProtected.post(uris.gifts_images, use: giftController.uploadImage)
+    tokenProtected.post(uris.gifts_images, use: giftImageController.uploadImage)
     
     tokenProtected.post(uris.gifts_owner, use: giftController.filteredByOwner)
     
