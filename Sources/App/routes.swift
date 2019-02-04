@@ -34,7 +34,6 @@ public func routes(_ router: Router) throws {
     
     //Routes Gifts
     router.post(uris.gifts,use: giftController.index)
-    router.post(uris.gifts_categories,Category.parameter, use: giftController.filteredByCategory)
     
     tokenProtected.post(uris.gifts_register,use: giftController.create)
     tokenProtected.put(uris.gifts,Gift.parameter, use: giftController.update)
@@ -42,7 +41,7 @@ public func routes(_ router: Router) throws {
     
     tokenProtected.post(uris.gifts_images, use: giftImageController.uploadImage)
     
-    tokenProtected.post(uris.gifts_owner, use: giftController.filteredByOwner)
+    tokenProtected.post(uris.gifts_owner, use: giftController.ownerGifts)
     
     //Routes Admin
     adminProtected.put(uris.gifts_accept,Gift.parameter, use: giftAdminController.acceptGift)

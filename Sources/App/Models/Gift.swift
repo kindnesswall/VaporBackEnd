@@ -82,15 +82,18 @@ extension Gift {
 
 extension Gift {
     
-    static func getGiftsWithRangeFilter(query:QueryBuilder<PostgreSQLDatabase, Gift>,requestRange:RequestRange?)->Future<[Gift]>{
+    static func getGiftsWithRequestFilter(query:QueryBuilder<PostgreSQLDatabase, Gift>,requestInput:RequestInput?)->Future<[Gift]>{
         
-        if let beforeId = requestRange?.beforeId {
+        if let categoryId = requestInput?.categoryId {
+            query.filter(\.categoryId == categoryId)
+        }
+        
+        if let beforeId = requestInput?.beforeId {
             query.filter(\.id < beforeId)
         }
         
         let maximumCount = Constants.maximumRequestFetchResultsCount
-        var unwrappedCount = requestRange?.count ?? maximumCount
-        
+        var unwrappedCount = requestInput?.count ?? maximumCount
         if unwrappedCount > maximumCount {
             unwrappedCount = maximumCount
         }

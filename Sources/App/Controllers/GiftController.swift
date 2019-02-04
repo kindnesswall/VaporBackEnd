@@ -13,31 +13,19 @@ final class GiftController {
     /// Returns a list of all `Gift`s.
     func index(_ req: Request) throws -> Future<[Gift]> {
         
-        return try req.content.decode(RequestRange.self).flatMap { requestRange in
+        return try req.content.decode(RequestInput.self).flatMap { requestInput in
             let query = Gift.query(on: req)
-            return Gift.getGiftsWithRangeFilter(query: query, requestRange: requestRange)
+            return Gift.getGiftsWithRequestFilter(query: query, requestInput: requestInput)
         }
         
     }
     
-    func filteredByCategory(_ req: Request) throws -> Future<[Gift]> {
+    func ownerGifts(_ req: Request) throws -> Future<[Gift]> {
         
-        return try req.parameters.next(Category.self).flatMap { category in
-            
-            return try req.content.decode(RequestRange.self).flatMap({ requestRange in
-                let query = try category.gifts.query(on: req)
-                return Gift.getGiftsWithRangeFilter(query: query, requestRange: requestRange)
-            })
-            
-        }
-    }
-    
-    func filteredByOwner(_ req: Request) throws -> Future<[Gift]> {
-        
-        return try req.content.decode(RequestRange.self).flatMap({ requestRange in
+        return try req.content.decode(RequestInput.self).flatMap({ requestInput in
             let user = try req.requireAuthenticated(User.self)
             let query = try user.gifts.query(on: req)
-            return Gift.getGiftsWithRangeFilter(query: query, requestRange: requestRange)
+            return Gift.getGiftsWithRequestFilter(query: query, requestInput: requestInput)
         })
         
     }
