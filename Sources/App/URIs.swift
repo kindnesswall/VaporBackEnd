@@ -46,4 +46,7 @@ class URIs {
     var gifts_reject : String {
         return "\(apiRoute)/gifts/reject"
     }
+    var gifts_review : String {
+        return "\(apiRoute)/gifts/review"
+    }
 }

@@ -6,7 +6,7 @@
 //
 
 import Vapor
-
+import FluentPostgreSQL
 
 final class GiftAdminController {
     
@@ -26,6 +26,15 @@ final class GiftAdminController {
             gift.isReviewed = true
             return gift.save(on: req)
             }.transform(to: .ok)
+    }
+    
+    func unreviewedGifts(_ req: Request) throws -> Future<[Gift]> {
+        
+        return try req.content.decode(RequestInput.self).flatMap { requestInput in
+            let query = Gift.query(on: req).filter(\.isReviewed == false)
+            return Gift.getGiftsWithRequestFilter(query: query, requestInput: requestInput)
+        }
+        
     }
     
 }

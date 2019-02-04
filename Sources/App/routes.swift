@@ -46,6 +46,7 @@ public func routes(_ router: Router) throws {
     //Routes Admin
     adminProtected.put(uris.gifts_accept,Gift.parameter, use: giftAdminController.acceptGift)
     adminProtected.delete(uris.gifts_reject,Gift.parameter, use: giftAdminController.rejectGift)
+    adminProtected.post(uris.gifts_review, use: giftAdminController.unreviewedGifts)
     
     //Routes Categories
     router.get(uris.categories, use: categoryController.index)
