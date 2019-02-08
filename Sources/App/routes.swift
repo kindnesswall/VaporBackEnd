@@ -13,6 +13,7 @@ public func routes(_ router: Router) throws {
     let giftImageController = GiftImageController()
     let giftAdminController = GiftAdminController()
     let categoryController = CategoryController()
+    let locationController = LocationController()
     let userController = UserController()
     
     //Middlewares
@@ -50,6 +51,8 @@ public func routes(_ router: Router) throws {
     
     //Routes Categories
     router.get(uris.categories, use: categoryController.index)
+    router.get(uris.province, use: locationController.getProvinces)
+    router.get(uris.city, Province.parameter, use: locationController.getCities)
     
     
 }
