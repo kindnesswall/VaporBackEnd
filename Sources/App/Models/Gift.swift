@@ -20,6 +20,8 @@ final class Gift : PostgreSQLModel {
     var categoryId:Int
     var images:[String]
     var status:GiftStatus
+    var provinceId:Int
+    var cityId:Int
     
     var createdAt: Date?
     var updatedAt: Date?
@@ -36,6 +38,8 @@ final class Gift : PostgreSQLModel {
         self.categoryId=gift.categoryId
         self.images=gift.images
         self.status=gift.status
+        self.provinceId=gift.provinceId
+        self.cityId=gift.cityId
         
         self.isReviewed = false
     }
@@ -48,6 +52,8 @@ final class Gift : PostgreSQLModel {
         self.categoryId=gift.categoryId
         self.images=gift.images
         self.status=gift.status
+        self.provinceId=gift.provinceId
+        self.cityId=gift.cityId
 
         self.isReviewed = false
     }
@@ -61,6 +67,8 @@ final class Gift : PostgreSQLModel {
         var categoryId:Int
         var images:[String]
         var status:GiftStatus
+        var provinceId:Int
+        var cityId:Int
     }
 }
 
@@ -86,6 +94,14 @@ extension Gift {
         
         if let categoryId = requestInput?.categoryId {
             query.filter(\.categoryId == categoryId)
+        }
+        
+        if let cityId = requestInput?.cityId {
+            query.filter(\.cityId == cityId)
+        } else {
+            if let provinceId = requestInput?.provinceId {
+                query.filter(\.provinceId == provinceId)
+            }
         }
         
         if let beforeId = requestInput?.beforeId {

@@ -11,4 +11,6 @@ class RequestInput: Codable {
     var beforeId:Int?
     var count:Int?
     var categoryId:Int?
+    var provinceId:Int?
+    var cityId:Int?
 }
