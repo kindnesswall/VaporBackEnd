@@ -28,8 +28,10 @@ final class UserController {
                     user = User(phoneNumber: phoneNumber)
                 }
                 
-                user.activationCode = try User.generateActivationCode()
-                print("User Activation Code: \(user.activationCode ?? "")") ////
+                let activationCode = User.generateActivationCode()
+                user.activationCode = activationCode
+                print("User Activation Code: \(activationCode)") //
+//                self.sendActivationCodeSMS(phoneNumber: phoneNumber, activationCode: activationCode)
                 return user.save(on: req).transform(to: .ok)
                 
             })
@@ -67,6 +69,19 @@ final class UserController {
             })
         }
         
+        
+    }
+    
+    private func sendActivationCodeSMS(phoneNumber:String,activationCode:String){
+        guard let url = URIs().getSMSUrl(apiKey: Constants.appInfo.smsConfig.apiKey, receptor: phoneNumber, template: Constants.appInfo.smsConfig.activationCodeTemplate, token: activationCode) else {
+            return
+        }
+        
+        APICall.request(url: url, httpMethod: .POST) { (data, response, error) in
+            if let error = error {
+                print(error.localizedDescription)
+            }
+        }
         
     }
     

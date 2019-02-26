@@ -55,4 +55,10 @@ class URIs {
     var gifts_review : String {
         return "\(apiRoute)/gifts/review"
     }
+    
+    func getSMSUrl(apiKey:String,receptor:String,template:String,token:String)->String?{
+        let rawUrl = "https://saharsms.com/api/\(apiKey)/json/SendVerify?receptor=\(receptor)&template=\(template)&token=\(token)"
+        let encodedURL = rawUrl.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
+        return encodedURL
+    }
 }

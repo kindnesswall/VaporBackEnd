@@ -26,7 +26,7 @@ final class User : PostgreSQLModel {
 }
 
 extension User {
-    static func generateActivationCode() throws -> String {
+    static func generateActivationCode()-> String {
         let randomActivationCode = AppRandom.randomNumericString(count: 5)
         return randomActivationCode
     }
