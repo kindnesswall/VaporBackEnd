@@ -20,7 +20,9 @@ public func routes(_ router: Router) throws {
     let tokenAuthMiddleware = User.tokenAuthMiddleware()
     let guardAuthMiddleware = User.guardAuthMiddleware()
     let guardAdminMiddleware = GuardAdminMiddleware()
-    let guardianMiddleware = GuardianMiddleware(rate: Rate(limit: 1, interval: .minute))
+    let guardianMiddleware = GuardianMiddleware(rate: Rate(limit: 1, interval: .minute),closure:{ _ in
+        throw Constants.errors.tryOneMinuteLater
+    })
     
     //Groups
     let tokenProtected = router.grouped(tokenAuthMiddleware, guardAuthMiddleware)

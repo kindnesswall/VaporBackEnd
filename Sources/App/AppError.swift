@@ -26,6 +26,7 @@ class AppErrorCatch {
 
 class ErrorConstants {
     
+    let tryOneMinuteLater = AppError(identifier: "tryOneMinuteLater", reason: "Please try one minute later")
     let unauthorizedRequest = AppError(identifier: "unauthorizedRequest", reason: "Request is unauthorized")
     let unauthorizedSocket = AppError(identifier: "unauthorizedSocket", reason: "Socket is unauthorized")
     let unauthorizedGift = AppError(identifier: "unauthorizedGift", reason: "Gift is unauthorized for this operation")
