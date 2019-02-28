@@ -11,7 +11,7 @@ class AppRandom {
     
     static func randomNumber(upper_bound:Int) -> Int
     {
-        return Int(arc4random_uniform(UInt32(upper_bound)))
+        return Int.random(in: 0..<upper_bound)
     }
     
     static func randomElementFromList<T>(list:[T])->T {
