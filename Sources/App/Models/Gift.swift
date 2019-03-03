@@ -18,8 +18,8 @@ final class Gift : PostgreSQLModel {
     var description:String
     var price:String
     var categoryId:Int
-    var images:[String]
-    var status:GiftStatus
+    var giftImages:[String]
+    var isNew:Bool
     var provinceId:Int
     var cityId:Int
     
@@ -36,8 +36,8 @@ final class Gift : PostgreSQLModel {
         self.description=gift.description
         self.price=gift.price
         self.categoryId=gift.categoryId
-        self.images=gift.images
-        self.status=gift.status
+        self.giftImages=gift.giftImages
+        self.isNew=gift.isNew
         self.provinceId=gift.provinceId
         self.cityId=gift.cityId
         
@@ -50,8 +50,8 @@ final class Gift : PostgreSQLModel {
         self.description=gift.description
         self.price=gift.price
         self.categoryId=gift.categoryId
-        self.images=gift.images
-        self.status=gift.status
+        self.giftImages=gift.giftImages
+        self.isNew=gift.isNew
         self.provinceId=gift.provinceId
         self.cityId=gift.cityId
 
@@ -65,8 +65,8 @@ final class Gift : PostgreSQLModel {
         var description:String
         var price:String
         var categoryId:Int
-        var images:[String]
-        var status:GiftStatus
+        var giftImages:[String]
+        var isNew:Bool
         var provinceId:Int
         var cityId:Int
     }
