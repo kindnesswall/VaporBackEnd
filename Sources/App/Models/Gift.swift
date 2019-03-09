@@ -12,6 +12,7 @@ final class Gift : PostgreSQLModel {
     var id:Int?
     var userId:Int?
     var isReviewed = false
+    var categoryTitle:String?
     
     var title:String
     var address:String

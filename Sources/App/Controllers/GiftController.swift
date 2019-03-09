@@ -34,10 +34,8 @@ final class GiftController {
     func create(_ req: Request) throws -> Future<Gift> {
         let user = try req.requireAuthenticated(User.self)
         return try req.content.decode(Gift.Input.self).flatMap { inputGift in
-            
             let gift = Gift(userId: user.id, gift: inputGift)
-            
-            return gift.save(on: req)
+            return self.saveGift(gift: gift, req: req)
         }
     }
     
@@ -49,13 +47,19 @@ final class GiftController {
             }
             
             return try req.content.decode(Gift.Input.self).flatMap { inputGift -> Future<Gift> in
-                
                 gift.update(gift: inputGift)
-                return gift.save(on: req)
+                return self.saveGift(gift: gift, req: req)
             }
             
         }
         
+    }
+    
+    private func saveGift(gift:Gift,req: Request)->Future<Gift>{
+        return gift.category.get(on: req).flatMap({ (category) -> Future<Gift> in
+            gift.categoryTitle = category.title
+            return gift.save(on: req)
+        })
     }
     
     /// Deletes a parameterized `Gift`.
