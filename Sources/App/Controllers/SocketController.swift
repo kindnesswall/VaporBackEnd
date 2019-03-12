@@ -58,7 +58,7 @@ class SocketController {
             guard let textMessage = message.textMessage else {
                 return
             }
-            self.textMessageIsReceived(userId: userId, req: req, textMessage: textMessage)
+            self.textMessageIsReceived(userId: userId, ws: ws, req: req, textMessage: textMessage)
             
         case .control:
             guard let controlMessage = message.controlMessage else {
@@ -74,16 +74,32 @@ class SocketController {
         switch controlMessage.type {
         case .fetch:
             self.fetchMessages(userId: userId, ws: ws, req: req, afterId: controlMessage.fetchMessage?.afterId)
+        case .ack:
+            guard let ackMessage = controlMessage.ackMessage else {
+                return
+            }
+            self.ackMessageIsReceived(userId:userId ,req: req, ackMessage: ackMessage)
         default:
             break
         }
         
     }
     
-    private func textMessageIsReceived(userId:Int,req:Request,textMessage:TextMessage){
-        textMessage.senderId = userId
-        self.saveTextMessage(textMessage: textMessage, req: req)
-        
+    private func textMessageIsReceived(userId:Int,ws:WebSocket,req:Request,textMessage:TextMessage){
+        self.saveTextMessage(userId: userId, ws: ws, req: req, textMessage: textMessage)
+    }
+    
+    private func ackMessageIsReceived(userId:Int,req:Request,ackMessage:AckMessage) {
+        TextMessage.find(ackMessage.messageId, on: req).map { message -> Future<TextMessage> in
+            guard let message = message else {
+                throw Constants.errors.messageNotFound
+            }
+            guard message.receiverId == userId else {
+                throw Constants.errors.unauthorizedMessage
+            }
+            message.ack = true
+            return message.save(on: req)
+        }.catch(AppErrorCatch.printError)
     }
     
     
@@ -91,6 +107,15 @@ class SocketController {
     
     private func sendReadyControlMessage(ws:WebSocket){
         let controlMessage = ControlMessage(type: .ready)
+        let message = Message(controlMessage: controlMessage)
+        self.sendMessage(sockets: [ws], message: message)
+    }
+    
+    private func sendTextAckMessage(ws:WebSocket,message:TextMessage) {
+        guard let ackMessage = AckMessage(textMessage: message) else {
+            return
+        }
+        let controlMessage = ControlMessage(ackMessage: ackMessage)
         let message = Message(controlMessage: controlMessage)
         self.sendMessage(sockets: [ws], message: message)
     }
@@ -123,14 +148,15 @@ class SocketController {
     
     //MARK: - Save Messages
     
-    private func saveTextMessage(textMessage:TextMessage,req:Request){
-        
+    private func saveTextMessage(userId:Int,ws:WebSocket,req:Request,textMessage:TextMessage){
+        textMessage.senderId = userId
+        textMessage.ack = false
         textMessage.save(on: req).map { [weak self] textMessage in
             
-            guard let receiverSockets = self?.getReceiverSockets(receiverId: textMessage.receiverId) else {
-                return
+            self?.sendTextAckMessage(ws: ws, message: textMessage)
+            if let receiverSockets = self?.getReceiverSockets(receiverId: textMessage.receiverId) {
+                self?.sendTextMessage(sockets: receiverSockets, textMessage: textMessage)
             }
-            self?.sendTextMessage(sockets: receiverSockets, textMessage: textMessage)
             
             }.catch(AppErrorCatch.printError)
     }

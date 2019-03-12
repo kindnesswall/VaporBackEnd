@@ -11,9 +11,10 @@ import FluentPostgreSQL
 
 final class TextMessage : PostgreSQLModel {
     var id:Int?
-    var senderId:Int?
+    var senderId:Int
     var text:String
     var receiverId:Int
+    var ack:Bool?
 }
 
 extension TextMessage {
