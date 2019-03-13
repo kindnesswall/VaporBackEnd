@@ -9,15 +9,15 @@ import Foundation
 
 final class ControlMessage : Codable {
     var type:ControlMessageType
-    var fetchMessage:FetchMessage?
+    var fetchMessageInput:FetchMessageInput?
     var ackMessage:AckMessage?
     
     init(type:ControlMessageType) {
         self.type=type
     }
-    init(fetchMessage:FetchMessage) {
+    init(fetchMessageInput:FetchMessageInput) {
         self.type = .fetch
-        self.fetchMessage=fetchMessage
+        self.fetchMessageInput=fetchMessageInput
     }
     init(ackMessage:AckMessage) {
         self.type = .ack

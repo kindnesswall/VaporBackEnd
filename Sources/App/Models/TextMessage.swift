@@ -11,22 +11,31 @@ import FluentPostgreSQL
 
 final class TextMessage : PostgreSQLModel {
     var id:Int?
-    var senderId:Int
+    var chatId:Int
+    var senderId:Int?
+    var receiverId:Int?
     var text:String
-    var receiverId:Int
     var ack:Bool?
 }
 
 extension TextMessage {
     
-    static func getTextMessages(userId:Int,req:Request,afterId:Int?)->Future<[TextMessage]> {
-        let query = TextMessage.query(on: req).group(.or) {
-            $0.filter(\.senderId == userId).filter(\.receiverId == userId)
+    static func getTextMessages(chat:Chat,req:Request,fetchMessageInput:FetchMessageInput?) ->Future<[TextMessage]>?  {
+        
+        do {
+            
+            let query = try chat.textMessages.query(on: req)
+            if let beforeId = fetchMessageInput?.beforeId {
+                query.filter(\.id < beforeId)
             }
-        if let afterId = afterId {
-            query.filter(\.id > afterId)
+            let maximumCount = Constants.maximumRequestFetchResultsCount
+            return query.sort(\.id, PostgreSQLDirection.descending).range(0..<maximumCount).all()
+            
+        } catch _ {
+            print("Error in fetching text messages")
+            return nil
         }
-        return query.all()
+      
     }
     
 }
