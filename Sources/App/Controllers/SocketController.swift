@@ -55,10 +55,10 @@ class SocketController {
         
         switch message.type {
         case .text:
-            guard let textMessage = message.textMessage else {
+            guard let textMessages = message.textMessages else {
                 return
             }
-            self.textMessageIsReceived(userId: userId, ws: ws, req: req, textMessage: textMessage)
+            self.textMessagesIsReceived(userId: userId, ws: ws, req: req, textMessages: textMessages)
             
         case .control:
             guard let controlMessage = message.controlMessage else {
@@ -85,14 +85,17 @@ class SocketController {
         
     }
     
-    private func textMessageIsReceived(userId:Int,ws:WebSocket,req:Request,textMessage:TextMessage){
+    private func textMessagesIsReceived(userId:Int,ws:WebSocket,req:Request,textMessages:[TextMessage]){
         
-        Chat.getChatSenderReceiver(userId: userId, req: req, chatId: textMessage.chatId).map { chatSenderReceiver -> Void in
-            guard let chatSenderReceiver = chatSenderReceiver else {
-                return
-            }
-            self.saveTextMessage(userId: userId, ws: ws, req: req, textMessage: textMessage, receiverId: chatSenderReceiver.receiverId)
-        }.catch(AppErrorCatch.printError)
+        for textMessage in textMessages {
+            Chat.getChatSenderReceiver(userId: userId, req: req, chatId: textMessage.chatId).map { chatSenderReceiver -> Void in
+                guard let chatSenderReceiver = chatSenderReceiver else {
+                    return
+                }
+                self.saveTextMessage(userId: userId, ws: ws, req: req, textMessage: textMessage, receiverId: chatSenderReceiver.receiverId)
+                }.catch(AppErrorCatch.printError)
+        }
+        
         
     }
     
@@ -127,8 +130,8 @@ class SocketController {
         self.sendMessage(sockets: [ws], message: message)
     }
     
-    private func sendTextMessage(sockets:[WebSocket], textMessage:TextMessage) {
-        let message = Message(textMessage:textMessage)
+    private func sendTextMessages(sockets:[WebSocket], textMessages:[TextMessage]) {
+        let message = Message(textMessages:textMessages)
         sendMessage(sockets:sockets , message:message)
     }
     
@@ -163,7 +166,7 @@ class SocketController {
             
             self?.sendTextAckMessage(ws: ws, message: textMessage)
             if let receiverSockets = self?.getReceiverSockets(receiverId: receiverId) {
-                self?.sendTextMessage(sockets: receiverSockets, textMessage: textMessage)
+                self?.sendTextMessages(sockets: receiverSockets, textMessages: [textMessage])
             }
             
             }.catch(AppErrorCatch.printError)
@@ -184,9 +187,7 @@ class SocketController {
     private func fetchMessages(chat:Chat,ws:WebSocket,req:Request,fetchMessageInput:FetchMessageInput?){
         
         TextMessage.getTextMessages(chat: chat, req: req, fetchMessageInput: fetchMessageInput)?.map { textMessages in
-            for textMessage in textMessages {
-                self.sendTextMessage(sockets: [ws], textMessage: textMessage)
-            }
+            self.sendTextMessages(sockets: [ws], textMessages: textMessages)
             }.catch(AppErrorCatch.printError)
         
     }

@@ -10,7 +10,7 @@ import Foundation
 final class Message : Codable {
     var type: MessageType
     
-    var textMessage: TextMessage?
+    var textMessages: [TextMessage]?
     var controlMessage: ControlMessage?
     
     init(controlMessage: ControlMessage) {
@@ -18,9 +18,9 @@ final class Message : Codable {
         self.controlMessage=controlMessage
     }
     
-    init(textMessage: TextMessage) {
+    init(textMessages: [TextMessage]) {
         self.type = .text
-        self.textMessage=textMessage
+        self.textMessages=textMessages
     }
 }
 
