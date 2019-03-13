@@ -131,6 +131,9 @@ class SocketController {
     }
     
     private func sendTextMessages(sockets:[WebSocket], textMessages:[TextMessage]) {
+        guard textMessages.count != 0 else {
+            return
+        }
         let message = Message(textMessages:textMessages)
         sendMessage(sockets:sockets , message:message)
     }

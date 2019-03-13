@@ -15,6 +15,7 @@ public func routes(_ router: Router) throws {
     let categoryController = CategoryController()
     let locationController = LocationController()
     let userController = UserController()
+    let chatController = ChatController()
     
     //Middlewares
     let tokenAuthMiddleware = User.tokenAuthMiddleware()
@@ -45,6 +46,9 @@ public func routes(_ router: Router) throws {
     tokenProtected.post(uris.gifts_images, use: giftImageController.uploadImage)
     
     tokenProtected.post(uris.gifts_owner, use: giftController.ownerGifts)
+    
+    //Routes Chat
+    tokenProtected.get(uris.chat,User.parameter, use: chatController.getChatId)
     
     //Routes Admin
     adminProtected.put(uris.gifts_accept,Gift.parameter, use: giftAdminController.acceptGift)

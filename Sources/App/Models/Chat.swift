@@ -21,6 +21,30 @@ final class Chat : PostgreSQLModel {
 }
 
 extension Chat {
+    var textMessages : Children<Chat,TextMessage> {
+        return children(\.chatId)
+    }
+}
+
+extension Chat {
+    static func findChat(userId:Int,contactId:Int,req:Request) -> Future<Chat?> {
+        return Chat.query(on: req).group(.or) { query in
+            query.group(.and, closure: { query in
+                query.filter(\.firstId == userId).filter(\.secondId == contactId)
+            }).group(.and, closure: { query in
+                query.filter(\.firstId == contactId).filter(\.secondId == userId)
+            })
+            }.first()
+    }
+    
+    static func userChats(userId:Int,req:Request) -> Future<[Chat]> {
+        return Chat.query(on: req).group(.or) { query in
+            query.filter(\.firstId == userId).filter(\.secondId == userId)
+        }.all()
+    }
+}
+
+extension Chat {
     class ChatSenderReceiver {
         var senderId:Int
         var receiverId:Int
