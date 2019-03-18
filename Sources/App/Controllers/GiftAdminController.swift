@@ -32,7 +32,7 @@ final class GiftAdminController {
         
         return try req.content.decode(RequestInput.self).flatMap { requestInput in
             let query = Gift.query(on: req).filter(\.isReviewed == false)
-            return Gift.getGiftsWithRequestFilter(query: query, requestInput: requestInput)
+            return Gift.getGiftsWithRequestFilter(query: query, requestInput: requestInput,onlyUndonatedGifts: false)
         }
         
     }

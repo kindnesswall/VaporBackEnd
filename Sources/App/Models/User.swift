@@ -36,6 +36,9 @@ extension User {
     var gifts : Children<User,Gift> {
         return children(\.userId)
     }
+    var receivedGifts : Children<User,Gift>{
+        return children(\.donatedToUserId)
+    }
 }
 
 extension User: TokenAuthenticatable {

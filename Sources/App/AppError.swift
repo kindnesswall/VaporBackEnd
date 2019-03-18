@@ -30,10 +30,12 @@ class ErrorConstants {
     let unauthorizedRequest = AppError(identifier: "unauthorizedRequest", reason: "Request is unauthorized")
     let unauthorizedSocket = AppError(identifier: "unauthorizedSocket", reason: "Socket is unauthorized")
     let unauthorizedGift = AppError(identifier: "unauthorizedGift", reason: "Gift is unauthorized for this operation")
+    let unreviewedGift = AppError(identifier: "unreviewedGift", reason: "Gift is not reviewed")
     let unauthorizedMessage = AppError(identifier: "unauthorizedMessage", reason: "Message is unauthorized for this operation")
     let invalidPhoneNumber = AppError(identifier: "invalidPhoneNumber", reason: "The phone number is invalid")
     let invalidActivationCode = AppError(identifier: "invalidActivationCode", reason: "The activation code is invalid")
     let nilUserId = AppError(identifier: "nilUserId", reason: "User Id is nil")
     let nilGiftId = AppError(identifier: "nilGiftId", reason: "Gift Id is nil")
     let messageNotFound = AppError(identifier: "messageNotFound", reason: "Message not found")
+    let giftNotFound = AppError(identifier: "giftNotFound", reason: "Gift not found")
 }

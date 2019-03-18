@@ -11,6 +11,7 @@ import FluentPostgreSQL
 final class Gift : PostgreSQLModel {
     var id:Int?
     var userId:Int?
+    var donatedToUserId:Int?
     var isReviewed = false
     var categoryTitle:String?
     
@@ -91,7 +92,7 @@ extension Gift {
 
 extension Gift {
     
-    static func getGiftsWithRequestFilter(query:QueryBuilder<PostgreSQLDatabase, Gift>,requestInput:RequestInput?)->Future<[Gift]>{
+    static func getGiftsWithRequestFilter(query:QueryBuilder<PostgreSQLDatabase, Gift>,requestInput:RequestInput?,onlyUndonatedGifts:Bool)->Future<[Gift]>{
         
         if let categoryId = requestInput?.categoryId {
             query.filter(\.categoryId == categoryId)
@@ -107,6 +108,10 @@ extension Gift {
         
         if let beforeId = requestInput?.beforeId {
             query.filter(\.id < beforeId)
+        }
+        
+        if onlyUndonatedGifts {
+            query.filter(\.donatedToUserId == nil)
         }
         
         let maximumCount = Constants.maximumRequestFetchResultsCount

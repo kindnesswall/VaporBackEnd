@@ -12,6 +12,7 @@ public func routes(_ router: Router) throws {
     let giftController = GiftController()
     let giftImageController = GiftImageController()
     let giftAdminController = GiftAdminController()
+    let giftDonationController = GiftDonationController()
     let categoryController = CategoryController()
     let locationController = LocationController()
     let userController = UserController()
@@ -46,6 +47,10 @@ public func routes(_ router: Router) throws {
     tokenProtected.post(uris.gifts_images, use: giftImageController.uploadImage)
     
     tokenProtected.post(uris.gifts_owner, use: giftController.ownerGifts)
+    
+    tokenProtected.post(uris.gifts_donated, use: giftDonationController.donatedGifts)
+    tokenProtected.post(uris.gifts_received, use: giftDonationController.receivedGifts)
+    tokenProtected.post(uris.donate, use: giftDonationController.donate)
     
     //Routes Chat
     tokenProtected.get(uris.chat,User.parameter, use: chatController.getChatId)
