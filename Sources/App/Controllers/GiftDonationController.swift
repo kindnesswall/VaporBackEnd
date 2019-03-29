@@ -40,7 +40,7 @@ class GiftDonationController {
 //                guard gift.isReviewed == true else {
 //                    throw Constants.errors.unreviewedGift
 //                }
-                return Chat.findChat(userId: userId, contactId: donate.donatedToUserId, req: req).flatMap({ chat -> Future<Gift> in
+                return Chat.findChat(userId: userId, contactId: donate.donatedToUserId, conn: req).flatMap({ chat -> Future<Gift> in
                     guard chat != nil else {
                         throw Constants.errors.unauthorizedRequest
                     }

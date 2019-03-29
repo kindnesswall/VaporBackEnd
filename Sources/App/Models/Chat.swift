@@ -27,8 +27,8 @@ extension Chat {
 }
 
 extension Chat {
-    static func findChat(userId:Int,contactId:Int,req:Request) -> Future<Chat?> {
-        return Chat.query(on: req).group(.or) { query in
+    static func findChat(userId:Int,contactId:Int,conn:DatabaseConnectable) -> Future<Chat?> {
+        return Chat.query(on: conn).group(.or) { query in
             query.group(.and, closure: { query in
                 query.filter(\.firstId == userId).filter(\.secondId == contactId)
             }).group(.and, closure: { query in
@@ -37,8 +37,8 @@ extension Chat {
             }.first()
     }
     
-    static func userChats(userId:Int,req:Request) -> Future<[Chat]> {
-        return Chat.query(on: req).group(.or) { query in
+    static func userChats(userId:Int,conn:DatabaseConnectable) -> Future<[Chat]> {
+        return Chat.query(on: conn).group(.or) { query in
             query.filter(\.firstId == userId).filter(\.secondId == userId)
         }.all()
     }
@@ -54,8 +54,8 @@ extension Chat {
         }
     }
     
-    static func getChatSenderReceiver(userId:Int,req:Request,chatId:Int)->Future<ChatSenderReceiver?> {
-        return Chat.find(chatId, on: req).map{ chat -> ChatSenderReceiver? in
+    static func getChatSenderReceiver(userId:Int,conn:DatabaseConnectable,chatId:Int)->Future<ChatSenderReceiver?> {
+        return Chat.find(chatId, on: conn).map{ chat -> ChatSenderReceiver? in
             guard let chat = chat else {
                 return nil
             }

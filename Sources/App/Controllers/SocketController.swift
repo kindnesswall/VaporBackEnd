@@ -18,7 +18,13 @@ class SocketController {
     
     func socketConnected(ws:WebSocket,req:Request) throws {
         
-        try AuthWebSocket().isAuthenticated(req: req).map({[weak self] (user) in
+        let socketDB = SocketDataBaseController(req: req)
+        
+        guard let bearerAuthorization = req.http.headers.bearerAuthorization else {
+            throw Constants.errors.unauthorizedSocket
+        }
+        
+        try AuthWebSocket().isAuthenticated(bearerAuthorization: bearerAuthorization, socketDB: socketDB).map({[weak self] (user) in
             print("User: \(user.id?.description ?? "") is connected with socket")
             
             guard let userId = user.id else {
@@ -33,7 +39,7 @@ class SocketController {
             // Add a new on text callback
             ws.onText({ [weak self] (ws, input) in
                 
-                self?.messageIsReceived(userId: userId, ws: ws, req:req, input: input)
+                self?.messageIsReceived(userId: userId, ws: ws, socketDB: socketDB, input: input)
                 
             })
             
@@ -48,7 +54,7 @@ class SocketController {
     
     //MARK: - Receive Messages
     
-    private func messageIsReceived(userId:Int,ws:WebSocket,req:Request,input:String){
+    private func messageIsReceived(userId:Int,ws:WebSocket,socketDB:SocketDataBaseController,input:String){
         guard let message = try? JSONDecoder().decode(Message.self, from: input.convertToData()) else {
             return
         }
@@ -58,49 +64,49 @@ class SocketController {
             guard let textMessages = message.textMessages else {
                 return
             }
-            self.textMessagesIsReceived(userId: userId, ws: ws, req: req, textMessages: textMessages)
+            self.textMessagesIsReceived(userId: userId, ws: ws, socketDB: socketDB, textMessages: textMessages)
             
         case .control:
             guard let controlMessage = message.controlMessage else {
                 return
             }
-            self.controlMessageIsReceived(userId: userId, ws: ws, req: req, controlMessage: controlMessage)
+            self.controlMessageIsReceived(userId: userId, ws: ws, socketDB: socketDB, controlMessage: controlMessage)
         }
         
     }
     
-    private func controlMessageIsReceived(userId:Int,ws:WebSocket,req:Request,controlMessage:ControlMessage) {
+    private func controlMessageIsReceived(userId:Int,ws:WebSocket,socketDB:SocketDataBaseController,controlMessage:ControlMessage) {
         
         switch controlMessage.type {
         case .fetch:
-            self.fetchMessages(userId: userId, ws: ws, req: req, fetchMessageInput: controlMessage.fetchMessageInput)
+            self.fetchMessages(userId: userId, ws: ws, socketDB: socketDB, fetchMessageInput: controlMessage.fetchMessageInput)
         case .ack:
             guard let ackMessage = controlMessage.ackMessage else {
                 return
             }
-            self.ackMessageIsReceived(userId:userId ,req: req, ackMessage: ackMessage)
+            self.ackMessageIsReceived(userId:userId ,socketDB: socketDB, ackMessage: ackMessage)
         default:
             break
         }
         
     }
     
-    private func textMessagesIsReceived(userId:Int,ws:WebSocket,req:Request,textMessages:[TextMessage]){
+    private func textMessagesIsReceived(userId:Int,ws:WebSocket,socketDB:SocketDataBaseController,textMessages:[TextMessage]){
         
         for textMessage in textMessages {
-            Chat.getChatSenderReceiver(userId: userId, req: req, chatId: textMessage.chatId).map { chatSenderReceiver -> Void in
+            socketDB.getChatSenderReceiver(userId:userId,chatId:textMessage.chatId).map { chatSenderReceiver -> Void in
                 guard let chatSenderReceiver = chatSenderReceiver else {
                     return
                 }
-                self.saveTextMessage(userId: userId, ws: ws, req: req, textMessage: textMessage, receiverId: chatSenderReceiver.receiverId)
+                self.saveTextMessage(userId: userId, ws: ws, socketDB: socketDB, textMessage: textMessage, receiverId: chatSenderReceiver.receiverId)
                 }.catch(AppErrorCatch.printError)
         }
         
         
     }
     
-    private func ackMessageIsReceived(userId:Int,req:Request,ackMessage:AckMessage) {
-        TextMessage.find(ackMessage.messageId, on: req).map { message -> Future<TextMessage> in
+    private func ackMessageIsReceived(userId:Int,socketDB:SocketDataBaseController,ackMessage:AckMessage) {
+        socketDB.getTextMessage(id: ackMessage.messageId).map { message -> Future<TextMessage> in
             guard let message = message else {
                 throw Constants.errors.messageNotFound
             }
@@ -108,7 +114,7 @@ class SocketController {
                 throw Constants.errors.unauthorizedMessage
             }
             message.ack = true
-            return message.save(on: req)
+            return socketDB.saveMessage(message: message)
         }.catch(AppErrorCatch.printError)
     }
     
@@ -161,11 +167,11 @@ class SocketController {
     
     //MARK: - Save Messages
     
-    private func saveTextMessage(userId:Int,ws:WebSocket,req:Request,textMessage:TextMessage,receiverId:Int){
+    private func saveTextMessage(userId:Int,ws:WebSocket,socketDB:SocketDataBaseController,textMessage:TextMessage,receiverId:Int){
         textMessage.senderId = userId
         textMessage.receiverId = receiverId
         textMessage.ack = false
-        textMessage.save(on: req).map { [weak self] textMessage in
+        socketDB.saveMessage(message: textMessage).map { [weak self] textMessage in
             
             self?.sendTextAckMessage(ws: ws, message: textMessage)
             if let receiverSockets = self?.getReceiverSockets(receiverId: receiverId) {
@@ -177,19 +183,19 @@ class SocketController {
     
     //MARK: - Fetch Messages
     
-    private func fetchMessages(userId:Int,ws:WebSocket,req:Request,fetchMessageInput:FetchMessageInput?){
+    private func fetchMessages(userId:Int,ws:WebSocket,socketDB:SocketDataBaseController,fetchMessageInput:FetchMessageInput?){
         
-        Chat.userChats(userId: userId, req: req).map{ chats in
+        socketDB.getUserChats(userId: userId).map{ chats in
             for chat in chats {
-                self.fetchMessages(chat: chat, ws: ws, req: req, fetchMessageInput: fetchMessageInput)
+                self.fetchMessages(chat: chat, ws: ws, socketDB: socketDB, fetchMessageInput: fetchMessageInput)
             }
         }.catch(AppErrorCatch.printError)
         
     }
     
-    private func fetchMessages(chat:Chat,ws:WebSocket,req:Request,fetchMessageInput:FetchMessageInput?){
+    private func fetchMessages(chat:Chat,ws:WebSocket,socketDB:SocketDataBaseController,fetchMessageInput:FetchMessageInput?){
         
-        TextMessage.getTextMessages(chat: chat, req: req, fetchMessageInput: fetchMessageInput)?.map { textMessages in
+        socketDB.getTextMessages(chat: chat, fetchMessageInput: fetchMessageInput).map { textMessages in
             self.sendTextMessages(sockets: [ws], textMessages: textMessages)
             }.catch(AppErrorCatch.printError)
         

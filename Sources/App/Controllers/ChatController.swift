@@ -22,7 +22,7 @@ final class ChatController{
                 throw Constants.errors.nilUserId
             }
             
-            return Chat.findChat(userId: userId, contactId: contactId, req: req).flatMap({ chat -> Future<Chat> in
+            return Chat.findChat(userId: userId, contactId: contactId, conn: req).flatMap({ chat -> Future<Chat> in
                 if let chat = chat {
                     let promise = req.eventLoop.newPromise(of: Chat.self)
                     promise.succeed(result: chat)
