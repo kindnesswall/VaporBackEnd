@@ -14,7 +14,7 @@ class SocketController {
         print("init SocketController")
     }
     
-    var allSockets = [Int:[WebSocket]]()
+    var allSockets = [Int:UserSockets]()
     
     func socketConnected(ws:WebSocket,req:Request) throws {
         
@@ -32,9 +32,9 @@ class SocketController {
             }
             
             if self?.allSockets[userId] == nil {
-                self?.allSockets[userId] = []
+                self?.allSockets[userId] = UserSockets()
             }
-            self?.allSockets[userId]?.append(ws)
+            self?.allSockets[userId]?.addSocket(socket: ws)
             
             // Add a new on text callback
             ws.onText({ [weak self] (ws, input) in
@@ -158,12 +158,6 @@ class SocketController {
         
     }
     
-    private func getReceiverSockets(receiverId:Int) -> [WebSocket]? {
-        guard let receiverSockets = self.allSockets[receiverId] else {
-            return nil
-        }
-        return receiverSockets
-    }
     
     //MARK: - Save Messages
     
@@ -174,8 +168,11 @@ class SocketController {
         socketDB.saveMessage(message: textMessage).map { [weak self] textMessage in
             
             self?.sendTextAckMessage(ws: ws, message: textMessage)
-            if let receiverSockets = self?.getReceiverSockets(receiverId: receiverId) {
+            if let receiverSockets = UserSockets.getUserSockets(allSockets: self?.allSockets, userId: receiverId) {
                 self?.sendTextMessages(sockets: receiverSockets, textMessages: [textMessage])
+            }
+            if let senderOtherSockets = UserSockets.getUserSockets(allSockets: self?.allSockets, userId: userId, excludeSocket: ws) {
+                self?.sendTextMessages(sockets: senderOtherSockets, textMessages: [textMessage])
             }
             
             }.catch(AppErrorCatch.printError)

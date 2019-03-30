@@ -12,5 +12,6 @@ class Constants {
     static let appInfo = AppInfo()
     static let errors = ErrorConstants()
     static let maximumRequestFetchResultsCount = 50
+    static let maximumActiveSocketsPerUser = 3
     
 }
