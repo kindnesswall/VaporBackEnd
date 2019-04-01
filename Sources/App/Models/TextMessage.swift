@@ -20,10 +20,10 @@ final class TextMessage : PostgreSQLModel {
 
 extension TextMessage {
     
-    static func getTextMessages(chat:Chat,conn:DatabaseConnectable,fetchMessageInput:FetchMessageInput?) throws ->Future<[TextMessage]>   {
+    static func getTextMessages(chat:Chat,beforeId:Int?,conn:DatabaseConnectable) throws ->Future<[TextMessage]>   {
         
             let query = try chat.textMessages.query(on: conn)
-            if let beforeId = fetchMessageInput?.beforeId {
+            if let beforeId = beforeId {
                 query.filter(\.id < beforeId)
             }
             let maximumCount = Constants.maximumRequestFetchResultsCount

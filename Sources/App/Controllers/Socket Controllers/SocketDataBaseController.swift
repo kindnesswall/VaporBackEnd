@@ -45,15 +45,21 @@ class SocketDataBaseController {
         })
     }
     
-    func getTextMessages(chat:Chat,fetchMessageInput:FetchMessageInput?)->Future<[TextMessage]>{
+    func getTextMessages(chat:Chat,beforeId:Int?)->Future<[TextMessage]>{
         return performQuery(query: { conn in
-            return try TextMessage.getTextMessages(chat: chat, conn: conn, fetchMessageInput: fetchMessageInput)
+            return try TextMessage.getTextMessages(chat: chat, beforeId: beforeId, conn: conn)
         })
     }
     
     func saveMessage(message:TextMessage) -> Future<TextMessage> {
         return performQuery(query: { conn in
             return message.save(on: conn)
+        })
+    }
+    
+    func getChat(chatId:Int)->Future<Chat?>{
+        return performQuery(query: { conn in
+            return Chat.find(chatId, on: conn)
         })
     }
     

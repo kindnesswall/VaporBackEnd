@@ -79,10 +79,15 @@ class SocketController {
         
         switch controlMessage.type {
         case .fetch:
-            self.fetchMessages(userId: userId, ws: ws, socketDB: socketDB, fetchMessageInput: controlMessage.fetchMessageInput)
+            self.fetchMessages(userId: userId, ws: ws, socketDB: socketDB)
+        case .fetchMore:
+            guard let fetchMoreMessagesInput = controlMessage.fetchMoreMessagesInput else {
+                break
+            }
+            self.fetchMoreMessages(userId: userId, ws: ws, socketDB: socketDB, fetchMoreMessagesInput: fetchMoreMessagesInput)
         case .ack:
             guard let ackMessage = controlMessage.ackMessage else {
-                return
+                break
             }
             self.ackMessageIsReceived(userId:userId ,socketDB: socketDB, ackMessage: ackMessage)
         default:
@@ -158,6 +163,11 @@ class SocketController {
         
     }
     
+    private func sendNoMoreOldMessages(ws:WebSocket,fetchMoreMessagesInput:FetchMoreMessagesInput){
+        let controlMessage = ControlMessage(type: .noMoreOldMessages, fetchMoreMessagesInput: fetchMoreMessagesInput)
+        let message = Message(controlMessage: controlMessage)
+        self.sendMessage(sockets: [ws], message: message)
+    }
     
     //MARK: - Save Messages
     
@@ -180,19 +190,39 @@ class SocketController {
     
     //MARK: - Fetch Messages
     
-    private func fetchMessages(userId:Int,ws:WebSocket,socketDB:SocketDataBaseController,fetchMessageInput:FetchMessageInput?){
+    private func fetchMessages(userId:Int,ws:WebSocket,socketDB:SocketDataBaseController){
         
         socketDB.getUserChats(userId: userId).map{ chats in
             for chat in chats {
-                self.fetchMessages(chat: chat, ws: ws, socketDB: socketDB, fetchMessageInput: fetchMessageInput)
+                self.fetchMessages(chat: chat, beforeId: nil, ws: ws, socketDB: socketDB)
             }
         }.catch(AppErrorCatch.printError)
         
     }
     
-    private func fetchMessages(chat:Chat,ws:WebSocket,socketDB:SocketDataBaseController,fetchMessageInput:FetchMessageInput?){
+    private func fetchMoreMessages(userId:Int,ws:WebSocket,socketDB:SocketDataBaseController,fetchMoreMessagesInput:FetchMoreMessagesInput){
         
-        socketDB.getTextMessages(chat: chat, fetchMessageInput: fetchMessageInput).map { textMessages in
+        socketDB.getChat(chatId: fetchMoreMessagesInput.chatId).map { chat in
+            guard let chat = chat else { return }
+            guard Chat.isUserChat(userId: userId, chat: chat) else {
+                print(Constants.errors.unauthorizedRequest.debugDescription)
+                return
+            }
+            self.fetchMessages(chat: chat, beforeId: fetchMoreMessagesInput.beforeId, ws: ws, socketDB: socketDB,onEmptyList:{
+                self.sendNoMoreOldMessages(ws: ws, fetchMoreMessagesInput: fetchMoreMessagesInput)
+            })
+            
+        }.catch(AppErrorCatch.printError)
+        
+    }
+    
+    private func fetchMessages(chat:Chat,beforeId:Int?,ws:WebSocket,socketDB:SocketDataBaseController,onEmptyList:(()->Void)?=nil){
+        
+        socketDB.getTextMessages(chat: chat, beforeId: beforeId).map { textMessages in
+            guard textMessages.count != 0 else {
+                onEmptyList?()
+                return
+            }
             self.sendTextMessages(sockets: [ws], textMessages: textMessages)
             }.catch(AppErrorCatch.printError)
         

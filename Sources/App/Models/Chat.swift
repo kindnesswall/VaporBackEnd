@@ -42,6 +42,13 @@ extension Chat {
             query.filter(\.firstId == userId).filter(\.secondId == userId)
         }.all()
     }
+    
+    static func isUserChat(userId:Int,chat:Chat)->Bool {
+        if chat.firstId == userId || chat.secondId == userId {
+            return true
+        }
+        return false
+    }
 }
 
 extension Chat {
@@ -59,7 +66,7 @@ extension Chat {
             guard let chat = chat else {
                 return nil
             }
-            guard chat.firstId == userId || chat.secondId == userId else {
+            guard isUserChat(userId: userId, chat: chat) else {
                 return nil
             }
             if chat.firstId == userId {
