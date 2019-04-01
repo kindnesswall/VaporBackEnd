@@ -16,6 +16,11 @@ final class TextMessage : PostgreSQLModel {
     var receiverId:Int?
     var text:String
     var ack:Bool?
+    var createdAt:Date?
+}
+
+extension TextMessage {
+    static let createdAtKey: TimestampKey? = \.createdAt
 }
 
 extension TextMessage {
