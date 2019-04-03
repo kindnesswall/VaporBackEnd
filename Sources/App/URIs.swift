@@ -48,6 +48,9 @@ class URIs {
     var gifts_received : String {
         return "\(apiRoute)/gifts/received"
     }
+    var gifts_todonate : String {
+        return "\(apiRoute)/gifts/todonate"
+    }
     
     var gifts_images : String {
         return "\(apiRoute)/gifts/images"
@@ -63,6 +66,9 @@ class URIs {
         return "\(apiRoute)/gifts/review"
     }
     
+    var gifts_request : String {
+        return "\(apiRoute)/gifts/request"
+    }
     var donate : String {
         return "\(apiRoute)/donate"
     }

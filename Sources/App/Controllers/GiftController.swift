@@ -25,7 +25,7 @@ final class GiftController {
         return try req.content.decode(RequestInput.self).flatMap({ requestInput in
             let user = try req.requireAuthenticated(User.self)
             let query = try user.gifts.query(on: req)
-            return Gift.getGiftsWithRequestFilter(query: query, requestInput: requestInput,onlyUndonatedGifts: true)
+            return Gift.getGiftsWithRequestFilter(query: query, requestInput: requestInput,onlyUndonatedGifts: false)
         })
         
     }
