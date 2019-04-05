@@ -37,8 +37,10 @@ class ErrorConstants {
     let invalidPhoneNumber = AppError(identifier: "invalidPhoneNumber", reason: "The phone number is invalid")
     let invalidActivationCode = AppError(identifier: "invalidActivationCode", reason: "The activation code is invalid")
     let nilUserId = AppError(identifier: "nilUserId", reason: "User id is nil")
+    let wrongUserId = AppError(identifier: "wrongUserId", reason: "User id is wrong")
     let nilGiftId = AppError(identifier: "nilGiftId", reason: "Gift id is nil")
     let nilGiftUserId = AppError(identifier: "nilGiftUserId", reason: "Gift user id is nil")
     let messageNotFound = AppError(identifier: "messageNotFound", reason: "Message not found")
     let giftNotFound = AppError(identifier: "giftNotFound", reason: "Gift not found")
+    let userAccessIsDenied = AppError(identifier: "userAccessIsDenied", reason: "User access is denied")
 }

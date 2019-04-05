@@ -15,6 +15,10 @@ final class User : PostgreSQLModel {
     var activationCode:String?
     var isAdmin:Bool = false
     
+    var createdAt: Date?
+    var updatedAt: Date?
+    var deletedAt: Date?
+    
     final class Input : Codable {
         var phoneNumber:String
         var activationCode:String?
@@ -23,6 +27,12 @@ final class User : PostgreSQLModel {
     init(phoneNumber:String) {
         self.phoneNumber=phoneNumber
     }
+}
+
+extension User {
+    static let createdAtKey: TimestampKey? = \.createdAt
+    static let updatedAtKey: TimestampKey? = \.updatedAt
+    static let deletedAtKey: TimestampKey? = \.deletedAt
 }
 
 extension User {

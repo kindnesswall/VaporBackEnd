@@ -65,6 +65,12 @@ class URIs {
     var gifts_review : String {
         return "\(apiRoute)/gifts/review"
     }
+    var users_allowAccess : String {
+        return "\(apiRoute)/users/allowAccess"
+    }
+    var users_denyAccess : String {
+        return "\(apiRoute)/users/denyAccess"
+    }
     
     var gifts_request : String {
         return "\(apiRoute)/gifts/request"

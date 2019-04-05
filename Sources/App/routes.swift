@@ -16,6 +16,7 @@ public func routes(_ router: Router) throws {
     let categoryController = CategoryController()
     let locationController = LocationController()
     let userController = UserController()
+    let userAdminController = UserAdminController()
     let giftRequestController = GiftRequestController()
     
     //Middlewares
@@ -60,6 +61,8 @@ public func routes(_ router: Router) throws {
     adminProtected.put(uris.gifts_accept,Gift.parameter, use: giftAdminController.acceptGift)
     adminProtected.delete(uris.gifts_reject,Gift.parameter, use: giftAdminController.rejectGift)
     adminProtected.post(uris.gifts_review, use: giftAdminController.unreviewedGifts)
+    adminProtected.put(uris.users_allowAccess, use: userAdminController.userAllowAccess)
+    adminProtected.delete(uris.users_denyAccess,User.parameter, use: userAdminController.userDenyAccess)
     
     //Routes Categories
     router.get(uris.categories, use: categoryController.index)

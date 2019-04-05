@@ -14,9 +14,9 @@ final class GiftAdminController {
         
         return try req.parameters.next(Gift.self).flatMap { (gift) -> Future<Void> in
             gift.isReviewed = false
-            gift.save(on: req).catch(AppErrorCatch.printError)
-            
-            return gift.delete(on: req)
+            return gift.save(on: req).flatMap({ gift in
+                return gift.delete(on: req)
+            })
             }.transform(to: .ok)
     }
     

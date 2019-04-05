@@ -19,7 +19,11 @@ final class UserController {
             
             let phoneNumber = try UserController.checkPhoneNumber(inputUser: inputUser)
             
-            return User.query(on: req).filter(\User.phoneNumber == phoneNumber).first().flatMap({ (dBUser) -> Future<HTTPStatus> in
+            return User.query(on: req, withSoftDeleted: true).filter(\User.phoneNumber == phoneNumber).first().flatMap({ (dBUser) -> Future<HTTPStatus> in
+                
+                guard dBUser?.deletedAt == nil else {
+                    throw Constants.errors.userAccessIsDenied
+                }
                 
                 var user:User
                 if let dBUser=dBUser {
@@ -61,11 +65,10 @@ final class UserController {
                 }
                 
                 user.activationCode = nil
-                user.save(on: req).catch(AppErrorCatch.printError)
-                
-                let token = try Token.generate(for: user)
-                return token.save(on: req)
-
+                return user.save(on: req).flatMap({ user in
+                    let token = try Token.generate(for: user)
+                    return token.save(on: req)
+                })
             })
         }
         
