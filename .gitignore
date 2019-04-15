@@ -6,3 +6,4 @@ DerivedData/
 .DS_Store
 AppInfo.swift
 Public/images
+AppInfo_Server.swift
