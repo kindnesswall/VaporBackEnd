@@ -25,7 +25,8 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
 
     // Configure a PostgreSQL database
 
-    let postgreSQLConfig = PostgreSQLDatabaseConfig(hostname: Constants.appInfo.dataBaseHost, port: Constants.appInfo.dataBasePort, username: Constants.appInfo.dataBaseUser, database: Constants.appInfo.dataBaseName)
+    let postgreSQLConfig = PostgreSQLDatabaseConfig(hostname: Constants.appInfo.dataBaseHost, port: Constants.appInfo.dataBasePort, username: Constants.appInfo.dataBaseUser, database: Constants.appInfo.dataBaseName,password: Constants.appInfo.dataBasePassword)
+    
     let postgreSQL = PostgreSQLDatabase(config: postgreSQLConfig)
     
     /// Register the configured SQLite database to the database config.
