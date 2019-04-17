@@ -10,7 +10,7 @@ import Vapor
 class AppFileManager {
     
     enum Directory : String {
-        case publicDirectory = "public"
+        case publicDirectory = "Public"
         case imagesDirectory = "images"
     }
     
