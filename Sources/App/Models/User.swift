@@ -14,6 +14,8 @@ final class User : PostgreSQLModel {
     var phoneNumber:String
     var activationCode:String?
     var isAdmin:Bool = false
+    var name:String?
+    var image:String?
     
     var createdAt: Date?
     var updatedAt: Date?

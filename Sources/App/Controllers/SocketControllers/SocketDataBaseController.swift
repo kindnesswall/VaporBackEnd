@@ -69,4 +69,10 @@ class SocketDataBaseController {
         })
     }
     
+    func getContactProfile(contactId:Int)->Future<User?> {
+        return performQuery(query: { conn in
+            return User.find(contactId, on: conn)
+        })
+    }
+    
 }
