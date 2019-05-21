@@ -99,11 +99,11 @@ class SocketController {
     private func textMessagesIsReceived(userId:Int,ws:WebSocket,socketDB:SocketDataBaseController,textMessages:[TextMessage]){
         
         for textMessage in textMessages {
-            socketDB.getChatSenderReceiver(userId:userId,chatId:textMessage.chatId).map { chatSenderReceiver -> Void in
-                guard let chatSenderReceiver = chatSenderReceiver else {
+            socketDB.getChatContacts(userId:userId,chatId:textMessage.chatId).map { chatContacts -> Void in
+                guard let chatContacts = chatContacts else {
                     return
                 }
-                self.saveTextMessage(userId: userId, ws: ws, socketDB: socketDB, textMessage: textMessage, receiverId: chatSenderReceiver.receiverId)
+                self.saveTextMessage(userId: userId, ws: ws, socketDB: socketDB, textMessage: textMessage, receiverId: chatContacts.contactId)
                 }.catch(AppErrorCatch.printError)
         }
         
@@ -189,6 +189,23 @@ class SocketController {
     }
     
     //MARK: - Fetch Messages
+    
+    private func fetchContacts(userId:Int,ws:WebSocket,socketDB:SocketDataBaseController){
+        
+        socketDB.getUserChats(userId: userId).map{ chats in
+            for chat in chats {
+                guard let chatContacts = Chat.getChatContacts(userId: userId, chat: chat) else {
+                    continue
+                }
+                self.fetchContact(userId: userId, ws: ws, socketDB: socketDB, contactId: chatContacts.contactId)
+            }
+            }.catch(AppErrorCatch.printError)
+        
+    }
+    
+    private func fetchContact(userId:Int,ws:WebSocket,socketDB:SocketDataBaseController,contactId:Int){
+        
+    }
     
     private func fetchMessages(userId:Int,ws:WebSocket,socketDB:SocketDataBaseController){
         

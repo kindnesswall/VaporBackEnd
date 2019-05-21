@@ -52,29 +52,36 @@ extension Chat {
 }
 
 extension Chat {
-    class ChatSenderReceiver {
-        var senderId:Int
-        var receiverId:Int
-        init(senderId:Int,receiverId:Int) {
-            self.senderId=senderId
-            self.receiverId=receiverId
+    class ChatContacts {
+        var userId:Int
+        var contactId:Int
+        init(userId:Int,contactId:Int) {
+            self.userId=userId
+            self.contactId=contactId
         }
     }
     
-    static func getChatSenderReceiver(userId:Int,conn:DatabaseConnectable,chatId:Int)->Future<ChatSenderReceiver?> {
-        return Chat.find(chatId, on: conn).map{ chat -> ChatSenderReceiver? in
+    static func getChatContacts(userId:Int,conn:DatabaseConnectable,chatId:Int)->Future<ChatContacts?> {
+        return Chat.find(chatId, on: conn).map{ chat -> ChatContacts? in
             guard let chat = chat else {
                 return nil
             }
-            guard isUserChat(userId: userId, chat: chat) else {
-                return nil
-            }
-            if chat.firstId == userId {
-                return ChatSenderReceiver(senderId: chat.firstId, receiverId: chat.secondId)
-            }
-            return ChatSenderReceiver(senderId: chat.secondId, receiverId: chat.firstId)
+            return Chat.getChatContacts(userId: userId, chat: chat)
+            
         }
     }
+    
+    static func getChatContacts(userId:Int,chat:Chat)->ChatContacts? {
+        
+        guard isUserChat(userId: userId, chat: chat) else {
+            return nil
+        }
+        if chat.firstId == userId {
+            return ChatContacts(userId: chat.firstId, contactId: chat.secondId)
+        }
+        return ChatContacts(userId: chat.secondId, contactId: chat.firstId)
+    }
+    
 }
 
 

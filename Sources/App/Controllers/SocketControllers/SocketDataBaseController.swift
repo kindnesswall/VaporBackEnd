@@ -33,9 +33,9 @@ class SocketDataBaseController {
         })
     }
     
-    func getChatSenderReceiver(userId:Int,chatId:Int)->Future<Chat.ChatSenderReceiver?> {
+    func getChatContacts(userId:Int,chatId:Int)->Future<Chat.ChatContacts?> {
         return performQuery(query: { conn in
-            return Chat.getChatSenderReceiver(userId: userId, conn: conn, chatId: chatId)
+            return Chat.getChatContacts(userId: userId, conn: conn, chatId: chatId)
         })
     }
     
