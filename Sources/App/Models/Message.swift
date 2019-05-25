@@ -10,14 +10,9 @@ import Foundation
 final class Message : Codable {
     var type: MessageType
     
-    var textMessages: [TextMessage]?
     var contactMessage: ContactMessage?
     var controlMessage: ControlMessage?
     
-    init(textMessages: [TextMessage]) {
-        self.type = .text
-        self.textMessages=textMessages
-    }
     init(contactMessage: ContactMessage) {
         self.type = .contact
         self.contactMessage=contactMessage
@@ -29,7 +24,6 @@ final class Message : Codable {
 }
 
 enum MessageType : String,Codable {
-    case text
     case contact
     case control
 }

@@ -53,9 +53,11 @@ extension Chat {
 
 extension Chat {
     class ChatContacts {
+        var chat:Chat
         var userId:Int
         var contactId:Int
-        init(userId:Int,contactId:Int) {
+        init(chat:Chat,userId:Int,contactId:Int) {
+            self.chat=chat
             self.userId=userId
             self.contactId=contactId
         }
@@ -77,9 +79,9 @@ extension Chat {
             return nil
         }
         if chat.firstId == userId {
-            return ChatContacts(userId: chat.firstId, contactId: chat.secondId)
+            return ChatContacts(chat: chat, userId: chat.firstId, contactId: chat.secondId)
         }
-        return ChatContacts(userId: chat.secondId, contactId: chat.firstId)
+        return ChatContacts(chat: chat, userId: chat.secondId, contactId: chat.firstId)
     }
     
 }

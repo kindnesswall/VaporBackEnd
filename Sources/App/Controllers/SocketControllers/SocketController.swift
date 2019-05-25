@@ -60,13 +60,11 @@ class SocketController {
         }
         
         switch message.type {
-        case .text:
-            guard let textMessages = message.textMessages else {
+        case .contact:
+            guard let contactMessage = message.contactMessage else {
                 return
             }
-            self.textMessagesIsReceived(userId: userId, ws: ws, socketDB: socketDB, textMessages: textMessages)
-        case .contact:
-            break
+            self.contactMessageIsReceived(userId: userId, ws: ws, socketDB: socketDB, contactMessage: contactMessage)
         case .control:
             guard let controlMessage = message.controlMessage else {
                 return
@@ -98,6 +96,13 @@ class SocketController {
         
     }
     
+    private func contactMessageIsReceived(userId:Int,ws:WebSocket,socketDB:SocketDataBaseController,contactMessage:ContactMessage){
+        guard let textMessages = contactMessage.textMessages else {
+            return
+        }
+        textMessagesIsReceived(userId: userId, ws: ws, socketDB: socketDB, textMessages: textMessages)
+    }
+    
     private func textMessagesIsReceived(userId:Int,ws:WebSocket,socketDB:SocketDataBaseController,textMessages:[TextMessage]){
         
         for textMessage in textMessages {
@@ -105,7 +110,7 @@ class SocketController {
                 guard let chatContacts = chatContacts else {
                     return
                 }
-                self.saveTextMessage(userId: userId, ws: ws, socketDB: socketDB, textMessage: textMessage, receiverId: chatContacts.contactId)
+                self.saveTextMessage(userId: userId, ws: ws, socketDB: socketDB, textMessage: textMessage, chat: chatContacts.chat, receiverId: chatContacts.contactId)
                 }.catch(AppErrorCatch.printError)
         }
         
@@ -143,11 +148,17 @@ class SocketController {
         self.sendMessage(sockets: [ws], message: message)
     }
     
-    private func sendTextMessages(sockets:[WebSocket], textMessages:[TextMessage]) {
+    private func sendTextMessages(sockets:[WebSocket],socketDB:SocketDataBaseController, textMessages:[TextMessage],chat:Chat,contactId:Int) {
         guard textMessages.count != 0 else {
             return
         }
-        let message = Message(textMessages:textMessages)
+        
+        sendContact(withTextMessages: textMessages, sockets: sockets, socketDB: socketDB, chat: chat, contactId: contactId)
+        
+    }
+    
+    private func sendContactMessage(sockets:[WebSocket], contactMessage:ContactMessage) {
+        let message = Message(contactMessage:contactMessage)
         sendMessage(sockets:sockets , message:message)
     }
     
@@ -173,7 +184,8 @@ class SocketController {
     
     //MARK: - Save Messages
     
-    private func saveTextMessage(userId:Int,ws:WebSocket,socketDB:SocketDataBaseController,textMessage:TextMessage,receiverId:Int){
+    private func saveTextMessage(userId:Int,ws:WebSocket,socketDB:SocketDataBaseController,textMessage:TextMessage,chat:Chat,receiverId:Int){
+        
         textMessage.senderId = userId
         textMessage.receiverId = receiverId
         textMessage.ack = false
@@ -181,10 +193,11 @@ class SocketController {
             
             self?.sendTextAckMessage(ws: ws, message: textMessage)
             if let receiverSockets = UserSockets.getUserSockets(allSockets: self?.allSockets, userId: receiverId) {
-                self?.sendTextMessages(sockets: receiverSockets, textMessages: [textMessage])
+                
+                self?.sendTextMessages(sockets: receiverSockets, socketDB: socketDB, textMessages: [textMessage], chat: chat, contactId: userId)
             }
             if let senderOtherSockets = UserSockets.getUserSockets(allSockets: self?.allSockets, userId: userId, excludeSocket: ws) {
-                self?.sendTextMessages(sockets: senderOtherSockets, textMessages: [textMessage])
+                self?.sendTextMessages(sockets: senderOtherSockets, socketDB: socketDB, textMessages: [textMessage], chat: chat, contactId: receiverId)
             }
             
             }.catch(AppErrorCatch.printError)
@@ -199,17 +212,20 @@ class SocketController {
                 guard let chatContacts = Chat.getChatContacts(userId: userId, chat: chat) else {
                     continue
                 }
-                self.fetchContact(userId: userId, ws: ws, socketDB: socketDB, chat: chat, contactId: chatContacts.contactId)
+                self.sendContact(withTextMessages: nil, sockets: [ws], socketDB: socketDB, chat: chat, contactId: chatContacts.contactId)
             }
             }.catch(AppErrorCatch.printError)
         
     }
     
-    private func fetchContact(userId:Int,ws:WebSocket,socketDB:SocketDataBaseController,chat:Chat,contactId:Int){
+    private func sendContact(withTextMessages textMessages: [TextMessage]?,sockets:[WebSocket],socketDB:SocketDataBaseController,chat:Chat,contactId:Int){
         
         socketDB.getContactProfile(contactId: contactId).map { contactUser in
             guard let contactUser = contactUser else { return }
-            let contact = ContactMessage(chat: chat, contactName: contactUser.name, contactImage: contactUser.image)
+            let contactInfo = ContactInfo(id: contactId, name: contactUser.name, image: contactUser.image)
+            let contactMessage = ContactMessage(chat: chat, contactInfo: contactInfo)
+            contactMessage.textMessages = textMessages
+            self.sendContactMessage(sockets: sockets, contactMessage: contactMessage)
             
         }.catch(AppErrorCatch.printError)
     }
@@ -222,7 +238,11 @@ class SocketController {
                 print(Constants.errors.unauthorizedRequest.debugDescription)
                 return
             }
-            self.fetchMessages(chat: chat, beforeId: fetchMessagesInput.beforeId, ws: ws, socketDB: socketDB,onEmptyList:{
+            guard let chatContacts = Chat.getChatContacts(userId: userId, chat: chat) else {
+                return
+            }
+            
+            self.fetchMessages(chat: chat, beforeId: fetchMessagesInput.beforeId, ws: ws, socketDB: socketDB, contactId: chatContacts.contactId, onEmptyList:{
                 self.sendNoMoreOldMessages(ws: ws, fetchMessagesInput: fetchMessagesInput)
             })
             
@@ -230,14 +250,14 @@ class SocketController {
         
     }
     
-    private func fetchMessages(chat:Chat,beforeId:Int?,ws:WebSocket,socketDB:SocketDataBaseController,onEmptyList:(()->Void)?=nil){
+    private func fetchMessages(chat:Chat,beforeId:Int?,ws:WebSocket,socketDB:SocketDataBaseController,contactId:Int,onEmptyList:(()->Void)?=nil){
         
         socketDB.getTextMessages(chat: chat, beforeId: beforeId).map { textMessages in
             guard textMessages.count != 0 else {
                 onEmptyList?()
                 return
             }
-            self.sendTextMessages(sockets: [ws], textMessages: textMessages)
+            self.sendTextMessages(sockets: [ws], socketDB: socketDB, textMessages: textMessages, chat: chat, contactId: contactId)
             }.catch(AppErrorCatch.printError)
         
     }
