@@ -1,5 +1,5 @@
 //
-//  GiftImageController.swift
+//  ImageController.swift
 //  App
 //
 //  Created by Amir Hossein on 2/4/19.
@@ -7,7 +7,7 @@
 
 import Vapor
 
-final class GiftImageController {
+final class ImageController {
     
     func uploadImage(_ req: Request) throws -> Future<ImageOutput> {
         
