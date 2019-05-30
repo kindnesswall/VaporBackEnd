@@ -118,15 +118,22 @@ class SocketController {
     }
     
     private func ackMessageIsReceived(userId:Int,socketDB:SocketDataBaseController,ackMessage:AckMessage) {
-        socketDB.getTextMessage(id: ackMessage.messageId).map { message -> Future<TextMessage> in
+        socketDB.getTextMessage(id: ackMessage.messageId).map { message in
             guard let message = message else {
                 throw Constants.errors.messageNotFound
             }
             guard message.receiverId == userId else {
                 throw Constants.errors.unauthorizedMessage
             }
-            message.ack = true
-            return socketDB.saveMessage(message: message)
+            if message.ack == false {
+                message.ack = true
+                
+                socketDB.saveMessage(message: message).map({ [weak self] message in
+                    self?.updateChatNotification(userId: userId, chatId: message.chatId, socketDB: socketDB)
+                }).catch(AppErrorCatch.printError)
+                
+            }
+            
         }.catch(AppErrorCatch.printError)
     }
     
@@ -189,8 +196,14 @@ class SocketController {
         textMessage.senderId = userId
         textMessage.receiverId = receiverId
         textMessage.ack = false
+        
+        guard let chatId = chat.id else {
+            return
+        }
+        
         socketDB.saveMessage(message: textMessage).map { [weak self] textMessage in
             
+            self?.updateChatNotification(userId: receiverId, chatId: chatId, socketDB: socketDB)
             self?.sendTextAckMessage(ws: ws, message: textMessage)
             if let receiverSockets = UserSockets.getUserSockets(allSockets: self?.allSockets, userId: receiverId) {
                 
@@ -212,20 +225,36 @@ class SocketController {
                 guard let chatContacts = Chat.getChatContacts(userId: userId, chat: chat) else {
                     continue
                 }
-                self.sendContact(withTextMessages: nil, sockets: [ws], socketDB: socketDB, chat: chat, contactId: chatContacts.contactId)
+                
+                self.fetchContact(userId: userId, ws: ws, socketDB: socketDB, chat: chat, contactId: chatContacts.contactId)
+                
             }
             }.catch(AppErrorCatch.printError)
         
     }
     
-    private func sendContact(withTextMessages textMessages: [TextMessage]?,sockets:[WebSocket],socketDB:SocketDataBaseController,chat:Chat,contactId:Int){
+    private func fetchContact(userId:Int,ws:WebSocket,socketDB:SocketDataBaseController,chat:Chat,contactId:Int){
+        
+        guard let chatId = chat.id else { return }
+        
+        socketDB.findChatNotification(userId: userId, chatId: chatId).map({ chatNotification in
+            guard let chatNotification = chatNotification else { return }
+            
+            self.sendContact(withTextMessages: nil, sockets: [ws], socketDB: socketDB, chat: chat, contactId: contactId, notificationCount: chatNotification.notificationCount)
+            
+            
+        }).catch(AppErrorCatch.printError)
+    }
+    
+    private func sendContact(withTextMessages textMessages: [TextMessage]?,sockets:[WebSocket],socketDB:SocketDataBaseController,chat:Chat,contactId:Int,notificationCount:Int? = nil){
+        
         
         socketDB.getContactProfile(contactId: contactId).map { contactUser in
             guard let contactUser = contactUser else { return }
             let contactInfo = ContactInfo(id: contactId, name: contactUser.name, image: contactUser.image)
-            let contactMessage = ContactMessage(chat: chat, contactInfo: contactInfo)
-            contactMessage.textMessages = textMessages
-            self.sendContactMessage(sockets: sockets, contactMessage: contactMessage)
+            
+                let contactMessage = ContactMessage(chat: chat, textMessages: textMessages, contactInfo: contactInfo, notificationCount: notificationCount)
+                self.sendContactMessage(sockets: sockets, contactMessage: contactMessage)
             
         }.catch(AppErrorCatch.printError)
     }
@@ -262,5 +291,40 @@ class SocketController {
         
     }
     
+    //MARK: - Chat Notifications
+    
+    
+    func updateChatNotification(userId:Int,chatId:Int,socketDB:SocketDataBaseController) {
+        
+        socketDB.calculateNumberOfNotifications(userId: userId, chatId: chatId).map { notificationCount  in
+            
+            self.setChatNotification(userId: userId, chatId: chatId, notificationCount: notificationCount, socketDB: socketDB)
+        }.catch(AppErrorCatch.printError)
+        
+        
+    }
+    
+    func setChatNotification(userId:Int,chatId:Int,notificationCount:Int,socketDB:SocketDataBaseController) {
+        
+        socketDB.findChatNotification(userId: userId, chatId: chatId).map { (foundChatNotification) -> Future<ChatNotification> in
+            
+            var chatNotification:ChatNotification
+            if let _chatNotification = foundChatNotification {
+                chatNotification = _chatNotification
+            } else {
+                chatNotification = ChatNotification(userId: userId, chatId: chatId)
+            }
+            
+            chatNotification.notificationCount = notificationCount
+            
+            return socketDB.saveChatNotification(chatNotification: chatNotification)
+            
+        }.catch(AppErrorCatch.printError)
+    }
+    
 }
+
+
+
+
 

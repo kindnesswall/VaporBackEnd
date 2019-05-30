@@ -36,6 +36,18 @@ extension TextMessage {
       
     }
     
+    static func calculateNumberOfNotifications(userId:Int,chatId:Int,conn:DatabaseConnectable) -> Future<Int> {
+        
+        let query = TextMessage.query(on: conn)
+        
+        query.filter(\.chatId == chatId)
+            .filter(\.receiverId == userId)
+            .filter(\.ack == false)
+        
+        return query.count()
+        
+    }
+    
 }
 
 extension TextMessage : Migration {}

@@ -75,4 +75,22 @@ class SocketDataBaseController {
         })
     }
     
+    func calculateNumberOfNotifications(userId:Int,chatId:Int)->Future<Int>{
+        return performQuery(query: { conn in
+            return TextMessage.calculateNumberOfNotifications(userId: userId, chatId: chatId, conn: conn)
+        })
+    }
+    
+    func findChatNotification(userId:Int,chatId:Int)->Future<ChatNotification?> {
+        return performQuery(query: { conn in
+            return ChatNotification.find(userId: userId, chatId: chatId, conn: conn)
+        })
+    }
+    
+    func saveChatNotification(chatNotification:ChatNotification) -> Future<ChatNotification> {
+        return performQuery(query: { conn in
+            return chatNotification.save(on: conn)
+        })
+    }
+    
 }

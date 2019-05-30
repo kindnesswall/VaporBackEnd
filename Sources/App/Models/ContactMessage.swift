@@ -12,9 +12,13 @@ class ContactMessage: Codable {
     var chat: Chat?
     var contactInfo: ContactInfo?
     var textMessages: [TextMessage]?
-    init(chat: Chat?,contactInfo: ContactInfo?) {
+    var notificationCount: Int?
+    
+    init(chat: Chat?,textMessages: [TextMessage]?,contactInfo: ContactInfo?,notificationCount: Int?) {
         self.chat = chat
+        self.textMessages = textMessages
         self.contactInfo = contactInfo
+        self.notificationCount = notificationCount
     }
 }
 
