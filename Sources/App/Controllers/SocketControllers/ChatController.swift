@@ -10,11 +10,21 @@ import Vapor
 
 class ChatController {
     
+    class RequestInfo {
+        let userId:Int
+        let dataBase:ChatDataBase
+        
+        init(userId:Int,dataBase:ChatDataBase) {
+            self.userId=userId
+            self.dataBase=dataBase
+        }
+    }
+    
     //MARK: - Save Messages
     
-    func saveTextMessage(userId:Int,socketDB:SocketDataBaseController,textMessage:TextMessage,chat:Chat,receiverId:Int) throws -> Future<TextMessage>{
+    func saveTextMessage(requestInfo:RequestInfo,textMessage:TextMessage,chat:Chat,receiverId:Int) throws -> Future<TextMessage>{
         
-        textMessage.senderId = userId
+        textMessage.senderId = requestInfo.userId
         textMessage.receiverId = receiverId
         textMessage.ack = false
         
@@ -22,27 +32,27 @@ class ChatController {
             throw Constants.errors.nilChatId
         }
         
-        return socketDB.saveMessage(message: textMessage).map { [weak self] textMessage in
+        return requestInfo.dataBase.saveMessage(message: textMessage).map { [weak self] textMessage in
             
-            self?.updateChatNotification(userId: receiverId, chatId: chatId, socketDB: socketDB)
+            self?.updateChatNotification(requestInfo: requestInfo, notificationUserId: receiverId, chatId: chatId)
             
             return textMessage
         }
     }
     
-    func ackMessageIsReceived(userId:Int,socketDB:SocketDataBaseController,ackMessage:AckMessage) {
-        socketDB.getTextMessage(id: ackMessage.messageId).map { message in
+    func ackMessageIsReceived(requestInfo:RequestInfo,ackMessage:AckMessage) {
+        requestInfo.dataBase.getTextMessage(id: ackMessage.messageId).map { message in
             guard let message = message else {
                 throw Constants.errors.messageNotFound
             }
-            guard message.receiverId == userId else {
+            guard message.receiverId == requestInfo.userId else {
                 throw Constants.errors.unauthorizedMessage
             }
             if message.ack == false {
                 message.ack = true
                 
-                socketDB.saveMessage(message: message).map({ [weak self] message in
-                    self?.updateChatNotification(userId: userId, chatId: message.chatId, socketDB: socketDB)
+                requestInfo.dataBase.saveMessage(message: message).map({ [weak self] message in
+                    self?.updateChatNotification(requestInfo: requestInfo, notificationUserId: requestInfo.userId, chatId: message.chatId)
                 }).catch(AppErrorCatch.printError)
                 
             }
@@ -53,20 +63,20 @@ class ChatController {
     
     //MARK: - Fetch Messages
     
-    func fetchContacts(userId:Int,socketDB:SocketDataBaseController) throws -> Future<[ContactMessage]>{
+    func fetchContacts(requestInfo:RequestInfo) throws -> Future<[ContactMessage]>{
         
-        let promise = socketDB.getPromise(type: [ContactMessage].self)
+        let promise = requestInfo.dataBase.getPromise(type: [ContactMessage].self)
         
         let arrayResult = ArrayResult<ContactMessage>()
         
-        socketDB.getUserChats(userId: userId).map{ chats in
+        requestInfo.dataBase.getUserChats(userId: requestInfo.userId).map{ chats in
             let chatsCount = chats.count
             for chat in chats {
-                guard let chatContacts = Chat.getChatContacts(userId: userId, chat: chat) else {
+                guard let chatContacts = Chat.getChatContacts(userId: requestInfo.userId, chat: chat) else {
                     continue
                 }
                 
-                try self.fetchContact(userId: userId, socketDB: socketDB, chat: chat, contactId: chatContacts.contactId).map({ contactMessage in
+                try self.fetchContact(requestInfo: requestInfo, chat: chat, contactId: chatContacts.contactId).map({ contactMessage in
                     arrayResult.array.append(contactMessage)
                     if arrayResult.array.count == chatsCount {
                         promise.succeed(result: arrayResult.array)
@@ -80,23 +90,23 @@ class ChatController {
         
     }
     
-    func fetchContact(userId:Int,socketDB:SocketDataBaseController,chat:Chat,contactId:Int) throws ->Future<ContactMessage>{
+    func fetchContact(requestInfo:RequestInfo,chat:Chat,contactId:Int) throws ->Future<ContactMessage>{
         
         guard let chatId = chat.id else { throw Constants.errors.nilChatId }
         
-        return socketDB.findChatNotification(userId: userId, chatId: chatId).flatMap({ chatNotification in
+        return requestInfo.dataBase.findChatNotification(userId: requestInfo.userId, chatId: chatId).flatMap({ chatNotification in
             guard let chatNotification = chatNotification else { throw Constants.errors.chatNotificationNotFound }
             
-            return self.fetchContactInfo(withTextMessages: nil, socketDB: socketDB, chat: chat, contactId: contactId, notificationCount: chatNotification.notificationCount)
+            return self.fetchContactInfo(requestInfo: requestInfo, withTextMessages: nil, chat: chat, contactId: contactId, notificationCount: chatNotification.notificationCount)
             
             
         }).catch(AppErrorCatch.printError)
     }
     
-    func fetchContactInfo(withTextMessages textMessages: [TextMessage]?,socketDB:SocketDataBaseController,chat:Chat,contactId:Int,notificationCount:Int? = nil)->Future<ContactMessage>{
+    func fetchContactInfo(requestInfo:RequestInfo,withTextMessages textMessages: [TextMessage]?,chat:Chat,contactId:Int,notificationCount:Int? = nil)->Future<ContactMessage>{
         
         
-        return socketDB.getContactProfile(contactId: contactId).map { contactUser in
+        return requestInfo.dataBase.getContactProfile(contactId: contactId).map { contactUser in
             guard let contactUser = contactUser else { throw Constants.errors.contactNotFound }
             let contactInfo = ContactInfo(id: contactId, name: contactUser.name, image: contactUser.image)
             let contactMessage = ContactMessage(chat: chat, textMessages: textMessages, contactInfo: contactInfo, notificationCount: notificationCount)
@@ -107,19 +117,19 @@ class ChatController {
     }
     
     
-    func fetchMessages(userId:Int,ws:WebSocket,socketDB:SocketDataBaseController,fetchMessagesInput:FetchMessagesInput) throws -> Future<(chat:Chat,chatContacts:Chat.ChatContacts,textMessages:[TextMessage])>{
+    func fetchMessages(requestInfo:RequestInfo,fetchMessagesInput:FetchMessagesInput) throws -> Future<(chat:Chat,chatContacts:Chat.ChatContacts,textMessages:[TextMessage])>{
         
-        return socketDB.getChat(chatId: fetchMessagesInput.chatId).flatMap { chat in
+        return requestInfo.dataBase.getChat(chatId: fetchMessagesInput.chatId).flatMap { chat in
             guard let chat = chat else {
                 throw Constants.errors.chatNotFound
             }
-            guard Chat.isUserChat(userId: userId, chat: chat),
-                let chatContacts = Chat.getChatContacts(userId: userId, chat: chat)
+            guard Chat.isUserChat(userId: requestInfo.userId, chat: chat),
+                let chatContacts = Chat.getChatContacts(userId: requestInfo.userId, chat: chat)
                 else {
                     throw Constants.errors.unauthorizedRequest
             }
             
-            return socketDB.getTextMessages(chat: chat, beforeId: fetchMessagesInput.beforeId).map({ textMessages in
+            return requestInfo.dataBase.getTextMessages(chat: chat, beforeId: fetchMessagesInput.beforeId).map({ textMessages in
                 return (chat:chat,chatContacts:chatContacts,textMessages:textMessages)
             })
             
@@ -131,30 +141,30 @@ class ChatController {
     //MARK: - Chat Notifications
     
     
-    func updateChatNotification(userId:Int,chatId:Int,socketDB:SocketDataBaseController) {
+    func updateChatNotification(requestInfo:RequestInfo,notificationUserId:Int,chatId:Int) {
         
-        socketDB.calculateNumberOfNotifications(userId: userId, chatId: chatId).map { notificationCount  in
+        requestInfo.dataBase.calculateNumberOfNotifications(userId: notificationUserId, chatId: chatId).map { notificationCount  in
             
-            self.setChatNotification(userId: userId, chatId: chatId, notificationCount: notificationCount, socketDB: socketDB)
+            self.setChatNotification(requestInfo: requestInfo, notificationUserId: notificationUserId, chatId: chatId, notificationCount: notificationCount)
             }.catch(AppErrorCatch.printError)
         
         
     }
     
-    func setChatNotification(userId:Int,chatId:Int,notificationCount:Int,socketDB:SocketDataBaseController) {
+    private func setChatNotification(requestInfo:RequestInfo,notificationUserId:Int,chatId:Int,notificationCount:Int) {
         
-        socketDB.findChatNotification(userId: userId, chatId: chatId).map { (foundChatNotification) -> Future<ChatNotification> in
+        requestInfo.dataBase.findChatNotification(userId: notificationUserId, chatId: chatId).map { (foundChatNotification) -> Future<ChatNotification> in
             
             var chatNotification:ChatNotification
             if let _chatNotification = foundChatNotification {
                 chatNotification = _chatNotification
             } else {
-                chatNotification = ChatNotification(userId: userId, chatId: chatId)
+                chatNotification = ChatNotification(userId: notificationUserId, chatId: chatId)
             }
             
             chatNotification.notificationCount = notificationCount
             
-            return socketDB.saveChatNotification(chatNotification: chatNotification)
+            return requestInfo.dataBase.saveChatNotification(chatNotification: chatNotification)
             
             }.catch(AppErrorCatch.printError)
     }

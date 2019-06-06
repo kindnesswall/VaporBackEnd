@@ -10,15 +10,15 @@ import Vapor
 
 class AuthWebSocket {
     
-    public func isAuthenticated(bearerAuthorization:BearerAuthorization,socketDB:SocketDataBaseController) throws -> Future<User> {
+    public func isAuthenticated(bearerAuthorization:BearerAuthorization,dataBase:ChatDataBase) throws -> Future<User> {
         
-        return socketDB.isTokenAuthenticated(bearerAuthorization: bearerAuthorization).flatMap { (token) -> Future<User> in
+        return dataBase.isTokenAuthenticated(bearerAuthorization: bearerAuthorization).flatMap { (token) -> Future<User> in
             
             guard let token = token else {
                 throw Constants.errors.unauthorizedSocket
             }
             
-            return socketDB.isUserAuthenticated(token: token).map({ (user) -> User in
+            return dataBase.isUserAuthenticated(token: token).map({ (user) -> User in
                 guard let user = user else {
                     throw Constants.errors.unauthorizedSocket
                 }

@@ -1,5 +1,5 @@
 //
-//  SocketDataBaseController.swift
+//  ChatDataBase.swift
 //  App
 //
 //  Created by Amir Hossein on 3/29/19.
@@ -8,7 +8,7 @@
 import Vapor
 import FluentPostgreSQL
 
-class SocketDataBaseController {
+class ChatDataBase {
     private var req:Request
     
     init(req:Request) {
