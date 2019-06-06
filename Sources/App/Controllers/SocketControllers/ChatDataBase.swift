@@ -44,6 +44,12 @@ class ChatDataBase {
         })
     }
     
+    func getUserChats(userId:Int)->Future<[Chat]>{
+        return performQuery(query: { conn in
+            return Chat.userChats(userId: userId, conn: conn)
+        })
+    }
+    
     func getTextMessage(id:Int)->Future<TextMessage?>{
         return performQuery(query: { conn in
             return TextMessage.find(id, on: conn)
@@ -68,11 +74,6 @@ class ChatDataBase {
         })
     }
     
-    func getUserChats(userId:Int)->Future<[Chat]>{
-        return performQuery(query: { conn in
-            return Chat.userChats(userId: userId, conn: conn)
-        })
-    }
     
     func getContactProfile(contactId:Int)->Future<User?> {
         return performQuery(query: { conn in
@@ -80,15 +81,15 @@ class ChatDataBase {
         })
     }
     
-    func calculateNumberOfNotifications(userId:Int,chatId:Int)->Future<Int>{
+    func calculateNumberOfNotifications(notificationUserId:Int,chatId:Int)->Future<Int>{
         return performQuery(query: { conn in
-            return TextMessage.calculateNumberOfNotifications(userId: userId, chatId: chatId, conn: conn)
+            return TextMessage.calculateNumberOfNotifications(userId: notificationUserId, chatId: chatId, conn: conn)
         })
     }
     
-    func findChatNotification(userId:Int,chatId:Int)->Future<ChatNotification?> {
+    func findChatNotification(notificationUserId:Int,chatId:Int)->Future<ChatNotification?> {
         return performQuery(query: { conn in
-            return ChatNotification.find(userId: userId, chatId: chatId, conn: conn)
+            return ChatNotification.find(userId: notificationUserId, chatId: chatId, conn: conn)
         })
     }
     

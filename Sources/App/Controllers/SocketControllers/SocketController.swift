@@ -139,12 +139,12 @@ class SocketController {
         self.sendMessage(sockets: [ws], message: message)
     }
     
-    private func sendTextMessages(requestInfo:ChatController.RequestInfo,sockets:[WebSocket], textMessages:[TextMessage],chat:Chat,contactId:Int) {
+    private func sendTextMessages(requestInfo:ChatController.RequestInfo,sockets:[WebSocket], textMessages:[TextMessage],chat:Chat,contactInfoId:Int) {
         guard textMessages.count != 0 else {
             return
         }
 
-        chatController.fetchContactInfo(requestInfo: requestInfo, withTextMessages: textMessages, chat: chat, contactId: contactId).map{ [weak self] contactMessage in
+        chatController.fetchContactInfo(requestInfo: requestInfo, withTextMessages: textMessages, chat: chat, contactId: contactInfoId).map{ [weak self] contactMessage in
             self?.sendContactMessage(sockets: sockets, contactMessage: contactMessage)
         }.catch(AppErrorCatch.printError)
 
@@ -186,11 +186,11 @@ class SocketController {
             
             self?.sendTextAckMessage(ws: ws, message: textMessage)
             if let receiverSockets = UserSockets.getUserSockets(allSockets: self?.allSockets, userId: receiverId) {
-                self?.sendTextMessages(requestInfo: requestInfo, sockets: receiverSockets, textMessages: [textMessage], chat: chat, contactId: requestInfo.userId)
+                self?.sendTextMessages(requestInfo: requestInfo, sockets: receiverSockets, textMessages: [textMessage], chat: chat, contactInfoId: requestInfo.userId)
             }
             
             if let senderOtherSockets = UserSockets.getUserSockets(allSockets: self?.allSockets, userId: requestInfo.userId, excludeSocket: ws) {
-                self?.sendTextMessages(requestInfo: requestInfo, sockets: senderOtherSockets, textMessages: [textMessage], chat: chat, contactId: receiverId)
+                self?.sendTextMessages(requestInfo: requestInfo, sockets: senderOtherSockets, textMessages: [textMessage], chat: chat, contactInfoId: receiverId)
             }
             
         }.catch(AppErrorCatch.printError)
@@ -235,7 +235,7 @@ class SocketController {
                     self.sendNoMoreOldMessages(ws: ws, fetchMessagesInput: fetchMessagesInput)
                     return
                 }
-                self.sendTextMessages(requestInfo: requestInfo, sockets: [ws], textMessages: fetch.textMessages, chat: fetch.chat, contactId: fetch.chatContacts.contactId)
+                self.sendTextMessages(requestInfo: requestInfo, sockets: [ws], textMessages: fetch.textMessages, chat: fetch.chat, contactInfoId: fetch.chatContacts.contactId)
                 }.catch(AppErrorCatch.printError)
         } catch {
             AppErrorCatch.printError(error: error)

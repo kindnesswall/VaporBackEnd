@@ -94,7 +94,7 @@ class ChatController {
         
         guard let chatId = chat.id else { throw Constants.errors.nilChatId }
         
-        return requestInfo.dataBase.findChatNotification(userId: requestInfo.userId, chatId: chatId).flatMap({ chatNotification in
+        return requestInfo.dataBase.findChatNotification(notificationUserId: requestInfo.userId, chatId: chatId).flatMap({ chatNotification in
             guard let chatNotification = chatNotification else { throw Constants.errors.chatNotificationNotFound }
             
             return self.fetchContactInfo(requestInfo: requestInfo, withTextMessages: nil, chat: chat, contactId: contactId, notificationCount: chatNotification.notificationCount)
@@ -143,7 +143,7 @@ class ChatController {
     
     func updateChatNotification(requestInfo:RequestInfo,notificationUserId:Int,chatId:Int) {
         
-        requestInfo.dataBase.calculateNumberOfNotifications(userId: notificationUserId, chatId: chatId).map { notificationCount  in
+        requestInfo.dataBase.calculateNumberOfNotifications(notificationUserId: notificationUserId, chatId: chatId).map { notificationCount  in
             
             self.setChatNotification(requestInfo: requestInfo, notificationUserId: notificationUserId, chatId: chatId, notificationCount: notificationCount)
             }.catch(AppErrorCatch.printError)
@@ -153,7 +153,7 @@ class ChatController {
     
     private func setChatNotification(requestInfo:RequestInfo,notificationUserId:Int,chatId:Int,notificationCount:Int) {
         
-        requestInfo.dataBase.findChatNotification(userId: notificationUserId, chatId: chatId).map { (foundChatNotification) -> Future<ChatNotification> in
+        requestInfo.dataBase.findChatNotification(notificationUserId: notificationUserId, chatId: chatId).map { (foundChatNotification) -> Future<ChatNotification> in
             
             var chatNotification:ChatNotification
             if let _chatNotification = foundChatNotification {
