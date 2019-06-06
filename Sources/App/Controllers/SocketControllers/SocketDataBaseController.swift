@@ -15,6 +15,11 @@ class SocketDataBaseController {
         self.req=req
     }
     
+    func getPromise<T>(type:T.Type)->Promise<T>{
+        let promise = self.req.eventLoop.newPromise(type.self)
+        return promise
+    }
+    
     func performQuery<T>(query: @escaping (DatabaseConnectable) throws ->Future<T>)->Future<T> {
         return req.withPooledConnection(to: .psql, closure: { conn in
             return try query(conn)

@@ -78,13 +78,13 @@ class SocketController {
         
         switch controlMessage.type {
         case .fetchContact:
-            self.fetchContacts(userId: userId, ws: ws, socketDB: socketDB)
+            self.fetchContactsInSocket(userId: userId, ws: ws, socketDB: socketDB)
             break
         case .fetchMessage:
             guard let fetchMessagesInput = controlMessage.fetchMessagesInput else {
                 break
             }
-            self.fetchMessages(userId: userId, ws: ws, socketDB: socketDB, fetchMessagesInput: fetchMessagesInput)
+            self.fetchMessagesInSocket(userId: userId, ws: ws, socketDB: socketDB, fetchMessagesInput: fetchMessagesInput)
         case .ack:
             guard let ackMessage = controlMessage.ackMessage else {
                 break
@@ -110,7 +110,7 @@ class SocketController {
                 guard let chatContacts = chatContacts else {
                     return
                 }
-                self.saveTextMessage(userId: userId, ws: ws, socketDB: socketDB, textMessage: textMessage, chat: chatContacts.chat, receiverId: chatContacts.contactId)
+                self.saveTextMessageInSocket(userId: userId, ws: ws, socketDB: socketDB, textMessage: textMessage, chat: chatContacts.chat, receiverId: chatContacts.contactId)
                 }.catch(AppErrorCatch.printError)
         }
         
@@ -159,9 +159,11 @@ class SocketController {
         guard textMessages.count != 0 else {
             return
         }
-        
-        sendContact(withTextMessages: textMessages, sockets: sockets, socketDB: socketDB, chat: chat, contactId: contactId)
-        
+
+        sendContact(withTextMessages: textMessages, socketDB: socketDB, chat: chat, contactId: contactId).map{ [weak self] contactMessage in
+            self?.sendContactMessage(sockets: sockets, contactMessage: contactMessage)
+        }.catch(AppErrorCatch.printError)
+
     }
     
     private func sendContactMessage(sockets:[WebSocket], contactMessage:ContactMessage) {
@@ -191,105 +193,160 @@ class SocketController {
     
     //MARK: - Save Messages
     
-    private func saveTextMessage(userId:Int,ws:WebSocket,socketDB:SocketDataBaseController,textMessage:TextMessage,chat:Chat,receiverId:Int){
+    private func saveTextMessageInSocket(userId:Int,ws:WebSocket,socketDB:SocketDataBaseController,textMessage:TextMessage,chat:Chat,receiverId:Int){
+        
+        
+        do {
+        
+        try saveTextMessage(userId: userId, socketDB: socketDB, textMessage: textMessage, chat: chat, receiverId: receiverId).map { [weak self] textMessage  in
+            
+            self?.sendTextAckMessage(ws: ws, message: textMessage)
+            if let receiverSockets = UserSockets.getUserSockets(allSockets: self?.allSockets, userId: receiverId) {
+                self?.sendTextMessages(sockets: receiverSockets, socketDB: socketDB, textMessages: [textMessage], chat: chat, contactId: userId)
+            }
+            
+            if let senderOtherSockets = UserSockets.getUserSockets(allSockets: self?.allSockets, userId: userId, excludeSocket: ws) {
+                self?.sendTextMessages(sockets: senderOtherSockets, socketDB: socketDB, textMessages: [textMessage], chat: chat, contactId: receiverId)
+            }
+            
+        }.catch(AppErrorCatch.printError)
+        
+        } catch {
+            AppErrorCatch.printError(error: error)
+        }
+        
+        
+        
+    }
+    
+    private func saveTextMessage(userId:Int,socketDB:SocketDataBaseController,textMessage:TextMessage,chat:Chat,receiverId:Int) throws -> Future<TextMessage>{
         
         textMessage.senderId = userId
         textMessage.receiverId = receiverId
         textMessage.ack = false
         
         guard let chatId = chat.id else {
-            return
+            throw Constants.errors.nilChatId
         }
         
-        socketDB.saveMessage(message: textMessage).map { [weak self] textMessage in
+        return socketDB.saveMessage(message: textMessage).map { [weak self] textMessage in
             
             self?.updateChatNotification(userId: receiverId, chatId: chatId, socketDB: socketDB)
-            self?.sendTextAckMessage(ws: ws, message: textMessage)
-            if let receiverSockets = UserSockets.getUserSockets(allSockets: self?.allSockets, userId: receiverId) {
-                
-                self?.sendTextMessages(sockets: receiverSockets, socketDB: socketDB, textMessages: [textMessage], chat: chat, contactId: userId)
-            }
-            if let senderOtherSockets = UserSockets.getUserSockets(allSockets: self?.allSockets, userId: userId, excludeSocket: ws) {
-                self?.sendTextMessages(sockets: senderOtherSockets, socketDB: socketDB, textMessages: [textMessage], chat: chat, contactId: receiverId)
-            }
             
-            }.catch(AppErrorCatch.printError)
+            return textMessage
+        }
     }
     
     //MARK: - Fetch Messages
     
-    private func fetchContacts(userId:Int,ws:WebSocket,socketDB:SocketDataBaseController){
+    
+    private func fetchContactsInSocket(userId:Int,ws:WebSocket,socketDB:SocketDataBaseController){
+        
+        do {
+            try fetchContacts(userId: userId, socketDB: socketDB).map { [weak self] contactMessages in
+                for contactMessage in contactMessages {
+                    self?.sendContactMessage(sockets: [ws], contactMessage: contactMessage)
+                }
+            }.catch(AppErrorCatch.printError)
+            
+        } catch {
+            AppErrorCatch.printError(error: error)
+        }
+        
+    }
+    
+    private func fetchContacts(userId:Int,socketDB:SocketDataBaseController) throws -> Future<[ContactMessage]>{
+        
+        let promise = socketDB.getPromise(type: [ContactMessage].self)
+        
+        let arrayResult = ArrayResult<ContactMessage>()
         
         socketDB.getUserChats(userId: userId).map{ chats in
+            let chatsCount = chats.count
             for chat in chats {
                 guard let chatContacts = Chat.getChatContacts(userId: userId, chat: chat) else {
                     continue
                 }
                 
-                self.fetchContact(userId: userId, ws: ws, socketDB: socketDB, chat: chat, contactId: chatContacts.contactId)
+                try self.fetchContact(userId: userId, socketDB: socketDB, chat: chat, contactId: chatContacts.contactId).map({ contactMessage in
+                    arrayResult.array.append(contactMessage)
+                    if arrayResult.array.count == chatsCount {
+                        promise.succeed(result: arrayResult.array)
+                    }
+                }).catch(AppErrorCatch.printError)
                 
             }
             }.catch(AppErrorCatch.printError)
         
+        return promise.futureResult
+        
     }
     
-    private func fetchContact(userId:Int,ws:WebSocket,socketDB:SocketDataBaseController,chat:Chat,contactId:Int){
+    private func fetchContact(userId:Int,socketDB:SocketDataBaseController,chat:Chat,contactId:Int) throws ->Future<ContactMessage>{
         
-        guard let chatId = chat.id else { return }
+        guard let chatId = chat.id else { throw Constants.errors.nilChatId }
         
-        socketDB.findChatNotification(userId: userId, chatId: chatId).map({ chatNotification in
-            guard let chatNotification = chatNotification else { return }
+        return socketDB.findChatNotification(userId: userId, chatId: chatId).flatMap({ chatNotification in
+            guard let chatNotification = chatNotification else { throw Constants.errors.chatNotificationNotFound }
             
-            self.sendContact(withTextMessages: nil, sockets: [ws], socketDB: socketDB, chat: chat, contactId: contactId, notificationCount: chatNotification.notificationCount)
+            return self.sendContact(withTextMessages: nil, socketDB: socketDB, chat: chat, contactId: contactId, notificationCount: chatNotification.notificationCount)
             
             
         }).catch(AppErrorCatch.printError)
     }
     
-    private func sendContact(withTextMessages textMessages: [TextMessage]?,sockets:[WebSocket],socketDB:SocketDataBaseController,chat:Chat,contactId:Int,notificationCount:Int? = nil){
+    private func sendContact(withTextMessages textMessages: [TextMessage]?,socketDB:SocketDataBaseController,chat:Chat,contactId:Int,notificationCount:Int? = nil)->Future<ContactMessage>{
         
         
-        socketDB.getContactProfile(contactId: contactId).map { contactUser in
-            guard let contactUser = contactUser else { return }
+        return socketDB.getContactProfile(contactId: contactId).map { contactUser in
+            guard let contactUser = contactUser else { throw Constants.errors.contactNotFound }
             let contactInfo = ContactInfo(id: contactId, name: contactUser.name, image: contactUser.image)
-            
-                let contactMessage = ContactMessage(chat: chat, textMessages: textMessages, contactInfo: contactInfo, notificationCount: notificationCount)
-                self.sendContactMessage(sockets: sockets, contactMessage: contactMessage)
+            let contactMessage = ContactMessage(chat: chat, textMessages: textMessages, contactInfo: contactInfo, notificationCount: notificationCount)
+            return contactMessage
+
             
         }.catch(AppErrorCatch.printError)
     }
     
-    private func fetchMessages(userId:Int,ws:WebSocket,socketDB:SocketDataBaseController,fetchMessagesInput:FetchMessagesInput){
+    
+    private func fetchMessagesInSocket(userId:Int,ws:WebSocket,socketDB:SocketDataBaseController,fetchMessagesInput:FetchMessagesInput){
         
-        socketDB.getChat(chatId: fetchMessagesInput.chatId).map { chat in
-            guard let chat = chat else { return }
-            guard Chat.isUserChat(userId: userId, chat: chat) else {
-                print(Constants.errors.unauthorizedRequest.debugDescription)
-                return
+        
+        do {
+            try fetchMessages(userId: userId, ws: ws, socketDB: socketDB, fetchMessagesInput: fetchMessagesInput).map { fetch in
+                guard fetch.textMessages.count != 0 else {
+                    self.sendNoMoreOldMessages(ws: ws, fetchMessagesInput: fetchMessagesInput)
+                    return
+                }
+                self.sendTextMessages(sockets: [ws], socketDB: socketDB, textMessages: fetch.textMessages, chat: fetch.chat, contactId: fetch.chatContacts.contactId)
+                }.catch(AppErrorCatch.printError)
+        } catch {
+            AppErrorCatch.printError(error: error)
+        }
+        
+        
+    }
+    
+    private func fetchMessages(userId:Int,ws:WebSocket,socketDB:SocketDataBaseController,fetchMessagesInput:FetchMessagesInput) throws -> Future<(chat:Chat,chatContacts:Chat.ChatContacts,textMessages:[TextMessage])>{
+        
+        return socketDB.getChat(chatId: fetchMessagesInput.chatId).flatMap { chat in
+            guard let chat = chat else {
+                throw Constants.errors.chatNotFound
             }
-            guard let chatContacts = Chat.getChatContacts(userId: userId, chat: chat) else {
-                return
+            guard Chat.isUserChat(userId: userId, chat: chat),
+            let chatContacts = Chat.getChatContacts(userId: userId, chat: chat)
+            else {
+                throw Constants.errors.unauthorizedRequest
             }
             
-            self.fetchMessages(chat: chat, beforeId: fetchMessagesInput.beforeId, ws: ws, socketDB: socketDB, contactId: chatContacts.contactId, onEmptyList:{
-                self.sendNoMoreOldMessages(ws: ws, fetchMessagesInput: fetchMessagesInput)
+            return socketDB.getTextMessages(chat: chat, beforeId: fetchMessagesInput.beforeId).map({ textMessages in
+                return (chat:chat,chatContacts:chatContacts,textMessages:textMessages)
             })
             
-        }.catch(AppErrorCatch.printError)
+        }
         
     }
     
-    private func fetchMessages(chat:Chat,beforeId:Int?,ws:WebSocket,socketDB:SocketDataBaseController,contactId:Int,onEmptyList:(()->Void)?=nil){
-        
-        socketDB.getTextMessages(chat: chat, beforeId: beforeId).map { textMessages in
-            guard textMessages.count != 0 else {
-                onEmptyList?()
-                return
-            }
-            self.sendTextMessages(sockets: [ws], socketDB: socketDB, textMessages: textMessages, chat: chat, contactId: contactId)
-            }.catch(AppErrorCatch.printError)
-        
-    }
     
     //MARK: - Chat Notifications
     
@@ -324,7 +381,9 @@ class SocketController {
     
 }
 
-
+class ArrayResult<T> {
+    var array = [T]()
+}
 
 
 
