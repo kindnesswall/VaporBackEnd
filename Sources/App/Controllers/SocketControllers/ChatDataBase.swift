@@ -8,6 +8,25 @@
 import Vapor
 import FluentPostgreSQL
 
+
+class ChatRequestInfo {
+    let userId:Int
+    let dataBase:ChatDataBase
+    
+    init(userId:Int,dataBase:ChatDataBase) {
+        self.userId=userId
+        self.dataBase=dataBase
+    }
+    
+    func getChatContacts(chatId:Int)->Future<Chat.ChatContacts?> {
+        return dataBase.getChatContacts(userId: self.userId, chatId: chatId)
+    }
+    
+    func getUserChats()->Future<[Chat]>{
+        return dataBase.getUserChats(userId: self.userId)
+    }
+}
+
 class ChatDataBase {
     private var req:Request
     
@@ -38,13 +57,13 @@ class ChatDataBase {
         })
     }
     
-    func getChatContacts(userId:Int,chatId:Int)->Future<Chat.ChatContacts?> {
+    fileprivate func getChatContacts(userId:Int,chatId:Int)->Future<Chat.ChatContacts?> {
         return performQuery(query: { conn in
             return Chat.getChatContacts(userId: userId, conn: conn, chatId: chatId)
         })
     }
-    
-    func getUserChats(userId:Int)->Future<[Chat]>{
+
+    fileprivate func getUserChats(userId:Int)->Future<[Chat]>{
         return performQuery(query: { conn in
             return Chat.userChats(userId: userId, conn: conn)
         })

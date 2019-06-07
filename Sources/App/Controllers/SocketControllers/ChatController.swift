@@ -10,19 +10,9 @@ import Vapor
 
 class ChatController {
     
-    class RequestInfo {
-        let userId:Int
-        let dataBase:ChatDataBase
-        
-        init(userId:Int,dataBase:ChatDataBase) {
-            self.userId=userId
-            self.dataBase=dataBase
-        }
-    }
-    
     //MARK: - Save Messages
     
-    func saveTextMessage(requestInfo:RequestInfo,textMessage:TextMessage,chat:Chat,receiverId:Int) throws -> Future<TextMessage>{
+    func saveTextMessage(requestInfo:ChatRequestInfo,textMessage:TextMessage,chat:Chat,receiverId:Int) throws -> Future<TextMessage>{
         
         textMessage.senderId = requestInfo.userId
         textMessage.receiverId = receiverId
@@ -40,7 +30,7 @@ class ChatController {
         }
     }
     
-    func ackMessageIsReceived(requestInfo:RequestInfo,ackMessage:AckMessage) {
+    func ackMessageIsReceived(requestInfo:ChatRequestInfo,ackMessage:AckMessage) {
         requestInfo.dataBase.getTextMessage(id: ackMessage.messageId).map { message in
             guard let message = message else {
                 throw Constants.errors.messageNotFound
@@ -63,13 +53,13 @@ class ChatController {
     
     //MARK: - Fetch Messages
     
-    func fetchContacts(requestInfo:RequestInfo) throws -> Future<[ContactMessage]>{
+    func fetchContacts(requestInfo:ChatRequestInfo) throws -> Future<[ContactMessage]>{
         
         let promise = requestInfo.dataBase.getPromise(type: [ContactMessage].self)
         
         let arrayResult = ArrayResult<ContactMessage>()
         
-        requestInfo.dataBase.getUserChats(userId: requestInfo.userId).map{ chats in
+        requestInfo.getUserChats().map{ chats in
             let chatsCount = chats.count
             for chat in chats {
                 guard let chatContacts = Chat.getChatContacts(userId: requestInfo.userId, chat: chat) else {
@@ -90,7 +80,7 @@ class ChatController {
         
     }
     
-    func fetchContact(requestInfo:RequestInfo,chat:Chat,contactId:Int) throws ->Future<ContactMessage>{
+    func fetchContact(requestInfo:ChatRequestInfo,chat:Chat,contactId:Int) throws ->Future<ContactMessage>{
         
         guard let chatId = chat.id else { throw Constants.errors.nilChatId }
         
@@ -103,7 +93,7 @@ class ChatController {
         }).catch(AppErrorCatch.printError)
     }
     
-    func fetchContactInfo(requestInfo:RequestInfo,withTextMessages textMessages: [TextMessage]?,chat:Chat,contactId:Int,notificationCount:Int? = nil)->Future<ContactMessage>{
+    func fetchContactInfo(requestInfo:ChatRequestInfo,withTextMessages textMessages: [TextMessage]?,chat:Chat,contactId:Int,notificationCount:Int? = nil)->Future<ContactMessage>{
         
         
         return requestInfo.dataBase.getContactProfile(contactId: contactId).map { contactUser in
@@ -117,7 +107,7 @@ class ChatController {
     }
     
     
-    func fetchMessages(requestInfo:RequestInfo,fetchMessagesInput:FetchMessagesInput) throws -> Future<(chat:Chat,chatContacts:Chat.ChatContacts,textMessages:[TextMessage])>{
+    func fetchMessages(requestInfo:ChatRequestInfo,fetchMessagesInput:FetchMessagesInput) throws -> Future<(chat:Chat,chatContacts:Chat.ChatContacts,textMessages:[TextMessage])>{
         
         return requestInfo.dataBase.getChat(chatId: fetchMessagesInput.chatId).flatMap { chat in
             guard let chat = chat else {
@@ -141,7 +131,7 @@ class ChatController {
     //MARK: - Chat Notifications
     
     
-    func updateChatNotification(requestInfo:RequestInfo,notificationUserId:Int,chatId:Int) {
+    func updateChatNotification(requestInfo:ChatRequestInfo,notificationUserId:Int,chatId:Int) {
         
         requestInfo.dataBase.calculateNumberOfNotifications(notificationUserId: notificationUserId, chatId: chatId).map { notificationCount  in
             
@@ -151,7 +141,7 @@ class ChatController {
         
     }
     
-    private func setChatNotification(requestInfo:RequestInfo,notificationUserId:Int,chatId:Int,notificationCount:Int) {
+    private func setChatNotification(requestInfo:ChatRequestInfo,notificationUserId:Int,chatId:Int,notificationCount:Int) {
         
         requestInfo.dataBase.findChatNotification(notificationUserId: notificationUserId, chatId: chatId).map { (foundChatNotification) -> Future<ChatNotification> in
             
