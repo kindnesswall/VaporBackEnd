@@ -30,8 +30,8 @@ class ChatController {
         }
     }
     
-    func ackMessageIsReceived(requestInfo:ChatRequestInfo,ackMessage:AckMessage) {
-        requestInfo.dataBase.getTextMessage(id: ackMessage.messageId).map { message in
+    func ackMessageIsReceived(requestInfo:ChatRequestInfo,ackMessage:AckMessage) -> Future<HTTPStatus> {
+        return requestInfo.dataBase.getTextMessage(id: ackMessage.messageId).flatMap { message in
             guard let message = message else {
                 throw Constants.errors.messageNotFound
             }
@@ -41,17 +41,30 @@ class ChatController {
             if message.ack == false {
                 message.ack = true
                 
-                requestInfo.dataBase.saveMessage(message: message).map({ [weak self] message in
+                return requestInfo.dataBase.saveMessage(message: message).map({ [weak self] message in
                     self?.updateChatNotification(requestInfo: requestInfo, notificationUserId: requestInfo.userId, chatId: message.chatId)
-                }).catch(AppErrorCatch.printError)
+                }).transform(to: .ok)
                 
+            } else {
+                throw Constants.errors.redundentAck
             }
             
-            }.catch(AppErrorCatch.printError)
+        }
     }
     
     
     //MARK: - Fetch Messages
+    
+    class FetchMessagesResult {
+        let chat:Chat
+        let chatContacts:Chat.ChatContacts
+        let textMessages:[TextMessage]
+        init(chat:Chat,chatContacts:Chat.ChatContacts,textMessages:[TextMessage]) {
+            self.chat=chat
+            self.chatContacts=chatContacts
+            self.textMessages=textMessages
+        }
+    }
     
     func fetchContacts(requestInfo:ChatRequestInfo) throws -> Future<[ContactMessage]>{
         
@@ -87,18 +100,18 @@ class ChatController {
         return requestInfo.dataBase.findChatNotification(notificationUserId: requestInfo.userId, chatId: chatId).flatMap({ chatNotification in
             guard let chatNotification = chatNotification else { throw Constants.errors.chatNotificationNotFound }
             
-            return self.fetchContactInfo(requestInfo: requestInfo, withTextMessages: nil, chat: chat, contactId: contactId, notificationCount: chatNotification.notificationCount)
+            return self.fetchContactInfo(requestInfo: requestInfo, withTextMessages: nil, chat: chat, contactInfoId: contactId, notificationCount: chatNotification.notificationCount)
             
             
         }).catch(AppErrorCatch.printError)
     }
     
-    func fetchContactInfo(requestInfo:ChatRequestInfo,withTextMessages textMessages: [TextMessage]?,chat:Chat,contactId:Int,notificationCount:Int? = nil)->Future<ContactMessage>{
+    func fetchContactInfo(requestInfo:ChatRequestInfo,withTextMessages textMessages: [TextMessage]?,chat:Chat,contactInfoId:Int,notificationCount:Int? = nil)->Future<ContactMessage>{
         
         
-        return requestInfo.dataBase.getContactProfile(contactId: contactId).map { contactUser in
+        return requestInfo.dataBase.getContactProfile(contactId: contactInfoId).map { contactUser in
             guard let contactUser = contactUser else { throw Constants.errors.contactNotFound }
-            let contactInfo = ContactInfo(id: contactId, name: contactUser.name, image: contactUser.image)
+            let contactInfo = ContactInfo(id: contactInfoId, name: contactUser.name, image: contactUser.image)
             let contactMessage = ContactMessage(chat: chat, textMessages: textMessages, contactInfo: contactInfo, notificationCount: notificationCount)
             return contactMessage
             
@@ -107,7 +120,7 @@ class ChatController {
     }
     
     
-    func fetchMessages(requestInfo:ChatRequestInfo,fetchMessagesInput:FetchMessagesInput) throws -> Future<(chat:Chat,chatContacts:Chat.ChatContacts,textMessages:[TextMessage])>{
+    func fetchMessages(requestInfo:ChatRequestInfo,fetchMessagesInput:FetchMessagesInput) throws -> Future<FetchMessagesResult>{
         
         return requestInfo.dataBase.getChat(chatId: fetchMessagesInput.chatId).flatMap { chat in
             guard let chat = chat else {
@@ -120,7 +133,7 @@ class ChatController {
             }
             
             return requestInfo.dataBase.getTextMessages(chat: chat, beforeId: fetchMessagesInput.beforeId).map({ textMessages in
-                return (chat:chat,chatContacts:chatContacts,textMessages:textMessages)
+                return FetchMessagesResult(chat:chat,chatContacts:chatContacts,textMessages:textMessages)
             })
             
         }

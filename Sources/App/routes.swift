@@ -19,6 +19,7 @@ public func routes(_ router: Router) throws {
     let userProfileController = UserProfileController()
     let userAdminController = UserAdminController()
     let giftRequestController = GiftRequestController()
+    let chatRestfulController = ChatRestfulController()
     
     //Middlewares
     let tokenAuthMiddleware = User.tokenAuthMiddleware()
@@ -61,6 +62,12 @@ public func routes(_ router: Router) throws {
     
     //Routes Gift Request
     tokenProtected.get(uris.gifts_request,Gift.parameter, use: giftRequestController.requestGift)
+    
+    //Routes Chat
+    tokenProtected.get(uris.chat_contacts, use: chatRestfulController.fetchContacts)
+    tokenProtected.post(uris.chat_messages, use: chatRestfulController.fetchMessages)
+    tokenProtected.post(uris.chat_send, use: chatRestfulController.sendMessage)
+    tokenProtected.post(uris.chat_ack, use: chatRestfulController.ackMessage)
     
     //Routes Admin
     adminProtected.put(uris.gifts_accept,Gift.parameter, use: giftAdminController.acceptGift)

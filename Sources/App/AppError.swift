@@ -47,4 +47,5 @@ class ErrorConstants {
     let nilChatId = AppError(identifier: "nilChatId", reason: "Chat id is nil")
     let contactNotFound = AppError(identifier: "contactNotFound", reason: "Contact not found")
     let chatNotificationNotFound = AppError(identifier: "chatNotificationNotFound", reason: "Chat's Notification not found")
+    let redundentAck = AppError(identifier: "redundentAck", reason: "Ack is redundent")
 }

@@ -34,6 +34,18 @@ class URIs {
     var chat : String {
         return "\(apiRoute)/chat"
     }
+    var chat_contacts : String {
+        return "\(apiRoute)/chat/contacts"
+    }
+    var chat_messages : String {
+        return "\(apiRoute)/chat/messages"
+    }
+    var chat_send : String {
+        return "\(apiRoute)/chat/send"
+    }
+    var chat_ack : String {
+        return "\(apiRoute)/chat/ack"
+    }
     
     var gifts_register : String {
         return "\(apiRoute)/gifts/register"

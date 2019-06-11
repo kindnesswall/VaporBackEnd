@@ -12,7 +12,7 @@ func sockets(wss: NIOWebSocketServer){
     
     let uris = URIs();
     
-    let socketController = SocketController()
+    let socketController = ChatSocketController()
     
     wss.get(uris.chat, use: socketController.socketConnected)
     

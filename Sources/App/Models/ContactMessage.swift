@@ -5,10 +5,10 @@
 //  Created by Amir Hossein on 5/22/19.
 //
 
-import Foundation
+import Vapor
 
 
-class ContactMessage: Codable {
+final class ContactMessage: Content {
     var chat: Chat?
     var contactInfo: ContactInfo?
     var textMessages: [TextMessage]?
@@ -22,7 +22,8 @@ class ContactMessage: Codable {
     }
 }
 
-class ContactInfo: Codable {
+
+final class ContactInfo: Content {
     var id: Int
     var name: String?
     var image: String?
