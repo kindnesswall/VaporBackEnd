@@ -41,6 +41,7 @@ class ErrorConstants {
     let nilGiftId = AppError(identifier: "nilGiftId", reason: "Gift id is nil")
     let nilGiftUserId = AppError(identifier: "nilGiftUserId", reason: "Gift user id is nil")
     let messageNotFound = AppError(identifier: "messageNotFound", reason: "Message not found")
+    let nilMessageId = AppError(identifier: "nilMessageId", reason: "Message id is nil")
     let giftNotFound = AppError(identifier: "giftNotFound", reason: "Gift not found")
     let userAccessIsDenied = AppError(identifier: "userAccessIsDenied", reason: "User access is denied")
     let chatNotFound = AppError(identifier: "chatNotFound", reason: "Chat not found")

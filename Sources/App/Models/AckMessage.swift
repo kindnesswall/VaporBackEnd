@@ -5,9 +5,9 @@
 //  Created by Amir Hossein on 3/11/19.
 //
 
-import Foundation
+import Vapor
 
-class AckMessage: Codable {
+final class AckMessage: Content {
     var messageId:Int
     var textMessage:TextMessage?
     
