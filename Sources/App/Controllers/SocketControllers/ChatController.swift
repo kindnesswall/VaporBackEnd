@@ -22,11 +22,12 @@ class ChatController {
             throw Constants.errors.nilChatId
         }
         
-        return requestInfo.dataBase.saveMessage(message: textMessage).map { [weak self] textMessage in
+        return requestInfo.dataBase.saveMessage(message: textMessage).flatMap { textMessage in
             
-            self?.updateChatNotification(requestInfo: requestInfo, notificationUserId: receiverId, chatId: chatId)
+            return self.updateChatNotification(requestInfo: requestInfo, notificationUserId: receiverId, chatId: chatId).map({ _ in
+                return textMessage
+            })
             
-            return textMessage
         }
     }
     
@@ -41,8 +42,8 @@ class ChatController {
             if message.ack == false {
                 message.ack = true
                 
-                return requestInfo.dataBase.saveMessage(message: message).map({ [weak self] message in
-                    self?.updateChatNotification(requestInfo: requestInfo, notificationUserId: requestInfo.userId, chatId: message.chatId)
+                return requestInfo.dataBase.saveMessage(message: message).flatMap({ message in
+                    return self.updateChatNotification(requestInfo: requestInfo, notificationUserId: requestInfo.userId, chatId: message.chatId)
                 }).transform(to: .ok)
                 
             } else {
@@ -98,9 +99,10 @@ class ChatController {
         guard let chatId = chat.id else { throw Constants.errors.nilChatId }
         
         return requestInfo.dataBase.findChatNotification(notificationUserId: requestInfo.userId, chatId: chatId).flatMap({ chatNotification in
-            guard let chatNotification = chatNotification else { throw Constants.errors.chatNotificationNotFound }
             
-            return self.fetchContactInfo(requestInfo: requestInfo, withTextMessages: nil, chat: chat, contactInfoId: contactId, notificationCount: chatNotification.notificationCount)
+            let notificationCount = chatNotification?.notificationCount ?? 0
+            
+            return self.fetchContactInfo(requestInfo: requestInfo, withTextMessages: nil, chat: chat, contactInfoId: contactId, notificationCount: notificationCount)
             
             
         }).catch(AppErrorCatch.printError)
@@ -144,19 +146,19 @@ class ChatController {
     //MARK: - Chat Notifications
     
     
-    func updateChatNotification(requestInfo:ChatRequestInfo,notificationUserId:Int,chatId:Int) {
+    private func updateChatNotification(requestInfo:ChatRequestInfo,notificationUserId:Int,chatId:Int) -> Future<ChatNotification> {
         
-        requestInfo.dataBase.calculateNumberOfNotifications(notificationUserId: notificationUserId, chatId: chatId).map { notificationCount  in
+        return requestInfo.dataBase.calculateNumberOfNotifications(notificationUserId: notificationUserId, chatId: chatId).flatMap { notificationCount  in
             
-            self.setChatNotification(requestInfo: requestInfo, notificationUserId: notificationUserId, chatId: chatId, notificationCount: notificationCount)
-            }.catch(AppErrorCatch.printError)
+            return self.setChatNotification(requestInfo: requestInfo, notificationUserId: notificationUserId, chatId: chatId, notificationCount: notificationCount)
+            }
         
         
     }
     
-    private func setChatNotification(requestInfo:ChatRequestInfo,notificationUserId:Int,chatId:Int,notificationCount:Int) {
+    private func setChatNotification(requestInfo:ChatRequestInfo,notificationUserId:Int,chatId:Int,notificationCount:Int)-> Future<ChatNotification> {
         
-        requestInfo.dataBase.findChatNotification(notificationUserId: notificationUserId, chatId: chatId).map { (foundChatNotification) -> Future<ChatNotification> in
+        return requestInfo.dataBase.findChatNotification(notificationUserId: notificationUserId, chatId: chatId).flatMap { foundChatNotification in
             
             var chatNotification:ChatNotification
             if let _chatNotification = foundChatNotification {
@@ -169,7 +171,7 @@ class ChatController {
             
             return requestInfo.dataBase.saveChatNotification(chatNotification: chatNotification)
             
-            }.catch(AppErrorCatch.printError)
+            }
     }
     
 }
