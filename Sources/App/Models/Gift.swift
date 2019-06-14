@@ -115,12 +115,12 @@ extension Gift {
         }
         
         let maximumCount = Constants.maximumRequestFetchResultsCount
-        var unwrappedCount = requestInput?.count ?? maximumCount
-        if unwrappedCount > maximumCount {
-            unwrappedCount = maximumCount
+        var count = requestInput?.count ?? maximumCount
+        if count > maximumCount {
+            count = maximumCount
         }
         
-        return query.sort(\.id, PostgreSQLDirection.descending).range(0..<unwrappedCount).all()
+        return query.range(0..<count).all()
     }
     
     
