@@ -44,9 +44,9 @@ final class UserController {
     
     
     
-    func loginHandler(_ req: Request) throws -> Future<Token> {
+    func loginHandler(_ req: Request) throws -> Future<AuthOutput> {
         
-        return try req.content.decode(User.Input.self).flatMap{ (inputUser)->Future<Token> in
+        return try req.content.decode(User.Input.self).flatMap{ inputUser in
             
             let phoneNumber = try UserController.checkPhoneNumber(inputUser: inputUser)
 
@@ -54,7 +54,7 @@ final class UserController {
                 throw Constants.errors.invalidActivationCode
             }
 
-            return User.query(on: req).filter(\User.phoneNumber == phoneNumber).first().flatMap({ (user) -> Future<Token> in
+            return User.query(on: req).filter(\User.phoneNumber == phoneNumber).first().flatMap({ user in
                 
                 guard let user = user else {
                      throw Constants.errors.invalidPhoneNumber
@@ -67,7 +67,10 @@ final class UserController {
                 user.activationCode = nil
                 return user.save(on: req).flatMap({ user in
                     let token = try Token.generate(for: user)
-                    return token.save(on: req)
+                    
+                    return token.save(on: req).map({ token in
+                        return AuthOutput(token: token, isAdmin: user.isAdmin)
+                    })
                 })
             })
         }
