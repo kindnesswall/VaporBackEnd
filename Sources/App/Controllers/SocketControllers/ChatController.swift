@@ -113,7 +113,7 @@ class ChatController {
         
         return requestInfo.dataBase.getContactProfile(contactId: contactInfoId).map { contactUser in
             guard let contactUser = contactUser else { throw Constants.errors.contactNotFound }
-            let contactInfo = ContactInfo(id: contactInfoId, name: contactUser.name, image: contactUser.image)
+            let contactInfo = UserProfile(id: contactInfoId, name: contactUser.name, image: contactUser.image)
             let contactMessage = ContactMessage(chat: chat, textMessages: textMessages, contactInfo: contactInfo, notificationCount: notificationCount)
             return contactMessage
             

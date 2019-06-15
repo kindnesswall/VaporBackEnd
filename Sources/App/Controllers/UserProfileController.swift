@@ -12,7 +12,10 @@ final class UserProfileController {
     
     func show(_ req: Request) throws -> Future<UserProfile> {
         return try req.parameters.next(User.self).map({ user in
-            let userProfile = UserProfile(name: user.name, image: user.image)
+            guard let userId = user.id else {
+                throw Constants.errors.nilUserId
+            }
+            let userProfile = UserProfile(id: userId, name: user.name, image: user.image)
             return userProfile
         })
     }
@@ -20,7 +23,7 @@ final class UserProfileController {
     func update(_ req: Request) throws -> Future<HTTPStatus> {
         let user = try req.requireAuthenticated(User.self)
         
-        return try req.content.decode(UserProfile.self).flatMap({ (userProfile) -> Future<User>  in
+        return try req.content.decode(UserProfile.Input.self).flatMap({ (userProfile) -> Future<User>  in
             user.name = userProfile.name
             user.image = userProfile.image
             

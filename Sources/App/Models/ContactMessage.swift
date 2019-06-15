@@ -10,11 +10,11 @@ import Vapor
 
 final class ContactMessage: Content {
     var chat: Chat?
-    var contactInfo: ContactInfo?
+    var contactInfo: UserProfile?
     var textMessages: [TextMessage]?
     var notificationCount: Int?
     
-    init(chat: Chat?,textMessages: [TextMessage]?,contactInfo: ContactInfo?,notificationCount: Int?) {
+    init(chat: Chat?,textMessages: [TextMessage]?,contactInfo: UserProfile?,notificationCount: Int?) {
         self.chat = chat
         self.textMessages = textMessages
         self.contactInfo = contactInfo
@@ -22,15 +22,3 @@ final class ContactMessage: Content {
     }
 }
 
-
-final class ContactInfo: Content {
-    var id: Int
-    var name: String?
-    var image: String?
-    
-    init(id: Int,name: String?,image: String?) {
-        self.id=id
-        self.name=name
-        self.image=image
-    }
-}
