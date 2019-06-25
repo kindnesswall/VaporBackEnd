@@ -48,9 +48,6 @@ class ChatRestfulController {
         let requestInfo = try getRequestInfo(req: req)
         return try req.content.decode(TextMessage.self).flatMap({ textMessage in
             return requestInfo.getChatContacts(chatId:textMessage.chatId).flatMap { chatContacts in
-                guard let chatContacts = chatContacts else {
-                    throw Constants.errors.unauthorizedRequest
-                }
                 return try self.chatController.saveTextMessage(requestInfo: requestInfo, textMessage: textMessage, chat: chatContacts.chat, receiverId: chatContacts.contactId).map({ textMessage in
                     guard let ackMessage = AckMessage(textMessage: textMessage) else {
                         throw Constants.errors.nilMessageId

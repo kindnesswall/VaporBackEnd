@@ -63,25 +63,32 @@ extension Chat {
         }
     }
     
-    static func getChatContacts(userId:Int,conn:DatabaseConnectable,chatId:Int)->Future<ChatContacts?> {
-        return Chat.find(chatId, on: conn).map{ chat -> ChatContacts? in
+    static func getChatContacts(userId:Int,chatId:Int,conn:DatabaseConnectable)->Future<ChatContacts> {
+        return Chat.find(chatId, on: conn).flatMap { chat in
             guard let chat = chat else {
-                return nil
+                throw Constants.errors.chatNotFound
             }
-            return Chat.getChatContacts(userId: userId, chat: chat)
+            return try Chat.getChatContacts(userId: userId, chat: chat, conn: conn)
             
         }
     }
     
-    static func getChatContacts(userId:Int,chat:Chat)->ChatContacts? {
+    static func getChatContacts(userId:Int,chat:Chat,conn:DatabaseConnectable,withBlocked:Bool = false) throws -> Future <ChatContacts> {
         
         guard isUserChat(userId: userId, chat: chat) else {
-            return nil
+            throw Constants.errors.unauthorizedRequest
         }
-        if chat.firstId == userId {
-            return ChatContacts(chat: chat, userId: chat.firstId, contactId: chat.secondId)
-        }
-        return ChatContacts(chat: chat, userId: chat.secondId, contactId: chat.firstId)
+        
+        return try ChatBlock.isChatUnblock(chat: chat, conn: conn).map({ chatIsUnblock in
+            guard (withBlocked || chatIsUnblock) else {
+                throw Constants.errors.chatHasBlocked
+            }
+            if chat.firstId == userId {
+                return ChatContacts(chat: chat, userId: chat.firstId, contactId: chat.secondId)
+            }
+            return ChatContacts(chat: chat, userId: chat.secondId, contactId: chat.firstId)
+        })
+        
     }
     
 }

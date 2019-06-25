@@ -49,4 +49,7 @@ class ErrorConstants {
     let contactNotFound = AppError(identifier: "contactNotFound", reason: "Contact not found")
     let chatNotificationNotFound = AppError(identifier: "chatNotificationNotFound", reason: "Chat's Notification not found")
     let redundentAck = AppError(identifier: "redundentAck", reason: "Ack is redundent")
+    let userWasAlreadyBlocked = AppError(identifier: "userWasAlreadyBlocked", reason: "User was already blocked")
+    let userWasAlreadyUnblocked = AppError(identifier: "userWasAlreadyUnblocked", reason: "User was already unblocked")
+    let chatHasBlocked = AppError(identifier: "chatHasBlocked", reason: "Chat has blocked")
 }

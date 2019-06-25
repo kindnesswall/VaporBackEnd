@@ -18,7 +18,11 @@ class ChatRequestInfo {
         self.dataBase=dataBase
     }
     
-    func getChatContacts(chatId:Int)->Future<Chat.ChatContacts?> {
+    func getChatContacts(chat:Chat)->Future<Chat.ChatContacts> {
+        return dataBase.getChatContacts(userId: self.userId, chat: chat)
+    }
+    
+    func getChatContacts(chatId:Int)->Future<Chat.ChatContacts> {
         return dataBase.getChatContacts(userId: self.userId, chatId: chatId)
     }
     
@@ -57,9 +61,15 @@ class ChatDataBase {
         })
     }
     
-    fileprivate func getChatContacts(userId:Int,chatId:Int)->Future<Chat.ChatContacts?> {
+    fileprivate func getChatContacts(userId:Int,chat:Chat)->Future<Chat.ChatContacts> {
         return performQuery(query: { conn in
-            return Chat.getChatContacts(userId: userId, conn: conn, chatId: chatId)
+            return try Chat.getChatContacts(userId: userId, chat: chat, conn: conn)
+        })
+    }
+    
+    fileprivate func getChatContacts(userId:Int,chatId:Int)->Future<Chat.ChatContacts> {
+        return performQuery(query: { conn in
+            return Chat.getChatContacts(userId: userId, chatId: chatId, conn: conn)
         })
     }
 

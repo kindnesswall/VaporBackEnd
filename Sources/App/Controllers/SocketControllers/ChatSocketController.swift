@@ -115,9 +115,6 @@ class ChatSocketController {
         
         for textMessage in textMessages {
             requestInfo.getChatContacts(chatId:textMessage.chatId).map { chatContacts -> Void in
-                guard let chatContacts = chatContacts else {
-                    return
-                }
                 self.saveTextMessage(requestInfo: requestInfo, ws: ws, textMessage: textMessage, chat: chatContacts.chat, receiverId: chatContacts.contactId)
                 }.catch(AppErrorCatch.printError)
         }

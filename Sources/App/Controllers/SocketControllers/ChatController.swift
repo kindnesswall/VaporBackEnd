@@ -76,17 +76,18 @@ class ChatController {
         requestInfo.getUserChats().map{ chats in
             let chatsCount = chats.count
             for chat in chats {
-                guard let chatContacts = Chat.getChatContacts(userId: requestInfo.userId, chat: chat) else {
+                guard let chatContacts = try? requestInfo.getChatContacts( chat: chat) else {
                     continue
                 }
                 
-                try self.fetchContact(requestInfo: requestInfo, chat: chat, contactId: chatContacts.contactId).map({ contactMessage in
-                    arrayResult.array.append(contactMessage)
-                    if arrayResult.array.count == chatsCount {
-                        promise.succeed(result: arrayResult.array)
-                    }
+                chatContacts.map({ chatContacts in
+                    try self.fetchContact(requestInfo: requestInfo, chat: chat, contactId: chatContacts.contactId).map({ contactMessage in
+                        arrayResult.array.append(contactMessage)
+                        if arrayResult.array.count == chatsCount {
+                            promise.succeed(result: arrayResult.array)
+                        }
+                    }).catch(AppErrorCatch.printError)
                 }).catch(AppErrorCatch.printError)
-                
             }
             }.catch(AppErrorCatch.printError)
         
@@ -128,16 +129,15 @@ class ChatController {
             guard let chat = chat else {
                 throw Constants.errors.chatNotFound
             }
-            guard Chat.isUserChat(userId: requestInfo.userId, chat: chat),
-                let chatContacts = Chat.getChatContacts(userId: requestInfo.userId, chat: chat)
-                else {
-                    throw Constants.errors.unauthorizedRequest
-            }
+            guard Chat.isUserChat(userId: requestInfo.userId, chat: chat) else { throw Constants.errors.unauthorizedRequest }
             
-            return requestInfo.dataBase.getTextMessages(chat: chat, beforeId: fetchMessagesInput.beforeId).map({ textMessages in
-                return FetchMessagesResult(chat:chat,chatContacts:chatContacts,textMessages:textMessages)
+            let chatContacts = try requestInfo.getChatContacts(chat: chat)
+            
+            return chatContacts.flatMap({ chatContacts in
+                return requestInfo.dataBase.getTextMessages(chat: chat, beforeId: fetchMessagesInput.beforeId).map({ textMessages in
+                    return FetchMessagesResult(chat:chat,chatContacts:chatContacts,textMessages:textMessages)
+                })
             })
-            
         }
         
     }
