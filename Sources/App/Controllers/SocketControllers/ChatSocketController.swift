@@ -20,7 +20,7 @@ class ChatSocketController {
     
     func socketConnected(ws:WebSocket,req:Request) throws {
         
-        let dataBase = ChatDataBase(req: req)
+        let dataBase = ChatDataBase(req: req, withPooledConnection: true)
         
         guard let bearerAuthorization = req.http.headers.bearerAuthorization else {
             throw Constants.errors.unauthorizedSocket

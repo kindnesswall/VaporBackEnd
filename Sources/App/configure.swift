@@ -48,7 +48,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     migrations.add(model: City.self, database: .psql)
     migrations.add(model: Chat.self, database: .psql)
     migrations.add(model: ChatNotification.self, database: .psql)
-//    migrations.add(model: ChatBlock.self, database: .psql)
+    migrations.add(model: ChatBlock.self, database: .psql)
     migrations.add(model: GiftRequest.self, database: .psql)
     
     //seeds

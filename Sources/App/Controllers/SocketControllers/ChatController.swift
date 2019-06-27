@@ -76,10 +76,8 @@ class ChatController {
         requestInfo.getUserChats().map{ chats in
             let chatsCount = chats.count
             for chat in chats {
-                guard let chatContacts = try? requestInfo.getChatContacts( chat: chat) else {
-                    continue
-                }
                 
+                let chatContacts = requestInfo.getChatContacts( chat: chat)
                 chatContacts.map({ chatContacts in
                     try self.fetchContact(requestInfo: requestInfo, chat: chat, contactId: chatContacts.contactId).map({ contactMessage in
                         arrayResult.array.append(contactMessage)
@@ -88,6 +86,7 @@ class ChatController {
                         }
                     }).catch(AppErrorCatch.printError)
                 }).catch(AppErrorCatch.printError)
+                
             }
             }.catch(AppErrorCatch.printError)
         

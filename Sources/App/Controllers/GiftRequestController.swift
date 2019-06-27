@@ -44,9 +44,9 @@ final class GiftRequestController{
         return Chat.findChat(userId: userId, contactId: contactId, conn: conn).flatMap({ chat -> Future<Chat> in
             
             if let chat = chat {
-                let promise = conn.eventLoop.newPromise(of: Chat.self)
-                promise.succeed(result: chat)
-                return promise.futureResult
+                
+                return conn.eventLoop.newSucceededFuture(result: chat)
+                
             } else {
                 let newChat = Chat(firstId: contactId, secondId: userId)
                 return newChat.save(on: conn)

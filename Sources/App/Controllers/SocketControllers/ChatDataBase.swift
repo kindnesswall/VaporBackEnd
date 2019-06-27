@@ -33,9 +33,11 @@ class ChatRequestInfo {
 
 class ChatDataBase {
     private var req:Request
+    private var withPooledConnection:Bool
     
-    init(req:Request) {
+    init(req:Request,withPooledConnection:Bool=false) {
         self.req=req
+        self.withPooledConnection=withPooledConnection
     }
     
     func getPromise<T>(type:T.Type)->Promise<T>{
@@ -44,9 +46,21 @@ class ChatDataBase {
     }
     
     func performQuery<T>(query: @escaping (DatabaseConnectable) throws ->Future<T>)->Future<T> {
-        return req.withPooledConnection(to: .psql, closure: { conn in
-            return try query(conn)
-        })
+        
+        if !withPooledConnection {
+            
+            do {
+                return try query(req)
+            } catch {
+                return req.eventLoop.newFailedFuture(error: error)
+            }
+            
+        } else {
+            return req.withPooledConnection(to: .psql, closure: { conn in
+                return try query(conn)
+            })
+        }
+        
     }
     
     func isTokenAuthenticated(bearerAuthorization:BearerAuthorization)->Future<Token?>{
