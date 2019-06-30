@@ -32,7 +32,7 @@ extension TextMessage {
                 query.filter(\.id < beforeId)
             }
             let maximumCount = Constants.maximumRequestFetchResultsCount
-            return query.range(0..<maximumCount).all()
+            return query.sort(\.id, .descending).range(0..<maximumCount).all()
       
     }
     

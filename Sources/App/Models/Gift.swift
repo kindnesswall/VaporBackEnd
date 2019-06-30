@@ -120,7 +120,7 @@ extension Gift {
             count = maximumCount
         }
         
-        return query.range(0..<count).all()
+        return query.sort(\.id, .descending).range(0..<count).all()
     }
     
     
