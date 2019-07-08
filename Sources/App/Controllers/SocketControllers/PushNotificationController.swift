@@ -38,23 +38,25 @@ class PushNotificationController {
     
     func sendPush(_ req: Request) throws -> Future<HTTPStatus> {
         return try req.content.decode(SendPushInput.self).map { input in
-            try PushNotificationController.sendPush(req, userId: input.userId, text: input.text)
+            try PushNotificationController.sendPush(req, userId: input.userId, title: input.title, body: input.body, data: nil)
             return .ok
         }
     }
     
-    static func sendPush(_ req: Request,userId:Int,text:String) throws {
+    static func sendPush(_ req: Request, userId:Int, title:String?, body:String?, data: String?) throws {
+        
+        guard let payload = PushPayload(title: title, body: body, data: data).textFormat else {
+            throw Constants.errors.pushPayloadIsNotValid
+        }
+        
         UserPushNotification.findAllTokens(userId: userId, type: PushNotificationType.APNS.rawValue, conn: req).map { allTokens in
             for token in allTokens {
-                try sendPush(req, token: token.devicePushToken, text: text)
+                try sendPush(req, token: token.devicePushToken, payload: payload)
             }
         }.catch(AppErrorCatch.printError)
     }
     
-    private static func sendPush(_ req: Request,token:String,text:String) throws {
-        guard let payload = PushPayload(alert: text).textFormat else {
-            throw Constants.errors.pushPayloadIsNotValid
-        }
+    private static func sendPush(_ req: Request,token: String,payload: String) throws {
         
         let shell = try req.make(Shell.self)
         

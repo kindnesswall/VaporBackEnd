@@ -9,9 +9,12 @@ import Foundation
 
 class PushPayload : Codable {
     let aps: PushPayloadAPS
+    let data: String?
     
-    init(alert: String, sound: String = "default") {
+    init(title:String?, body:String?, data: String?, sound: String? = nil) {
+        let alert = PushPayloadAPS.Alert(title: title, body: body)
         self.aps = PushPayloadAPS(alert: alert, sound: sound)
+        self.data = data
     }
     
     var textFormat: String? {
@@ -22,12 +25,22 @@ class PushPayload : Codable {
 }
 
 class PushPayloadAPS: Codable {
-    var alert: String
-    var sound: String
+    var alert: Alert
+    var sound: String?
     
-    init(alert: String, sound: String) {
+    init(alert: Alert, sound: String?) {
         self.alert = alert
         self.sound = sound
+    }
+    
+    class Alert: Codable {
+        var title:String?
+        var body:String?
+        
+        init(title:String?,body:String?) {
+            self.title = title
+            self.body = body
+        }
     }
 }
 

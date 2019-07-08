@@ -46,7 +46,8 @@ final class UserPushNotification: PostgreSQLModel {
 
 final class SendPushInput : Content {
     let userId:Int
-    let text:String
+    let title:String?
+    let body:String
 }
 
 enum PushNotificationType: String, Codable {

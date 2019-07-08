@@ -17,6 +17,12 @@ final class TextMessage : PostgreSQLModel {
     var text:String
     var ack:Bool?
     var createdAt:Date?
+    
+    var textFormat: String? {
+        guard let data = try? JSONEncoder().encode(self) else { return nil }
+        let text = String(data: data, encoding: .utf8)
+        return text
+    }
 }
 
 extension TextMessage {

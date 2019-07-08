@@ -49,6 +49,12 @@ class ChatRestfulController {
         return try req.content.decode(TextMessage.self).flatMap({ textMessage in
             return requestInfo.getChatContacts(chatId:textMessage.chatId).flatMap { chatContacts in
                 return try self.chatController.saveTextMessage(requestInfo: requestInfo, textMessage: textMessage, chat: chatContacts.chat, receiverId: chatContacts.contactId).map({ textMessage in
+                    
+                    try self.sendPushNotification(req, toUserId: chatContacts.contactId, textMessage: textMessage)
+                    
+                    // send message to other user active devices
+//                    try self.sendPushNotification(req, toUserId: chatContacts.userId, textMessage: textMessage)
+                    
                     guard let ackMessage = AckMessage(textMessage: textMessage) else {
                         throw Constants.errors.nilMessageId
                     }
@@ -56,6 +62,14 @@ class ChatRestfulController {
                 })
             }
         })
+    }
+    
+    
+    func sendPushNotification(_ req: Request, toUserId:Int, textMessage: TextMessage) throws {
+        guard let pushData = textMessage.textFormat else {
+            return
+        }
+        try PushNotificationController.sendPush(req, userId: toUserId, title: nil, body: textMessage.text, data: pushData)
     }
     
     func ackMessage(_ req: Request) throws -> Future<HTTPStatus> {
