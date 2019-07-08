@@ -21,6 +21,7 @@ public func routes(_ router: Router) throws {
     let giftRequestController = GiftRequestController()
     let chatRestfulController = ChatRestfulController()
     let chatBlockController = ChatBlockController()
+    let pushNotificationController = PushNotificationController()
     
     //Middlewares
     let tokenAuthMiddleware = User.tokenAuthMiddleware()
@@ -86,6 +87,10 @@ public func routes(_ router: Router) throws {
     router.get(uris.categories, use: categoryController.index)
     router.get(uris.province, use: locationController.getProvinces)
     router.get(uris.city, Province.parameter, use: locationController.getCities)
+    
+    //Routes Push Notification
+    tokenProtected.post(uris.push_register, use: pushNotificationController.registerPush)
+    adminProtected.post(uris.sendPush, use: pushNotificationController.sendPush)
     
     
 }

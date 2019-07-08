@@ -130,7 +130,7 @@ class ChatController {
             }
             guard Chat.isUserChat(userId: requestInfo.userId, chat: chat) else { throw Constants.errors.unauthorizedRequest }
             
-            let chatContacts = try requestInfo.getChatContacts(chat: chat)
+            let chatContacts = requestInfo.getChatContacts(chat: chat)
             
             return chatContacts.flatMap({ chatContacts in
                 return requestInfo.dataBase.getTextMessages(chat: chat, beforeId: fetchMessagesInput.beforeId).map({ textMessages in

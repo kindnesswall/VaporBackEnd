@@ -9,6 +9,8 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     try services.register(FluentPostgreSQLProvider())
     try services.register(AuthenticationProvider())
     
+    services.register(Shell.self)
+    
     let serverConfigure = NIOServerConfig.default(hostname: Constants.appInfo.hostName, port: Constants.appInfo.hostPort,maxBodySize:20_000_000)
     services.register(serverConfigure)
     
@@ -50,6 +52,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     migrations.add(model: ChatNotification.self, database: .psql)
     migrations.add(model: ChatBlock.self, database: .psql)
     migrations.add(model: GiftRequest.self, database: .psql)
+    migrations.add(model: UserPushNotification.self, database: .psql)
     
     //seeds
     migrations.add(migration: CategorySeed.self, database: .psql)
