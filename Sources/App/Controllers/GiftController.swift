@@ -69,7 +69,10 @@ final class GiftController {
             guard let userId = user.id , userId == gift.userId else {
                 throw Constants.errors.unauthorizedGift
             }
-            return gift.delete(on: req)
+            gift.isDeleted = true
+            return gift.save(on: req).flatMap({ gift in
+                return gift.delete(on: req)
+            })
             }.transform(to: .ok)
     }
     

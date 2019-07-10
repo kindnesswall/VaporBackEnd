@@ -13,7 +13,8 @@ final class GiftAdminController {
     func rejectGift(_ req: Request) throws -> Future<HTTPStatus> {
         
         return try req.parameters.next(Gift.self).flatMap { (gift) -> Future<Void> in
-            gift.isReviewed = false
+            gift.isRejected = true
+            gift.isReviewed = true
             return gift.save(on: req).flatMap({ gift in
                 return gift.delete(on: req)
             })

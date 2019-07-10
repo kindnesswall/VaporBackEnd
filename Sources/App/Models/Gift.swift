@@ -13,6 +13,8 @@ final class Gift : PostgreSQLModel {
     var userId:Int?
     var donatedToUserId:Int?
     var isReviewed = false
+    var isRejected = false
+    var isDeleted = false
     var categoryTitle:String?
     
     var title:String
@@ -42,8 +44,6 @@ final class Gift : PostgreSQLModel {
         self.isNew=gift.isNew
         self.provinceId=gift.provinceId
         self.cityId=gift.cityId
-        
-        self.isReviewed = false
     }
     
     func update(gift:Gift.Input) {
