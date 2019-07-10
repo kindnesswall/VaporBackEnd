@@ -74,6 +74,9 @@ class ChatController {
         let arrayResult = ArrayResult<ContactMessage>()
         
         requestInfo.getUserChats().map{ chats in
+            if chats.isEmpty {
+                promise.succeed(result: [])
+            }
             let chatsCount = chats.count
             for chat in chats {
                 
