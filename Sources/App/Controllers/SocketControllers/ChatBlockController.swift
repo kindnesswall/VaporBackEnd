@@ -62,7 +62,7 @@ class ChatBlockController {
             let chatContacts = try Chat.getChatContacts(userId: userId, chat: chat, conn: req, withBlocked: true)
             
             return chatContacts.map({ chatContacts in
-                return ChatBlock(chatId: chatId, blockedUserId: chatContacts.contactId)
+                return ChatBlock(chatId: chatId, blockedUserId: chatContacts.contactId, byUserId: chatContacts.userId)
             })
             
         })
