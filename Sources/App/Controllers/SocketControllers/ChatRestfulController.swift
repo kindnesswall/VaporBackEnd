@@ -66,10 +66,13 @@ class ChatRestfulController {
     
     
     func sendPushNotification(_ req: Request, toUserId:Int, textMessage: TextMessage) throws {
-        guard let pushData = textMessage.textFormat else {
-            return
-        }
-        try PushNotificationController.sendPush(req, userId: toUserId, title: nil, body: textMessage.text, data: pushData)
+        
+        try textMessage.encode(for: req).map { response in
+            guard let data = response.http.body.data else {return}
+            guard let text = String(data: data, encoding: .utf8) else {return}
+            try PushNotificationController.sendPush(req, userId: toUserId, title: nil, body: textMessage.text, data: text)
+        }.catch(AppErrorCatch.printError)
+        
     }
     
     func ackMessage(_ req: Request) throws -> Future<HTTPStatus> {
