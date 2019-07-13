@@ -69,34 +69,33 @@ class ChatController {
     
     func fetchContacts(requestInfo:ChatRequestInfo) throws -> Future<[ContactMessage]>{
         
-        let promise = requestInfo.dataBase.getPromise(type: [ContactMessage].self)
-        
-        let arrayResult = ArrayResult<ContactMessage>()
-        
-        requestInfo.getUserChats().map{ chats in
-            if chats.isEmpty {
-                promise.succeed(result: [])
-            }
-            let chatsCount = chats.count
-            for chat in chats {
-                
-                let chatContacts = requestInfo.getChatContacts( chat: chat)
-                chatContacts.map({ chatContacts in
-                    try self.fetchContact(requestInfo: requestInfo, chat: chat, contactId: chatContacts.contactId).map({ contactMessage in
-                        arrayResult.array.append(contactMessage)
-                        if arrayResult.array.count == chatsCount {
-                            promise.succeed(result: arrayResult.array)
-                        }
-                    }).catch(AppErrorCatch.printError)
-                }).catch(AppErrorCatch.printError)
-                
-            }
-            }.catch(AppErrorCatch.printError)
-        
-        return promise.futureResult
+        return requestInfo.getUserChats().flatMap{ chats in
+            return try self.fetchContactsInfo(requestInfo: requestInfo, chats: chats)
+        }
         
     }
     
+    func fetchContactsInfo(requestInfo:ChatRequestInfo,chats:[Chat]) throws -> Future<[ContactMessage]> {
+        
+        guard let req = requestInfo.dataBase.getRequest() else {
+            throw Constants.errors.requestIsInaccessible
+        }
+        
+        let arrayResult = CustomFutureList<ContactMessage>(req: req, count: chats.count)
+        
+        for chat in chats {
+            
+            let chatContacts = requestInfo.getChatContacts( chat: chat)
+            chatContacts.map({ chatContacts in
+                return try self.fetchContact(requestInfo: requestInfo, chat: chat, contactId: chatContacts.contactId).map({ contactMessage in
+                    arrayResult.appendAndIncrementHead(contactMessage)
+                })
+            }).catch(arrayResult.catchAndIncrementHead)
+        }
+        
+        return arrayResult.futureResult()
+    }
+        
     func fetchContact(requestInfo:ChatRequestInfo,chat:Chat,contactId:Int) throws ->Future<ContactMessage>{
         
         guard let chatId = chat.id else { throw Constants.errors.nilChatId }
@@ -178,7 +177,3 @@ class ChatController {
     
 }
 
-
-class ArrayResult<T> {
-    var array = [T]()
-}

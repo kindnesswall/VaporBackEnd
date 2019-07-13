@@ -40,9 +40,12 @@ class ChatDataBase {
         self.withPooledConnection=withPooledConnection
     }
     
-    func getPromise<T>(type:T.Type)->Promise<T>{
-        let promise = self.req.eventLoop.newPromise(type.self)
-        return promise
+    func getRequest() -> Request? {
+        if !withPooledConnection {
+            return req
+        } else {
+            return nil
+        }
     }
     
     func performQuery<T>(query: @escaping (DatabaseConnectable) throws ->Future<T>)->Future<T> {

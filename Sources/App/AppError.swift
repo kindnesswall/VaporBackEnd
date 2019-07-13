@@ -53,4 +53,5 @@ class ErrorConstants {
     let userWasAlreadyUnblocked = AppError(identifier: "userWasAlreadyUnblocked", reason: "User was already unblocked")
     let chatHasBlocked = AppError(identifier: "chatHasBlocked", reason: "Chat has blocked")
     let pushPayloadIsNotValid = AppError(identifier: "pushPayloadIsNotValid", reason: "Push payload is not valid")
+    let requestIsInaccessible = AppError(identifier: "requestIsInaccessible", reason: "Request is inaccessible")
 }
