@@ -37,6 +37,9 @@ class URIs {
     var chat_contacts : String {
         return "\(apiRoute)/chat/contacts"
     }
+    var chat_contacts_block : String {
+        return "\(apiRoute)/chat/contacts/block"
+    }
     var chat_messages : String {
         return "\(apiRoute)/chat/messages"
     }

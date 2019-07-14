@@ -63,17 +63,17 @@ extension Chat {
         }
     }
     
-    static func getChatContacts(userId:Int,chatId:Int,conn:DatabaseConnectable)->Future<ChatContacts> {
+    static func getChatContacts(userId:Int,chatId:Int,conn:DatabaseConnectable,withBlocked:Bool)->Future<ChatContacts> {
         return Chat.find(chatId, on: conn).flatMap { chat in
             guard let chat = chat else {
                 throw Constants.errors.chatNotFound
             }
-            return try Chat.getChatContacts(userId: userId, chat: chat, conn: conn)
+            return try Chat.getChatContacts(userId: userId, chat: chat, conn: conn, withBlocked: withBlocked)
             
         }
     }
     
-    static func getChatContacts(userId:Int,chat:Chat,conn:DatabaseConnectable,withBlocked:Bool = false) throws -> Future <ChatContacts> {
+    static func getChatContacts(userId:Int,chat:Chat,conn:DatabaseConnectable,withBlocked:Bool) throws -> Future <ChatContacts> {
         
         guard isUserChat(userId: userId, chat: chat) else {
             throw Constants.errors.unauthorizedRequest

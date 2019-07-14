@@ -45,11 +45,14 @@ final class ChatBlock : PostgreSQLModel {
         })
     }
     
-    static func allBlockedChat(byUserId:Int,conn:DatabaseConnectable) -> Future<[ChatBlock]> {
+    static func allBlockedChat(userId:Int,conn:DatabaseConnectable) -> Future<[ChatBlock]> {
         
         return ChatBlock.query(on: conn)
-            .filter(\.byUserId == byUserId)
-            .all()
+            .group(.or, closure: { query in
+                query
+                    .filter(\.blockedUserId == userId)
+                    .filter(\.byUserId == userId)
+            }).all()
     }
 }
 

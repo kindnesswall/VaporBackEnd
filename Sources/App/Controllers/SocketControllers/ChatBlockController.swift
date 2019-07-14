@@ -59,6 +59,8 @@ class ChatBlockController {
             guard let chatId = chat.id else {
                 throw Constants.errors.nilChatId
             }
+            
+            // Being sure that the user is associated with chat
             let chatContacts = try Chat.getChatContacts(userId: userId, chat: chat, conn: req, withBlocked: true)
             
             return chatContacts.map({ chatContacts in

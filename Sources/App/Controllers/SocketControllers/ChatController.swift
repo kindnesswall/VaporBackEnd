@@ -72,7 +72,13 @@ class ChatController {
         return requestInfo.getUserChats().flatMap{ chats in
             return try self.fetchContactsInfo(requestInfo: requestInfo, chats: chats)
         }
-        
+    }
+    
+    func fetchBlockedContacts(requestInfo:ChatRequestInfo) throws -> Future<[ContactMessage]>{
+
+        return requestInfo.getUserBlockedChats().flatMap({ chatBlocks in
+            return try self.fetchBlockedContactsInfo(requestInfo: requestInfo, chatBlocks: chatBlocks)
+        })
     }
     
     func fetchContactsInfo(requestInfo:ChatRequestInfo,chats:[Chat]) throws -> Future<[ContactMessage]> {
@@ -88,6 +94,28 @@ class ChatController {
             let chatContacts = requestInfo.getChatContacts( chat: chat)
             chatContacts.map({ chatContacts in
                 return try self.fetchContact(requestInfo: requestInfo, chat: chat, contactId: chatContacts.contactId).map({ contactMessage in
+                    arrayResult.appendAndIncrementHead(contactMessage)
+                })
+            }).catch(arrayResult.catchAndIncrementHead)
+        }
+        
+        return arrayResult.futureResult()
+    }
+    
+    func fetchBlockedContactsInfo(requestInfo:ChatRequestInfo,chatBlocks:[ChatBlock]) throws -> Future<[ContactMessage]> {
+        
+        guard let req = requestInfo.dataBase.getRequest() else {
+            throw Constants.errors.requestIsInaccessible
+        }
+        
+        let arrayResult = CustomFutureList<ContactMessage>(req: req, count: chatBlocks.count)
+        
+        for chatBlock in chatBlocks {
+            
+            let chatContacts = requestInfo.getChatContacts(chatId: chatBlock.chatId, withBlocked: true)
+            chatContacts.map({ chatContacts in
+                return try self.fetchContact(requestInfo: requestInfo, chat: chatContacts.chat, contactId: chatContacts.contactId).map({ contactMessage in
+                    contactMessage.blockedByUserId = chatBlock.byUserId
                     arrayResult.appendAndIncrementHead(contactMessage)
                 })
             }).catch(arrayResult.catchAndIncrementHead)
@@ -132,7 +160,7 @@ class ChatController {
             }
             guard Chat.isUserChat(userId: requestInfo.userId, chat: chat) else { throw Constants.errors.unauthorizedRequest }
             
-            let chatContacts = requestInfo.getChatContacts(chat: chat)
+            let chatContacts = requestInfo.getChatContacts(chat: chat, withBlocked: true)
             
             return chatContacts.flatMap({ chatContacts in
                 return requestInfo.dataBase.getTextMessages(chat: chat, beforeId: fetchMessagesInput.beforeId).map({ textMessages in

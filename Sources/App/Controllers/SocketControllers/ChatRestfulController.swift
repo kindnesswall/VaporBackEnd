@@ -29,6 +29,12 @@ class ChatRestfulController {
         return try chatController.fetchContacts(requestInfo: requestInfo)
     }
     
+    func fetchBlockedContacts(_ req: Request) throws -> Future<[ContactMessage]> {
+        
+        let requestInfo = try getRequestInfo(req: req)
+        return try chatController.fetchBlockedContacts(requestInfo: requestInfo)
+    }
+    
     func fetchMessages(_ req: Request) throws -> Future<ContactMessage> {
         
         let requestInfo = try getRequestInfo(req: req)

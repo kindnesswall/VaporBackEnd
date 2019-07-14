@@ -13,6 +13,7 @@ final class ContactMessage: Content {
     var contactInfo: UserProfile?
     var textMessages: [TextMessage]?
     var notificationCount: Int?
+    var blockedByUserId: Int?
     
     init(chat: Chat?,textMessages: [TextMessage]?,contactInfo: UserProfile?,notificationCount: Int?) {
         self.chat = chat
