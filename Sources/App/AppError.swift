@@ -20,7 +20,7 @@ class AppError : Error , Debuggable {
 
 class AppErrorCatch {
     public static func printError(error:Error){
-        print(error.localizedDescription)
+        print(error)
     }
 }
 
