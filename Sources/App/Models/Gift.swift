@@ -92,7 +92,7 @@ extension Gift {
 
 extension Gift {
     
-    static func getGiftsWithRequestFilter(query:QueryBuilder<PostgreSQLDatabase, Gift>,requestInput:RequestInput?,onlyUndonatedGifts:Bool)->Future<[Gift]>{
+    static func getGiftsWithRequestFilter(query:QueryBuilder<PostgreSQLDatabase, Gift>,requestInput:RequestInput?,onlyUndonatedGifts:Bool,onlyReviewedGifts:Bool)->Future<[Gift]>{
         
         if let categoryId = requestInput?.categoryId {
             query.filter(\.categoryId == categoryId)
@@ -112,6 +112,10 @@ extension Gift {
         
         if onlyUndonatedGifts {
             query.filter(\.donatedToUserId == nil)
+        }
+        
+        if onlyReviewedGifts {
+            query.filter(\.isReviewed == true)
         }
         
         let maximumCount = Constants.maximumRequestFetchResultsCount

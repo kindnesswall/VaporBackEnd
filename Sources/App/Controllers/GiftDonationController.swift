@@ -11,19 +11,23 @@ import FluentPostgreSQL
 class GiftDonationController {
     
     func donatedGifts(_ req: Request) throws -> Future<[Gift]> {
-        return try req.content.decode(RequestInput.self).flatMap({ requestInput in
-            let user = try req.requireAuthenticated(User.self)
-            let query = try user.gifts.query(on: req)
-            query.filter(\.donatedToUserId != nil)
-            return Gift.getGiftsWithRequestFilter(query: query, requestInput: requestInput,onlyUndonatedGifts: false)
+        
+        return try req.parameters.next(User.self).flatMap({ selectedUser in
+            return try req.content.decode(RequestInput.self).flatMap({ requestInput in
+                let query = try selectedUser.gifts.query(on: req)
+                query.filter(\.donatedToUserId != nil)
+                return Gift.getGiftsWithRequestFilter(query: query, requestInput: requestInput,onlyUndonatedGifts: false, onlyReviewedGifts: true)
+            })
         })
     }
     
     func receivedGifts(_ req: Request) throws -> Future<[Gift]> {
-        return try req.content.decode(RequestInput.self).flatMap({ requestInput in
-            let user = try req.requireAuthenticated(User.self)
-            let query = try user.receivedGifts.query(on: req)
-            return Gift.getGiftsWithRequestFilter(query: query, requestInput: requestInput,onlyUndonatedGifts: false)
+        
+        return try req.parameters.next(User.self).flatMap({ selectedUser in
+            return try req.content.decode(RequestInput.self).flatMap({ requestInput in
+                let query = try selectedUser.receivedGifts.query(on: req)
+                return Gift.getGiftsWithRequestFilter(query: query, requestInput: requestInput,onlyUndonatedGifts: false, onlyReviewedGifts: true)
+            })
         })
     }
     
@@ -40,7 +44,7 @@ class GiftDonationController {
             return try req.content.decode(RequestInput.self).flatMap({ requestInput in
                 let userGifts = try user.gifts.query(on: req)
                 let query=GiftRequest.getGiftsToDonate(userGifts: userGifts, userId: userId, requestUserId: contactUserId)
-                return Gift.getGiftsWithRequestFilter(query: query, requestInput: requestInput,onlyUndonatedGifts: true)
+                return Gift.getGiftsWithRequestFilter(query: query, requestInput: requestInput,onlyUndonatedGifts: true, onlyReviewedGifts: true)
             })
         })
     }
@@ -62,9 +66,9 @@ class GiftDonationController {
                         throw Constants.errors.unauthorizedGift
                     }
                     
-//                    guard gift.isReviewed == true else {
-//                        throw Constants.errors.unreviewedGift
-//                    }
+                    guard gift.isReviewed == true else {
+                        throw Constants.errors.unreviewedGift
+                    }
                     
                     guard gift.donatedToUserId == nil else {
                         throw Constants.errors.giftIsAlreadyDonated

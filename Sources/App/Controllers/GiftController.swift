@@ -6,6 +6,7 @@
 //
 
 import Vapor
+import FluentPostgreSQL
 
 /// Controls basic CRUD operations on `Gift`s.
 final class GiftController {
@@ -15,17 +16,43 @@ final class GiftController {
         
         return try req.content.decode(RequestInput.self).flatMap { requestInput in
             let query = Gift.query(on: req)
-            return Gift.getGiftsWithRequestFilter(query: query, requestInput: requestInput,onlyUndonatedGifts: true)
+            return Gift.getGiftsWithRequestFilter(query: query, requestInput: requestInput,onlyUndonatedGifts: true, onlyReviewedGifts: true)
         }
         
     }
     
-    func ownerGifts(_ req: Request) throws -> Future<[Gift]> {
+    func registeredGifts(_ req: Request) throws -> Future<[Gift]> {
         
-        return try req.content.decode(RequestInput.self).flatMap({ requestInput in
-            let user = try req.requireAuthenticated(User.self)
-            let query = try user.gifts.query(on: req)
-            return Gift.getGiftsWithRequestFilter(query: query, requestInput: requestInput,onlyUndonatedGifts: false)
+        
+        
+        return try req.parameters.next(User.self).flatMap({ selectedUser in
+            
+            guard let selectedUserId = selectedUser.id else {
+                throw Constants.errors.nilUserId
+            }
+            
+            let authUser = try req.requireAuthenticated(User.self)
+            let isAdmin = authUser.isAdmin
+            var isOwner = false
+            if let authUserId = authUser.id,
+                authUserId == selectedUserId {
+                isOwner = true
+            }
+            
+            
+            return try req.content.decode(RequestInput.self).flatMap({ requestInput in
+                
+                let query = Gift.query(on: req, withSoftDeleted: (isAdmin || isOwner))
+                .filter(\.userId == selectedUserId)
+                
+                if (isOwner && !isAdmin) {
+                    query.filter(\.isDeleted == false)
+                }
+                
+                return Gift.getGiftsWithRequestFilter(query: query, requestInput: requestInput,onlyUndonatedGifts: true, onlyReviewedGifts: !(isAdmin || isOwner))
+            })
+            
+            
         })
         
     }

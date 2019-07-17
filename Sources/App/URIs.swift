@@ -60,14 +60,14 @@ class URIs {
         return "\(apiRoute)/gifts/register"
     }
     
-    var gifts_owner : String {
-        return "\(apiRoute)/gifts/owner"
+    var gifts_userRegistered : String {
+        return "\(apiRoute)/gifts/userRegistered"
     }
-    var gifts_donated: String {
-        return "\(apiRoute)/gifts/donated"
+    var gifts_userDonated: String {
+        return "\(apiRoute)/gifts/userDonated"
     }
-    var gifts_received : String {
-        return "\(apiRoute)/gifts/received"
+    var gifts_userReceived : String {
+        return "\(apiRoute)/gifts/userReceived"
     }
     var gifts_todonate : String {
         return "\(apiRoute)/gifts/todonate"
