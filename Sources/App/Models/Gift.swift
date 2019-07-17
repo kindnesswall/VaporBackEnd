@@ -7,6 +7,7 @@
 
 import Vapor
 import FluentPostgreSQL
+import FluentSQL
 
 final class Gift : PostgreSQLModel {
     var id:Int?
@@ -93,6 +94,14 @@ extension Gift {
 extension Gift {
     
     static func getGiftsWithRequestFilter(query:QueryBuilder<PostgreSQLDatabase, Gift>,requestInput:RequestInput?,onlyUndonatedGifts:Bool,onlyReviewedGifts:Bool)->Future<[Gift]>{
+        
+        if let searchWord = requestInput?.searchWord {
+            query.group(.or) { query in
+                query
+                    .filter(\.title ~~ searchWord)
+                    .filter(\.description ~~ searchWord)
+            }
+        }
         
         if let categoryId = requestInput?.categoryId {
             query.filter(\.categoryId == categoryId)

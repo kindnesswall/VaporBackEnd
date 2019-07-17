@@ -13,4 +13,5 @@ class RequestInput: Codable {
     var categoryId:Int?
     var provinceId:Int?
     var cityId:Int?
+    var searchWord:String?
 }
