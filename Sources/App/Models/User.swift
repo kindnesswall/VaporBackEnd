@@ -14,12 +14,20 @@ final class User : PostgreSQLModel {
     var phoneNumber:String
     var activationCode:String?
     var isAdmin:Bool = false
+    var isCharity:Bool = false
     var name:String?
     var image:String?
     
     var createdAt: Date?
     var updatedAt: Date?
     var deletedAt: Date?
+    
+    func getId() throws -> Int {
+        guard let id = self.id else {
+            throw Constants.errors.nilUserId
+        }
+        return id
+    }
     
     final class Input : Codable {
         var phoneNumber:String
@@ -30,6 +38,17 @@ final class User : PostgreSQLModel {
         self.phoneNumber=phoneNumber
     }
 }
+
+extension User {
+    func userProfile(req:Request) throws -> UserProfile {
+        let id = try self.getId()
+        let auth = try? req.requireAuthenticated(User.self)
+        let phoneNumber = (auth?.isAdmin == true || auth?.isCharity == true) ? self.phoneNumber : nil
+        let userProfile = UserProfile(id: id, name: self.name, image: self.image, phoneNumber: phoneNumber)
+        return userProfile
+    }
+}
+
 
 extension User {
     static let createdAtKey: TimestampKey? = \.createdAt

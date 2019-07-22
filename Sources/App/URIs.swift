@@ -93,6 +93,22 @@ class URIs {
         return "\(apiRoute)/users/denyAccess"
     }
     
+    var charity_list : String {
+        return "\(apiRoute)/charity/list"
+    }
+    var charity_info : String {
+        return "\(apiRoute)/charity/info"
+    }
+    var charity_accept : String {
+        return "\(apiRoute)/charity/accept"
+    }
+    var charity_reject : String {
+        return "\(apiRoute)/charity/reject"
+    }
+    var charity_review : String {
+        return "\(apiRoute)/charity/review"
+    }
+    
     var gifts_request : String {
         return "\(apiRoute)/gifts/request"
     }

@@ -54,4 +54,7 @@ class ErrorConstants {
     let chatHasBlocked = AppError(identifier: "chatHasBlocked", reason: "Chat has blocked")
     let pushPayloadIsNotValid = AppError(identifier: "pushPayloadIsNotValid", reason: "Push payload is not valid")
     let requestIsInaccessible = AppError(identifier: "requestIsInaccessible", reason: "Request is inaccessible")
+    let charityInfoAlreadyExists = AppError(identifier: "charityInfoAlreadyExists", reason: "Charity info already exists")
+    let charityInfoNotFound = AppError(identifier: "charityInfoNotFound", reason: "Charity info not found")
+    let userIsNotCharity = AppError(identifier: "userIsNotCharity", reason: "User is not charity")
 }

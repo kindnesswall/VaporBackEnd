@@ -12,11 +12,7 @@ final class UserProfileController {
     
     func show(_ req: Request) throws -> Future<UserProfile> {
         return try req.parameters.next(User.self).map({ user in
-            guard let userId = user.id else {
-                throw Constants.errors.nilUserId
-            }
-            let userProfile = UserProfile(id: userId, name: user.name, image: user.image)
-            return userProfile
+            return try user.userProfile(req: req)
         })
     }
  

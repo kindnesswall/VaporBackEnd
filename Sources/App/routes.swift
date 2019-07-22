@@ -22,6 +22,8 @@ public func routes(_ router: Router) throws {
     let chatRestfulController = ChatRestfulController()
     let chatBlockController = ChatBlockController()
     let pushNotificationController = PushNotificationController()
+    let charityController = CharityController()
+    let charityAdminController = CharityAdminController()
     
     //Middlewares
     let tokenAuthMiddleware = User.tokenAuthMiddleware()
@@ -42,7 +44,7 @@ public func routes(_ router: Router) throws {
     router.post(uris.login, use: userController.loginHandler)
     
     //Routes User Profile
-    router.get(uris.profile,User.parameter, use: userProfileController.show)
+    tokenProtected.get(uris.profile,User.parameter, use: userProfileController.show)
     tokenProtected.post(uris.profile,use: userProfileController.update)
     
     
@@ -83,6 +85,20 @@ public func routes(_ router: Router) throws {
     adminProtected.post(uris.gifts_review, use: giftAdminController.unreviewedGifts)
     adminProtected.put(uris.users_allowAccess, use: userAdminController.userAllowAccess)
     adminProtected.delete(uris.users_denyAccess,User.parameter, use: userAdminController.userDenyAccess)
+    
+    //Routes Charity
+    tokenProtected.get(uris.charity_info, User.parameter, use: charityController.getCharityInfo)
+    tokenProtected.get(uris.charity_list, use: charityController.getCharityList)
+    
+    tokenProtected.get(uris.charity_info, use: charityController.show)
+    tokenProtected.post(uris.charity_info, use: charityController.create)
+    tokenProtected.put(uris.charity_info, use: charityController.update)
+    tokenProtected.delete(uris.charity_info, use: charityController.delete)
+    
+    //Routes Charity Admin
+    adminProtected.get(uris.charity_review, use: charityAdminController.getUnreviewedList)
+    adminProtected.put(uris.charity_accept, User.parameter, use: charityAdminController.acceptCharity)
+    adminProtected.put(uris.charity_reject, User.parameter, use: charityAdminController.rejectCharity)
     
     //Routes Categories
     router.get(uris.categories, use: categoryController.index)

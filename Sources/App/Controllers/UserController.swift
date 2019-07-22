@@ -69,7 +69,7 @@ final class UserController {
                     let token = try Token.generate(for: user)
                     
                     return token.save(on: req).map({ token in
-                        return AuthOutput(token: token, isAdmin: user.isAdmin)
+                        return AuthOutput(token: token, isAdmin: user.isAdmin, isCharity: user.isCharity)
                     })
                 })
             })

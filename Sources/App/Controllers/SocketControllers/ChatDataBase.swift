@@ -44,11 +44,11 @@ class ChatDataBase {
         self.withPooledConnection=withPooledConnection
     }
     
-    func getRequest() -> Request? {
+    func getRequest() throws -> Request {
         if !withPooledConnection {
             return req
         } else {
-            return nil
+            throw Constants.errors.requestIsInaccessible
         }
     }
     

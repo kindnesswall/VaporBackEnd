@@ -83,9 +83,7 @@ class ChatController {
     
     func fetchContactsInfo(requestInfo:ChatRequestInfo,chats:[Chat]) throws -> Future<[ContactMessage]> {
         
-        guard let req = requestInfo.dataBase.getRequest() else {
-            throw Constants.errors.requestIsInaccessible
-        }
+        let req = try requestInfo.dataBase.getRequest()
         
         let arrayResult = CustomFutureList<ContactMessage>(req: req, count: chats.count)
         
@@ -104,9 +102,7 @@ class ChatController {
     
     func fetchBlockedContactsInfo(requestInfo:ChatRequestInfo,chatBlocks:[ChatBlock]) throws -> Future<[ContactMessage]> {
         
-        guard let req = requestInfo.dataBase.getRequest() else {
-            throw Constants.errors.requestIsInaccessible
-        }
+        let req = try requestInfo.dataBase.getRequest()
         
         let arrayResult = CustomFutureList<ContactMessage>(req: req, count: chatBlocks.count)
         
@@ -143,7 +139,9 @@ class ChatController {
         
         return requestInfo.dataBase.getContactProfile(contactId: contactInfoId).map { contactUser in
             guard let contactUser = contactUser else { throw Constants.errors.contactNotFound }
-            let contactInfo = UserProfile(id: contactInfoId, name: contactUser.name, image: contactUser.image)
+            let req = try requestInfo.dataBase.getRequest()
+            let contactInfo = try contactUser.userProfile(req: req)
+            
             let contactMessage = ContactMessage(chat: chat, textMessages: textMessages, contactInfo: contactInfo, notificationCount: notificationCount)
             return contactMessage
             
