@@ -92,6 +92,18 @@ class URIs {
     var users_denyAccess : String {
         return "\(apiRoute)/users/denyAccess"
     }
+    var users_list_active : String {
+        return "\(apiRoute)/users/list/active"
+    }
+    var users_list_blocked : String {
+        return "\(apiRoute)/users/list/blocked"
+    }
+    var users_list_chatBlocked : String {
+        return "\(apiRoute)/users/list/chatBlocked"
+    }
+    var users_statistics : String {
+        return "\(apiRoute)/users/statistics"
+    }
     
     var charity_list : String {
         return "\(apiRoute)/charity/list"

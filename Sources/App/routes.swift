@@ -85,6 +85,10 @@ public func routes(_ router: Router) throws {
     adminProtected.post(uris.gifts_review, use: giftAdminController.unreviewedGifts)
     adminProtected.put(uris.users_allowAccess, use: userAdminController.userAllowAccess)
     adminProtected.delete(uris.users_denyAccess,User.parameter, use: userAdminController.userDenyAccess)
+    adminProtected.get(uris.users_statistics, User.parameter, use: userAdminController.userStatistics)
+    adminProtected.post(uris.users_list_active, use: userAdminController.usersActiveList)
+    adminProtected.post(uris.users_list_blocked, use: userAdminController.usersBlockedList)
+    adminProtected.get(uris.users_list_chatBlocked, use: userAdminController.usersChatBlockedList)
     
     //Routes Charity
     tokenProtected.get(uris.charity_info, User.parameter, use: charityController.getCharityInfo)
