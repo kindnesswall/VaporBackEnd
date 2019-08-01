@@ -36,10 +36,10 @@ final class UserPushNotification: PostgreSQLModel {
             .first()
     }
     
-    static func findAllTokens(userId:Int, type: String, conn: DatabaseConnectable) -> Future<[UserPushNotification]>{
+    static func findAllTokens(userId:Int, conn: DatabaseConnectable) -> Future<[UserPushNotification]>{
         return UserPushNotification.query(on: conn)
             .filter(\.userId == userId)
-            .filter(\.type == type).all()
+            .all()
     }
     
 }
@@ -52,6 +52,7 @@ final class SendPushInput : Content {
 
 enum PushNotificationType: String, Codable {
     case APNS
+    case Firebase
 }
 
 extension UserPushNotification : Migration {}

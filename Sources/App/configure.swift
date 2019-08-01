@@ -2,6 +2,7 @@
 import FluentPostgreSQL
 import Vapor
 import Authentication
+import FCM
 
 /// Called before your application initializes.
 public func configure(_ config: inout Config, _ env: inout Environment, _ services: inout Services) throws {
@@ -65,5 +66,9 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     sockets(wss: wss)
     // Register our server
     services.register(wss, as: WebSocketServer.self)
-
+    
+    //Firebase
+    let fcm = FCM(pathToServiceAccountKey: AppInfo().firebaseConfig.keyPath)
+    fcm.androidDefaultConfig = FCMAndroidConfig(ttl: "86400s", restricted_package_name: AppInfo().firebaseConfig.restricted_package_name, notification: FCMAndroidNotification(sound: "default"))
+    services.register(fcm, as: FCM.self)
 }

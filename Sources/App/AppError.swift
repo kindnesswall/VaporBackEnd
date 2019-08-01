@@ -57,4 +57,5 @@ class ErrorConstants {
     let charityInfoAlreadyExists = AppError(identifier: "charityInfoAlreadyExists", reason: "Charity info already exists")
     let charityInfoNotFound = AppError(identifier: "charityInfoNotFound", reason: "Charity info not found")
     let userIsNotCharity = AppError(identifier: "userIsNotCharity", reason: "User is not charity")
+    let wrongPushNotificationType = AppError(identifier: "wrongPushNotificationType", reason: "Push Notification Type is wrong")
 }

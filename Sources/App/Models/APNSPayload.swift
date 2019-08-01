@@ -1,5 +1,5 @@
 //
-//  PushPayload.swift
+//  APNSPayload.swift
 //  App
 //
 //  Created by Amir Hossein on 7/1/19.
@@ -7,13 +7,13 @@
 
 import Foundation
 
-class PushPayload : Codable {
-    let aps: PushPayloadAPS
+class APNSPayload : Codable {
+    let aps: APNSPayloadBody
     let data: String?
     
     init(title:String?, body:String?, data: String?, sound: String? = nil) {
-        let alert = PushPayloadAPS.Alert(title: title, body: body)
-        self.aps = PushPayloadAPS(alert: alert, sound: sound)
+        let alert = APNSPayloadBody.Alert(title: title, body: body)
+        self.aps = APNSPayloadBody(alert: alert, sound: sound)
         self.data = data
     }
     
@@ -24,7 +24,7 @@ class PushPayload : Codable {
     }
 }
 
-class PushPayloadAPS: Codable {
+class APNSPayloadBody: Codable {
     var alert: Alert
     var sound: String?
     
