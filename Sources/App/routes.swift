@@ -24,6 +24,7 @@ public func routes(_ router: Router) throws {
     let pushNotificationController = PushNotificationController()
     let charityController = CharityController()
     let charityAdminController = CharityAdminController()
+    let adminStatisticsController = AdminStatisticsController()
     
     //Middlewares
     let tokenAuthMiddleware = User.tokenAuthMiddleware()
@@ -113,6 +114,8 @@ public func routes(_ router: Router) throws {
     tokenProtected.post(uris.push_register, use: pushNotificationController.registerPush)
     adminProtected.post(uris.sendPush, use: pushNotificationController.sendPush)
     
+    //Statistics
+    adminProtected.get(uris.statistics, use: adminStatisticsController.getStatistics)
     
 }
 

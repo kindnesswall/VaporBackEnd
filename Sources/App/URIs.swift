@@ -136,6 +136,9 @@ class URIs {
     var push_register : String {
         return "\(apiRoute)/push/register"
     }
+    var statistics : String {
+        return "\(apiRoute)/statistics"
+    }
     
     func getSMSUrl(apiKey:String,receptor:String,template:String,token:String)->String?{
         let rawUrl = "https://saharsms.com/api/\(apiKey)/json/SendVerify?receptor=\(receptor)&template=\(template)&token=\(token)"
