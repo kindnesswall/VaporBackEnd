@@ -92,8 +92,8 @@ public func routes(_ router: Router) throws {
     adminProtected.get(uris.users_list_chatBlocked, use: userAdminController.usersChatBlockedList)
     
     //Routes Charity
-    tokenProtected.get(uris.charity_info, User.parameter, use: charityController.getCharityInfo)
-    tokenProtected.get(uris.charity_list, use: charityController.getCharityList)
+    router.get(uris.charity_info, User.parameter, use: charityController.getCharityInfo)
+    router.get(uris.charity_list, use: charityController.getCharityList)
     
     tokenProtected.get(uris.charity_info, use: charityController.show)
     tokenProtected.post(uris.charity_info, use: charityController.create)
@@ -109,6 +109,7 @@ public func routes(_ router: Router) throws {
     router.get(uris.categories, use: categoryController.index)
     router.get(uris.province, use: locationController.getProvinces)
     router.get(uris.city, Province.parameter, use: locationController.getCities)
+    router.get(uris.region, City.parameter, use: locationController.getRegions)
     
     //Routes Push Notification
     tokenProtected.post(uris.push_register, use: pushNotificationController.registerPush)

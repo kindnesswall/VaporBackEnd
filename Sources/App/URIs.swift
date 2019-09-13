@@ -25,6 +25,9 @@ class URIs {
     var city : String {
         return "\(apiRoute)/cities"
     }
+    var region: String {
+        return "\(apiRoute)/regions"
+    }
     var register : String {
         return "\(apiRoute)/register"
     }

@@ -9,12 +9,12 @@ import Vapor
 
 final class CharityController {
     
-    func getCharityList(_ req: Request) throws -> Future<[Charity_UserProfile]> {
+    func getCharityList(_ req: Request) throws -> Future<[Charity]> {
         
         return Charity.getAllCharities(conn: req).map({ result in
-            var list = [Charity_UserProfile]()
+            var list = [Charity]()
             for each in result {
-                list.append(try Charity_UserProfile(charity: each.1, user: each.0, req: req))
+                list.append(each.1)
             }
             return list
         })

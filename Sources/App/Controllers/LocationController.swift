@@ -19,5 +19,10 @@ final class LocationController {
             return try province.cities.query(on: req).all()
         })
     }
+    func getRegions(_ req: Request) throws -> Future<[Region]> {
+        return try req.parameters.next(City.self).flatMap({ city in
+            return try city.regions.query(on: req).all()
+        })
+    }
     
 }

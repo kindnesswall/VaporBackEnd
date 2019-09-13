@@ -19,7 +19,6 @@ final class Gift : PostgreSQLModel {
     var categoryTitle:String?
     
     var title:String
-    var address:String
     var description:String
     var price:String
     var categoryId:Int
@@ -27,6 +26,10 @@ final class Gift : PostgreSQLModel {
     var isNew:Bool
     var provinceId:Int
     var cityId:Int
+    var regionId:Int?
+    var provinceName:String?
+    var cityName:String?
+    var regionName:String?
     
     var createdAt: Date?
     var updatedAt: Date?
@@ -37,7 +40,6 @@ final class Gift : PostgreSQLModel {
         self.userId = userId
         
         self.title=gift.title
-        self.address=gift.address
         self.description=gift.description
         self.price=gift.price
         self.categoryId=gift.categoryId
@@ -45,11 +47,11 @@ final class Gift : PostgreSQLModel {
         self.isNew=gift.isNew
         self.provinceId=gift.provinceId
         self.cityId=gift.cityId
+        self.regionId=gift.regionId
     }
     
     func update(gift:Gift.Input) {
         self.title=gift.title
-        self.address=gift.address
         self.description=gift.description
         self.price=gift.price
         self.categoryId=gift.categoryId
@@ -57,6 +59,7 @@ final class Gift : PostgreSQLModel {
         self.isNew=gift.isNew
         self.provinceId=gift.provinceId
         self.cityId=gift.cityId
+        self.regionId=gift.regionId
 
         self.isReviewed = false
     }
@@ -64,7 +67,6 @@ final class Gift : PostgreSQLModel {
     
     final class Input : Codable {
         var title:String
-        var address:String
         var description:String
         var price:String
         var categoryId:Int
@@ -72,6 +74,7 @@ final class Gift : PostgreSQLModel {
         var isNew:Bool
         var provinceId:Int
         var cityId:Int
+        var regionId:Int?
     }
 }
 

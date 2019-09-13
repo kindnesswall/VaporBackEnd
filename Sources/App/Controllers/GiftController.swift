@@ -83,10 +83,26 @@ final class GiftController {
     }
     
     private func saveGift(gift:Gift,req: Request)->Future<Gift>{
-        return gift.category.get(on: req).flatMap({ (category) -> Future<Gift> in
+        
+        return gift.category.get(on: req).flatMap { category in
+        return Province.find(gift.provinceId, on: req).flatMap{ province in
+        return City.find(gift.cityId, on: req).flatMap { city in
             gift.categoryTitle = category.title
-            return gift.save(on: req)
-        })
+            gift.provinceName = province?.name
+            gift.cityName = city?.name
+            
+            if let regionId = gift.regionId {
+                return Region.find(regionId, on: req).flatMap { region in
+                    gift.regionName = region?.name
+                    return gift.save(on: req)
+                }
+            } else {
+                gift.regionName = nil
+                return gift.save(on: req)
+            }
+            
+            }}
+        }
     }
     
     /// Deletes a parameterized `Gift`.

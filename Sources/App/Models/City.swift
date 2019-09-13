@@ -14,6 +14,13 @@ final class City : PostgreSQLModel{
     var province_id:Int
     var county_id:Int
     var name:String
+    var hasRegions:Bool?
+}
+
+extension City {
+    var regions : Children<City,Region> {
+        return children(\.city_id)
+    }
 }
 
 
