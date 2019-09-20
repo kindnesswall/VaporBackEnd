@@ -10,8 +10,9 @@ import Vapor
 class RequestInput: Codable {
     var beforeId:Int?
     var count:Int?
-    var categoryId:Int?
+    var categoryIds:[Int]?
     var provinceId:Int?
     var cityId:Int?
+    var regionIds:[Int]? 
     var searchWord:String?
 }

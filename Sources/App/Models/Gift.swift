@@ -20,7 +20,7 @@ final class Gift : PostgreSQLModel {
     
     var title:String
     var description:String
-    var price:String
+    var price:Double
     var categoryId:Int
     var giftImages:[String]
     var isNew:Bool
@@ -68,7 +68,7 @@ final class Gift : PostgreSQLModel {
     final class Input : Codable {
         var title:String
         var description:String
-        var price:String
+        var price:Double
         var categoryId:Int
         var giftImages:[String]
         var isNew:Bool
@@ -106,15 +106,27 @@ extension Gift {
             }
         }
         
-        if let categoryId = requestInput?.categoryId {
-            query.filter(\.categoryId == categoryId)
+        if let categoryIds = requestInput?.categoryIds {
+            query.group(.or) { query in
+                for categoryId in categoryIds {
+                    query.filter(\.categoryId == categoryId)
+                }
+            }
         }
         
-        if let cityId = requestInput?.cityId {
-            query.filter(\.cityId == cityId)
+        if let regionIds = requestInput?.regionIds {
+            query.group(.or) { query in
+                for regionId in regionIds {
+                    query.filter(\.regionId == regionId)
+                }
+            }
         } else {
-            if let provinceId = requestInput?.provinceId {
-                query.filter(\.provinceId == provinceId)
+            if let cityId = requestInput?.cityId {
+                query.filter(\.cityId == cityId)
+            } else {
+                if let provinceId = requestInput?.provinceId {
+                    query.filter(\.provinceId == provinceId)
+                }
             }
         }
         
