@@ -48,7 +48,7 @@ class ChatDataBase {
         if !withPooledConnection {
             return req
         } else {
-            throw Constants.errors.requestIsInaccessible
+            throw Constants.errors.serverThrowsException 
         }
     }
     

@@ -8,16 +8,6 @@
 import Foundation
 import Vapor
 
-class AppError : Error , Debuggable {
-    var identifier: String
-    var reason: String
-    
-    init(identifier: String,reason: String) {
-        self.identifier = identifier
-        self.reason = reason
-    }
-}
-
 class AppErrorCatch {
     public static func printError(error:Error){
         print(error)
@@ -26,36 +16,54 @@ class AppErrorCatch {
 
 class ErrorConstants {
     
-    let tryOneMinuteLater = AppError(identifier: "tryOneMinuteLater", reason: "Please try one minute later")
-    let unauthorizedRequest = AppError(identifier: "unauthorizedRequest", reason: "Request is unauthorized")
-    let unauthorizedSocket = AppError(identifier: "unauthorizedSocket", reason: "Socket is unauthorized")
-    let unauthorizedGift = AppError(identifier: "unauthorizedGift", reason: "Gift is unauthorized for this operation")
-    let unreviewedGift = AppError(identifier: "unreviewedGift", reason: "Gift is not reviewed")
-    let unrequestedGift = AppError(identifier: "unrequestedGift", reason: "Gift is not requested")
-    let giftIsAlreadyDonated = AppError(identifier: "giftIsAlreadyDonated", reason: "Gift has already been donated")
-    let unauthorizedMessage = AppError(identifier: "unauthorizedMessage", reason: "Message is unauthorized for this operation")
-    let invalidPhoneNumber = AppError(identifier: "invalidPhoneNumber", reason: "The phone number is invalid")
-    let invalidActivationCode = AppError(identifier: "invalidActivationCode", reason: "The activation code is invalid")
-    let nilUserId = AppError(identifier: "nilUserId", reason: "User id is nil")
-    let wrongUserId = AppError(identifier: "wrongUserId", reason: "User id is wrong")
-    let nilGiftId = AppError(identifier: "nilGiftId", reason: "Gift id is nil")
-    let nilGiftUserId = AppError(identifier: "nilGiftUserId", reason: "Gift user id is nil")
-    let messageNotFound = AppError(identifier: "messageNotFound", reason: "Message not found")
-    let nilMessageId = AppError(identifier: "nilMessageId", reason: "Message id is nil")
-    let giftNotFound = AppError(identifier: "giftNotFound", reason: "Gift not found")
-    let userAccessIsDenied = AppError(identifier: "userAccessIsDenied", reason: "User access is denied")
-    let chatNotFound = AppError(identifier: "chatNotFound", reason: "Chat not found")
-    let nilChatId = AppError(identifier: "nilChatId", reason: "Chat id is nil")
-    let contactNotFound = AppError(identifier: "contactNotFound", reason: "Contact not found")
-    let chatNotificationNotFound = AppError(identifier: "chatNotificationNotFound", reason: "Chat's Notification not found")
-    let redundentAck = AppError(identifier: "redundentAck", reason: "Ack is redundent")
-    let userWasAlreadyBlocked = AppError(identifier: "userWasAlreadyBlocked", reason: "User was already blocked")
-    let userWasAlreadyUnblocked = AppError(identifier: "userWasAlreadyUnblocked", reason: "User was already unblocked")
-    let chatHasBlocked = AppError(identifier: "chatHasBlocked", reason: "Chat has blocked")
-    let pushPayloadIsNotValid = AppError(identifier: "pushPayloadIsNotValid", reason: "Push payload is not valid")
-    let requestIsInaccessible = AppError(identifier: "requestIsInaccessible", reason: "Request is inaccessible")
-    let charityInfoAlreadyExists = AppError(identifier: "charityInfoAlreadyExists", reason: "Charity info already exists")
-    let charityInfoNotFound = AppError(identifier: "charityInfoNotFound", reason: "Charity info not found")
-    let userIsNotCharity = AppError(identifier: "userIsNotCharity", reason: "User is not charity")
-    let wrongPushNotificationType = AppError(identifier: "wrongPushNotificationType", reason: "Push Notification Type is wrong")
+    //MARK: tooManyRequests
+    let tryOneMinuteLater = Abort(.tooManyRequests, reason: "Please try one minute later", identifier: "tryOneMinuteLater")
+    
+    //MARK: methodNotAllowed
+    let unauthorizedRequest = Abort(.methodNotAllowed, reason: "Request is unauthorized",identifier: "unauthorizedRequest")
+    let unauthorizedSocket = Abort(.methodNotAllowed, reason: "Socket is unauthorized",identifier: "unauthorizedSocket")
+    let unauthorizedGift = Abort(.methodNotAllowed, reason: "Gift is unauthorized for this operation",identifier: "unauthorizedGift")
+    let unauthorizedMessage = Abort(.methodNotAllowed, reason: "Message is unauthorized for this operation",identifier: "unauthorizedMessage")
+    let userIsNotCharity = Abort(.methodNotAllowed, reason: "User is not charity",identifier: "userIsNotCharity")
+    
+    //MARK: notAcceptable
+    let unreviewedGift = Abort(.notAcceptable, reason: "Gift is not reviewed",identifier: "unreviewedGift")
+    let unrequestedGift = Abort(.notAcceptable, reason: "Gift is not requested",identifier: "unrequestedGift")
+    let giftIsAlreadyDonated = Abort(.notAcceptable, reason: "Gift has already been donated",identifier: "giftIsAlreadyDonated")
+    let charityInfoAlreadyExists = Abort(.notAcceptable ,reason: "Charity info already exists",identifier: "charityInfoAlreadyExists")
+    
+    //MARK: nonAuthoritativeInformation
+    let invalidPhoneNumber = Abort(.nonAuthoritativeInformation, reason: "The phone number is invalid",identifier: "invalidPhoneNumber")
+    let invalidActivationCode = Abort(.nonAuthoritativeInformation, reason: "The activation code is invalid",identifier: "invalidActivationCode")
+    let wrongUserId = Abort(.nonAuthoritativeInformation, reason: "User id is wrong",identifier: "wrongUserId")
+    let pushPayloadIsNotValid = Abort(.nonAuthoritativeInformation ,reason: "Push payload is not valid",identifier: "pushPayloadIsNotValid")
+    let wrongPushNotificationType = Abort(.nonAuthoritativeInformation, reason: "Push Notification Type is wrong",identifier: "wrongPushNotificationType")
+    
+    //MARK: notFound
+    let nilUserId = Abort(.notFound, reason: "User id is nil",identifier: "nilUserId")
+    let nilGiftId = Abort(.notFound, reason: "Gift id is nil",identifier: "nilGiftId")
+    let nilGiftUserId = Abort(.notFound, reason: "Gift user id is nil",identifier: "nilGiftUserId")
+    let messageNotFound = Abort(.notFound, reason: "Message not found",identifier: "messageNotFound")
+    let nilMessageId = Abort(.notFound, reason: "Message id is nil",identifier: "nilMessageId")
+    let giftNotFound = Abort(.notFound, reason: "Gift not found",identifier: "giftNotFound")
+    let chatNotFound = Abort(.notFound, reason: "Chat not found",identifier: "chatNotFound")
+    let nilChatId = Abort(.notFound, reason: "Chat id is nil",identifier: "nilChatId")
+    let contactNotFound = Abort(.notFound, reason: "Contact not found",identifier: "contactNotFound")
+    let chatNotificationNotFound = Abort(.notFound, reason: "Chat's Notification not found",identifier: "chatNotificationNotFound")
+    let charityInfoNotFound = Abort(.notFound, reason: "Charity info not found",identifier: "charityInfoNotFound")
+    let activationCodeNotFound = Abort(.notFound, reason: "Activation code not found", identifier: "activationCodeNotFound")
+    
+    //MARK: forbidden
+    let userAccessIsDenied = Abort(.forbidden, reason: "User access is denied",identifier: "userAccessIsDenied")
+    let chatHasBlocked = Abort(.forbidden, reason: "Chat has blocked",identifier: "chatHasBlocked")
+    
+    //MARK: alreadyReported
+    let redundentAck = Abort(.alreadyReported, reason: "Ack is redundent",identifier: "redundentAck")
+    let userWasAlreadyBlocked = Abort(.alreadyReported, reason: "User was already blocked",identifier: "userWasAlreadyBlocked")
+    let userWasAlreadyUnblocked = Abort(.alreadyReported ,reason: "User was already unblocked",identifier: "userWasAlreadyUnblocked")
+    
+    //MARK: internalServerError
+    let serverThrowsException = Abort(.internalServerError, reason: "Server throws exception", identifier: "serverThrowsException")
+    
 }
+
