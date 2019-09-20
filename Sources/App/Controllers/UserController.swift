@@ -78,6 +78,34 @@ final class UserController {
         
     }
     
+    func adminAccessActivationCode(_ req: Request) throws -> Future<AuthAdminAccessOutput> {
+        let auth = try req.requireAuthenticated(User.self)
+        
+        // Only accessable by admin!
+        guard auth.isAdmin else {
+            throw Constants.errors.unauthorizedRequest
+        }
+        
+        return try req.content.decode(User.Input.self).flatMap({ inputUser in
+            
+            let phoneNumber = try UserController.checkPhoneNumber(inputUser: inputUser)
+            
+            return User.query(on: req).filter(\User.phoneNumber == phoneNumber).first().map({ user in
+                
+                guard let user = user else {
+                    throw Constants.errors.invalidPhoneNumber
+                }
+                
+                guard let activationCode = user.activationCode else {
+                    throw Constants.errors.activationCodeNotFound
+                }
+                
+                return AuthAdminAccessOutput(activationCode: activationCode)
+            })
+            
+        })
+    }
+    
     private func sendActivationCodeSMS(phoneNumber:String,activationCode:String){
         guard let url = URIs().getSMSUrl(apiKey: Constants.appInfo.smsConfig.apiKey, receptor: phoneNumber, template: Constants.appInfo.smsConfig.activationCodeTemplate, token: activationCode) else {
             return

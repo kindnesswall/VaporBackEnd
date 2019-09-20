@@ -30,7 +30,7 @@ public func routes(_ router: Router) throws {
     let tokenAuthMiddleware = User.tokenAuthMiddleware()
     let guardAuthMiddleware = User.guardAuthMiddleware()
     let guardAdminMiddleware = GuardAdminMiddleware()
-    let guardianMiddleware = GuardianMiddleware(rate: Rate(limit: 1, interval: .minute),closure:{ _ in
+    let guardianMiddleware = GuardianMiddleware(rate: Rate(limit: 3, interval: .minute),closure:{ _ in
         throw Constants.errors.tryOneMinuteLater
     })
     
@@ -43,6 +43,7 @@ public func routes(_ router: Router) throws {
     //Routes Login
     guardianProtected.post(uris.register, use: userController.registerHandler)
     router.post(uris.login, use: userController.loginHandler)
+    adminProtected.post(uris.login_admin_access, use: userController.adminAccessActivationCode)
     
     //Routes User Profile
     tokenProtected.get(uris.profile,User.parameter, use: userProfileController.show)

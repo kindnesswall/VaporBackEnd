@@ -34,6 +34,9 @@ class URIs {
     var login : String {
         return "\(apiRoute)/login"
     }
+    var login_admin_access : String {
+        return "\(apiRoute)/login/admin/access" 
+    }
     var chat : String {
         return "\(apiRoute)/chat"
     }

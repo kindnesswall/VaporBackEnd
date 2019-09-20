@@ -18,3 +18,13 @@ final class AuthOutput : Content {
         self.isCharity = isCharity
     }
 }
+
+final class AuthAdminAccessOutput : Content {
+    
+    let activationCode: String
+    
+    init(activationCode: String) {
+        self.activationCode = activationCode
+    }
+    
+}

@@ -55,7 +55,7 @@ extension User {
     func userProfile(req:Request) throws -> UserProfile {
         let id = try self.getId()
         let auth = try? req.requireAuthenticated(User.self)
-        let phoneNumber = (auth?.isAdmin == true || auth?.isCharity == true) ? self.phoneNumber : nil
+        let phoneNumber = (auth?.isAdmin == true || auth?.isCharity == true || id == auth?.id) ? self.phoneNumber : nil
         let userProfile = UserProfile(id: id, name: self.name, image: self.image, phoneNumber: phoneNumber)
         return userProfile
     }
@@ -133,5 +133,3 @@ final class UserStatistic:Content{
     }
     
 }
-
-
