@@ -42,7 +42,9 @@ class ChatRestfulController {
             
             return try self.chatController.fetchMessages(requestInfo: requestInfo, fetchMessagesInput: fetchMessagesInput).flatMap({ fetchResult in
                 
-                return self.chatController.fetchContactInfo(requestInfo: requestInfo, withTextMessages: fetchResult.textMessages, chat: fetchResult.chat, contactInfoId: fetchResult.chatContacts.contactId)
+                let contactMessage = ContactMessage(chatContacts: fetchResult.chatContacts, textMessages: fetchResult.textMessages, contactProfile: nil, notificationCount: nil, blockStatus: nil)
+                
+                return self.chatController.fetchContactProfile(requestInfo: requestInfo, contactId: fetchResult.chatContacts.contactId, contactMessage: contactMessage)
             })
             
         })
@@ -51,15 +53,30 @@ class ChatRestfulController {
     
     func sendMessage(_ req: Request) throws -> Future<AckMessage> {
         
-        let requestInfo = try getRequestInfo(req: req)
+        
         return try req.content.decode(TextMessage.self).flatMap({ textMessage in
-            return requestInfo.getChatContacts(chatId:textMessage.chatId).flatMap { chatContacts in
-                return try self.chatController.saveTextMessage(requestInfo: requestInfo, textMessage: textMessage, chat: chatContacts.chat, receiverId: chatContacts.contactId).map({ textMessage in
+            
+            return try self.sendMessage(req: req, textMessage: textMessage)
+        })
+    }
+    
+    private func sendMessage(req: Request, textMessage: TextMessage) throws -> Future<AckMessage> {
+        
+        let requestInfo = try getRequestInfo(req: req) 
+        
+        let chatId = textMessage.chatId
+        return requestInfo.dataBase.isChatUnblock(chatId: chatId).flatMap { chatIsUnblock in
+            guard chatIsUnblock else {
+                throw Constants.errors.chatHasBlocked
+            }
+            
+            return requestInfo.getChatContacts(chatId:chatId).flatMap { chatContacts in
+                return try self.chatController.saveTextMessage(requestInfo: requestInfo, textMessage: textMessage, chatContacts: chatContacts, receiverId: chatContacts.contactId).map({ textMessage in
                     
                     try self.sendPushNotification(req, toUserId: chatContacts.contactId, textMessage: textMessage)
                     
                     // send message to other user active devices
-//                    try self.sendPushNotification(req, toUserId: chatContacts.userId, textMessage: textMessage)
+                    //                    try self.sendPushNotification(req, toUserId: chatContacts.userId, textMessage: textMessage)
                     
                     guard let ackMessage = AckMessage(textMessage: textMessage) else {
                         throw Constants.errors.nilMessageId
@@ -67,7 +84,8 @@ class ChatRestfulController {
                     return ackMessage
                 })
             }
-        })
+            
+        }
     }
     
     

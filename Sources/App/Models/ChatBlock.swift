@@ -35,24 +35,50 @@ final class ChatBlock : PostgreSQLModel {
         })
     }
     
-    static func isChatUnblock(chat:Chat,conn:DatabaseConnectable) throws -> Future<Bool> {
-        guard let chatId = chat.id else {
-            throw Constants.errors.nilChatId
-        }
+    static func isChatUnblock(chatId:Int,conn:DatabaseConnectable) throws -> Future<Bool> {
         
         return ChatBlock.hasFound(chatId: chatId, conn: conn).map({ hasFound in
             return !hasFound
         })
     }
     
-    static func allBlockedChat(userId:Int,conn:DatabaseConnectable) -> Future<[ChatBlock]> {
+    static func userBlockedChats(userId:Int,conn:DatabaseConnectable) -> Future<[ChatBlock]> {
         
         return ChatBlock.query(on: conn)
-            .group(.or, closure: { query in
-                query
-                    .filter(\.blockedUserId == userId)
-                    .filter(\.byUserId == userId)
-            }).all()
+            .filter(\.byUserId == userId)
+            .all()
+    }
+}
+
+extension ChatBlock {
+    final class BlockStatus: Content {
+        var blockedByUser: Bool?
+        var blockedByContact: Bool?
+        
+        init(blockedByUser:Bool?, blockedByContact:Bool?) {
+            self.blockedByUser = blockedByUser
+            self.blockedByContact = blockedByContact
+        }
+    }
+    
+    static func getChatBlockStatus(userId:Int, chatId:Int, conn:DatabaseConnectable) -> Future<BlockStatus> {
+        
+        return ChatBlock.query(on: conn)
+        .filter(\.chatId == chatId)
+        .all()
+        .map { chatBlocks in
+            
+            let blockStatus = BlockStatus(blockedByUser: false, blockedByContact: false)
+            
+            for chatBlock in chatBlocks {
+                if chatBlock.byUserId == userId {
+                    blockStatus.blockedByUser = true
+                } else {
+                    blockStatus.blockedByContact = true
+                }
+            }
+            return blockStatus
+        }
     }
 }
 

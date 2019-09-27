@@ -33,7 +33,7 @@ class CustomFutureList<T> {
     }
     
     func catchAndIncrementHead(error:Error) {
-        AppErrorCatch.printError(error: error)
+//        AppErrorCatch.printError(error: error)
         incrementHead()
     }
     

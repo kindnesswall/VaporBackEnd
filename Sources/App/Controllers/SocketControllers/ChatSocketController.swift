@@ -114,11 +114,19 @@ class ChatSocketController {
     private func textMessagesIsReceived(requestInfo:ChatRequestInfo,ws:WebSocket,textMessages:[TextMessage]){
         
         for textMessage in textMessages {
-            requestInfo.getChatContacts(chatId:textMessage.chatId).map { chatContacts -> Void in
-                self.saveTextMessage(requestInfo: requestInfo, ws: ws, textMessage: textMessage, chat: chatContacts.chat, receiverId: chatContacts.contactId)
-                }.catch(AppErrorCatch.printError)
+            
+            let chatId = textMessage.chatId
+            requestInfo.dataBase.isChatUnblock(chatId: chatId).flatMap { chatIsUnblock -> Future<Void> in
+                guard chatIsUnblock else {
+                    throw Constants.errors.chatHasBlocked
+                }
+                
+                return requestInfo.getChatContacts(chatId:chatId).map { chatContacts -> Void in
+                    return self.saveTextMessage(requestInfo: requestInfo, ws: ws, textMessage: textMessage, chatContacts: chatContacts, receiverId: chatContacts.contactId)
+                    }
+            }.catch(AppErrorCatch.printError)
+            
         }
-        
         
     }
     
@@ -140,12 +148,14 @@ class ChatSocketController {
         self.sendMessage(sockets: [ws], message: message)
     }
     
-    private func sendTextMessages(requestInfo:ChatRequestInfo,sockets:[WebSocket], textMessages:[TextMessage],chat:Chat,contactInfoId:Int) {
+    private func sendTextMessages(requestInfo:ChatRequestInfo, sockets:[WebSocket], textMessages:[TextMessage], chatContacts:Chat.ChatContacts, contactInfoId:Int) {
         guard textMessages.count != 0 else {
             return
         }
+        
+        let contactMessage = ContactMessage(chatContacts: chatContacts, textMessages: textMessages, contactProfile: nil, notificationCount: nil, blockStatus: nil)
 
-        chatController.fetchContactInfo(requestInfo: requestInfo, withTextMessages: textMessages, chat: chat, contactInfoId: contactInfoId).map{ [weak self] contactMessage in
+        chatController.fetchContactProfile(requestInfo: requestInfo, contactId: contactInfoId, contactMessage: contactMessage).map { [weak self] contactMessage in
             self?.sendContactMessages(sockets: sockets, contactMessages: [contactMessage])
         }.catch(AppErrorCatch.printError)
 
@@ -178,20 +188,20 @@ class ChatSocketController {
     
     //MARK: - Save Messages
     
-    private func saveTextMessage(requestInfo:ChatRequestInfo,ws:WebSocket,textMessage:TextMessage,chat:Chat,receiverId:Int){
+    private func saveTextMessage(requestInfo:ChatRequestInfo,ws:WebSocket,textMessage:TextMessage,chatContacts:Chat.ChatContacts,receiverId:Int){
         
         
         do {
             
-            try chatController.saveTextMessage(requestInfo: requestInfo, textMessage: textMessage, chat: chat, receiverId: receiverId).map { [weak self] textMessage  in
+            try chatController.saveTextMessage(requestInfo: requestInfo, textMessage: textMessage, chatContacts: chatContacts, receiverId: receiverId).map { [weak self] textMessage  in
                 
                 self?.sendTextAckMessage(ws: ws, message: textMessage)
                 if let receiverSockets = UserSockets.getUserSockets(allSockets: self?.allSockets, userId: receiverId) {
-                    self?.sendTextMessages(requestInfo: requestInfo, sockets: receiverSockets, textMessages: [textMessage], chat: chat, contactInfoId: requestInfo.userId)
+                    self?.sendTextMessages(requestInfo: requestInfo, sockets: receiverSockets, textMessages: [textMessage], chatContacts: chatContacts, contactInfoId: requestInfo.userId)
                 }
                 
                 if let senderOtherSockets = UserSockets.getUserSockets(allSockets: self?.allSockets, userId: requestInfo.userId, excludeSocket: ws) {
-                    self?.sendTextMessages(requestInfo: requestInfo, sockets: senderOtherSockets, textMessages: [textMessage], chat: chat, contactInfoId: receiverId)
+                    self?.sendTextMessages(requestInfo: requestInfo, sockets: senderOtherSockets, textMessages: [textMessage], chatContacts: chatContacts, contactInfoId: receiverId)
                 }
                 
                 }.catch(AppErrorCatch.printError)
@@ -227,7 +237,7 @@ class ChatSocketController {
                     self.sendNoMoreOldMessages(ws: ws, fetchMessagesInput: fetchMessagesInput)
                     return
                 }
-                self.sendTextMessages(requestInfo: requestInfo, sockets: [ws], textMessages: fetchResult.textMessages, chat: fetchResult.chat, contactInfoId: fetchResult.chatContacts.contactId)
+                self.sendTextMessages(requestInfo: requestInfo, sockets: [ws], textMessages: fetchResult.textMessages, chatContacts: fetchResult.chatContacts, contactInfoId: fetchResult.chatContacts.contactId)
                 }.catch(AppErrorCatch.printError)
         } catch {
             AppErrorCatch.printError(error: error)

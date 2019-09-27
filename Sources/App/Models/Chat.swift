@@ -18,6 +18,20 @@ final class Chat : PostgreSQLModel {
         self.firstId=firstId
         self.secondId=secondId
     }
+    
+    func getId() throws -> Int {
+        guard let id = self.id else {
+            throw Constants.errors.nilChatId
+        }
+        return id
+    }
+    
+    func getIdFuture(req:Request) -> Future<Int> {
+        guard let id = self.id else {
+            return req.eventLoop.newFailedFuture(error: Constants.errors.nilChatId)
+        }
+        return req.eventLoop.newSucceededFuture(result: id)
+    }
 }
 
 extension Chat {
@@ -52,43 +66,40 @@ extension Chat {
 }
 
 extension Chat {
-    class ChatContacts {
-        var chat:Chat
+    final class ChatContacts: Content {
+        var chatId:Int
         var userId:Int
         var contactId:Int
-        init(chat:Chat,userId:Int,contactId:Int) {
-            self.chat=chat
+        init(chatId:Int,userId:Int,contactId:Int) {
+            self.chatId=chatId
             self.userId=userId
             self.contactId=contactId
         }
     }
     
-    static func getChatContacts(userId:Int,chatId:Int,conn:DatabaseConnectable,withBlocked:Bool)->Future<ChatContacts> {
-        return Chat.find(chatId, on: conn).flatMap { chat in
+    static func getChatContacts(userId:Int,chatId:Int,conn:DatabaseConnectable)->Future<ChatContacts> {
+        return Chat.find(chatId, on: conn).map { chat in
             guard let chat = chat else {
                 throw Constants.errors.chatNotFound
             }
-            return try Chat.getChatContacts(userId: userId, chat: chat, conn: conn, withBlocked: withBlocked)
+            return try Chat.getChatContacts(userId: userId, chat: chat)
             
         }
     }
     
-    static func getChatContacts(userId:Int,chat:Chat,conn:DatabaseConnectable,withBlocked:Bool) throws -> Future <ChatContacts> {
+    
+    static func getChatContacts(userId:Int,chat:Chat) throws -> ChatContacts {
         
         guard isUserChat(userId: userId, chat: chat) else {
             throw Constants.errors.unauthorizedRequest
         }
         
-        return try ChatBlock.isChatUnblock(chat: chat, conn: conn).map({ chatIsUnblock in
-            guard (withBlocked || chatIsUnblock) else {
-                throw Constants.errors.chatHasBlocked
-            }
-            if chat.firstId == userId {
-                return ChatContacts(chat: chat, userId: chat.firstId, contactId: chat.secondId)
-            }
-            return ChatContacts(chat: chat, userId: chat.secondId, contactId: chat.firstId)
-        })
+        guard let chatId = chat.id else { throw Constants.errors.nilChatId }
         
+        if chat.firstId == userId {
+            return ChatContacts(chatId: chatId, userId: chat.firstId, contactId: chat.secondId)
+        }
+        return ChatContacts(chatId: chatId, userId: chat.secondId, contactId: chat.firstId)
     }
     
 }

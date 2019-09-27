@@ -49,23 +49,21 @@ class ChatBlockController {
     }
     
     
-    private func getContactChatBlock(_ req: Request) throws -> Future<ChatBlock>{
+    private func getContactChatBlock(_ req: Request) throws -> Future<ChatBlock> {
         let user = try req.requireAuthenticated(User.self)
         guard let userId = user.id else {
             throw Constants.errors.nilUserId
         }
-        return try req.parameters.next(Chat.self).flatMap({ chat in
+        return try req.parameters.next(Chat.self).map({ chat in
             
             guard let chatId = chat.id else {
                 throw Constants.errors.nilChatId
             }
             
             // Being sure that the user is associated with chat
-            let chatContacts = try Chat.getChatContacts(userId: userId, chat: chat, conn: req, withBlocked: true)
+            let chatContacts = try Chat.getChatContacts(userId: userId, chat: chat)
             
-            return chatContacts.map({ chatContacts in
-                return ChatBlock(chatId: chatId, blockedUserId: chatContacts.contactId, byUserId: chatContacts.userId)
-            })
+            return ChatBlock(chatId: chatId, blockedUserId: chatContacts.contactId, byUserId: chatContacts.userId)
             
         })
     }

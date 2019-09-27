@@ -18,12 +18,8 @@ class ChatRequestInfo {
         self.dataBase=dataBase
     }
     
-    func getChatContacts(chat:Chat,withBlocked:Bool = false)->Future<Chat.ChatContacts> {
-        return dataBase.getChatContacts(userId: self.userId, chat: chat, withBlocked: withBlocked)
-    }
-    
-    func getChatContacts(chatId:Int,withBlocked:Bool = false)->Future<Chat.ChatContacts> {
-        return dataBase.getChatContacts(userId: self.userId, chatId: chatId, withBlocked: withBlocked)
+    func getChatContacts(chatId: Int)->Future<Chat.ChatContacts> {
+        return dataBase.getChatContacts(userId: self.userId, chatId: chatId)
     }
     
     func getUserBlockedChats()->Future<[ChatBlock]>{
@@ -82,15 +78,15 @@ class ChatDataBase {
         })
     }
     
-    fileprivate func getChatContacts(userId:Int,chat:Chat,withBlocked:Bool)->Future<Chat.ChatContacts> {
+    fileprivate func getChatContacts(userId:Int,chatId:Int)->Future<Chat.ChatContacts> {
         return performQuery(query: { conn in
-            return try Chat.getChatContacts(userId: userId, chat: chat, conn: conn, withBlocked: withBlocked)
+            return Chat.getChatContacts(userId: userId, chatId: chatId, conn: conn)
         })
     }
     
-    fileprivate func getChatContacts(userId:Int,chatId:Int,withBlocked:Bool)->Future<Chat.ChatContacts> {
+    func isChatUnblock(chatId:Int) -> Future<Bool> {
         return performQuery(query: { conn in
-            return Chat.getChatContacts(userId: userId, chatId: chatId, conn: conn, withBlocked: withBlocked)
+            return try ChatBlock.isChatUnblock(chatId: chatId, conn: conn)
         })
     }
 
@@ -102,7 +98,7 @@ class ChatDataBase {
     
     fileprivate func getUserBlockedChats(userId:Int)->Future<[ChatBlock]>{
         return performQuery(query: { conn in
-            return ChatBlock.allBlockedChat(userId: userId, conn: conn)
+            return ChatBlock.userBlockedChats(userId: userId, conn: conn)
         })
     }
     

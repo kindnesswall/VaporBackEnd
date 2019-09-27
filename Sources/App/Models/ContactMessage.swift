@@ -9,17 +9,18 @@ import Vapor
 
 
 final class ContactMessage: Content {
-    var chat: Chat?
-    var contactInfo: UserProfile?
+    var chatContacts: Chat.ChatContacts?
     var textMessages: [TextMessage]?
+    var contactProfile: UserProfile?
     var notificationCount: Int?
-    var blockedByUserId: Int?
+    var blockStatus: ChatBlock.BlockStatus?
     
-    init(chat: Chat?,textMessages: [TextMessage]?,contactInfo: UserProfile?,notificationCount: Int?) {
-        self.chat = chat
+    init(chatContacts: Chat.ChatContacts?, textMessages: [TextMessage]?, contactProfile: UserProfile?, notificationCount: Int?, blockStatus: ChatBlock.BlockStatus?) {
+        self.chatContacts = chatContacts
         self.textMessages = textMessages
-        self.contactInfo = contactInfo
+        self.contactProfile = contactProfile
         self.notificationCount = notificationCount
+        self.blockStatus = blockStatus
     }
 }
 
