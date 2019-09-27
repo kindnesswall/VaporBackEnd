@@ -21,7 +21,7 @@ final class CharityController {
         
     }
     
-    func getCharityInfo(_ req: Request) throws -> Future<Charity> {
+    func getCharityOfUser(_ req: Request) throws -> Future<Charity> {
         return try req.parameters.next(User.self).flatMap { selectedUser in
             guard selectedUser.isCharity else {
                 throw Constants.errors.userIsNotCharity
@@ -30,12 +30,32 @@ final class CharityController {
         }
     }
     
-    func show(_ req: Request) throws -> Future<CharityInfoStatus> {
+    func show(_ req: Request) throws -> Future<Charity_Status> {
         let user = try req.requireAuthenticated(User.self)
         return Charity.find(userId: try user.getId(), conn: req).map({ charity in
-            let isCreated = charity != nil ? true : false
-            return CharityInfoStatus(isCreated: isCreated, charity: charity)
+            
+            let status = self.getCharityStatus(user: user, charity: charity)
+            
+            return Charity_Status(charity: charity, status: status)
         })
+    }
+    
+    private func getCharityStatus(user: User, charity: Charity?) -> CharityStatus {
+        
+        if let charity = charity {
+            if user.isCharity {
+                return .isCharity
+            } else {
+                if charity.isRejected == true {
+                    return .rejected
+                } else {
+                    return .pending
+                }
+            }
+        } else {
+            return .notRequested
+        }
+        
     }
     
     

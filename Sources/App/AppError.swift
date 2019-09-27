@@ -30,7 +30,7 @@ class ErrorConstants {
     let unreviewedGift = Abort(.notAcceptable, reason: "Gift is not reviewed",identifier: "unreviewedGift")
     let unrequestedGift = Abort(.notAcceptable, reason: "Gift is not requested",identifier: "unrequestedGift")
     let giftIsAlreadyDonated = Abort(.notAcceptable, reason: "Gift has already been donated",identifier: "giftIsAlreadyDonated")
-    let charityInfoAlreadyExists = Abort(.notAcceptable ,reason: "Charity info already exists",identifier: "charityInfoAlreadyExists")
+    let charityInfoAlreadyExists = Abort(.notAcceptable ,reason: "Charity information already exists",identifier: "charityInfoAlreadyExists")
     
     //MARK: nonAuthoritativeInformation
     let invalidPhoneNumber = Abort(.nonAuthoritativeInformation, reason: "The phone number is invalid",identifier: "invalidPhoneNumber")
@@ -51,7 +51,7 @@ class ErrorConstants {
     let nilChatId = Abort(.notFound, reason: "Chat id is nil",identifier: "nilChatId")
     let contactNotFound = Abort(.notFound, reason: "Contact not found",identifier: "contactNotFound")
     let chatNotificationNotFound = Abort(.notFound, reason: "Chat's Notification not found",identifier: "chatNotificationNotFound")
-    let charityInfoNotFound = Abort(.notFound, reason: "Charity info not found",identifier: "charityInfoNotFound")
+    let charityInfoNotFound = Abort(.notFound, reason: "Charity information not found",identifier: "charityInfoNotFound")
     let activationCodeNotFound = Abort(.notFound, reason: "Activation code not found", identifier: "activationCodeNotFound")
     
     //MARK: forbidden

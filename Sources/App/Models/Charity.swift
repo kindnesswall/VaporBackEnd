@@ -104,14 +104,22 @@ extension Charity : Content {}
 extension Charity : Parameter {}
 
 
-final class CharityInfoStatus: Content {
-    var isCreated: Bool
-    var charity: Charity?
+final class Charity_Status: Content {
     
-    init(isCreated: Bool, charity: Charity?) {
-        self.isCreated = isCreated
+    var charity: Charity?
+    var status: CharityStatus
+    
+    init(charity: Charity?, status: CharityStatus) {
         self.charity = charity
+        self.status = status
     }
+}
+
+enum CharityStatus: String, Content {
+    case notRequested
+    case pending
+    case rejected
+    case isCharity
 }
 
 final class Charity_UserProfile: Content {

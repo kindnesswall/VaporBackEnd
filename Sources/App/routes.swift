@@ -97,18 +97,18 @@ public func routes(_ router: Router) throws {
     adminProtected.get(uris.users_list_chatBlocked, use: userAdminController.usersChatBlockedList)
     
     //Routes Charity
-    router.get(uris.charity_info, User.parameter, use: charityController.getCharityInfo)
+    router.get(uris.charity_user, User.parameter, use: charityController.getCharityOfUser)
     router.get(uris.charity_list, use: charityController.getCharityList)
     
-    tokenProtected.get(uris.charity_info, use: charityController.show)
-    tokenProtected.post(uris.charity_info, use: charityController.create)
-    tokenProtected.put(uris.charity_info, use: charityController.update)
-    tokenProtected.delete(uris.charity_info, use: charityController.delete)
+    tokenProtected.get(uris.charity_myInfo, use: charityController.show)
+    tokenProtected.post(uris.charity_myInfo, use: charityController.create)
+    tokenProtected.put(uris.charity_myInfo, use: charityController.update)
+    tokenProtected.delete(uris.charity_myInfo, use: charityController.delete)
     
     //Routes Charity Admin
     adminProtected.get(uris.charity_review, use: charityAdminController.getUnreviewedList)
-    adminProtected.put(uris.charity_accept, User.parameter, use: charityAdminController.acceptCharity)
-    adminProtected.put(uris.charity_reject, User.parameter, use: charityAdminController.rejectCharity)
+    adminProtected.put(uris.charity_accept_user, User.parameter, use: charityAdminController.acceptCharity)
+    adminProtected.put(uris.charity_reject_user, User.parameter, use: charityAdminController.rejectCharity)
     
     //Routes Categories
     router.get(uris.categories, use: categoryController.index)

@@ -123,14 +123,17 @@ class URIs {
     var charity_list : String {
         return "\(apiRoute)/charity/list"
     }
-    var charity_info : String {
-        return "\(apiRoute)/charity/info"
+    var charity_myInfo : String {
+        return "\(apiRoute)/charity/myInfo"
     }
-    var charity_accept : String {
-        return "\(apiRoute)/charity/accept"
+    var charity_user : String {
+        return "\(apiRoute)/charity/user"
     }
-    var charity_reject : String {
-        return "\(apiRoute)/charity/reject"
+    var charity_accept_user : String {
+        return "\(apiRoute)/charity/accept/user"
+    }
+    var charity_reject_user : String {
+        return "\(apiRoute)/charity/reject/user"
     }
     var charity_review : String {
         return "\(apiRoute)/charity/review"
