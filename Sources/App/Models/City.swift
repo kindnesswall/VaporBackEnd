@@ -15,6 +15,7 @@ final class City : PostgreSQLModel{
     var county_id:Int
     var name:String
     var hasRegions:Bool?
+    var sortIndex:Int? 
 }
 
 extension City {

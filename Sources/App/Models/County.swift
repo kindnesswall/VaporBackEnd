@@ -12,6 +12,7 @@ final class County : PostgreSQLModel{
     var id:Int?
     var province_id:Int
     var name:String
+    var sortIndex:Int? 
 }
 
 

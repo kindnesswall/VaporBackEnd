@@ -14,7 +14,8 @@ final class Region : PostgreSQLModel {
     var city_id:Int
     var name:String
     var latitude:Double
-    var longitude:Double 
+    var longitude:Double
+    var sortIndex:Int? 
 }
 
 
