@@ -34,6 +34,7 @@ class ErrorConstants {
     
     //MARK: nonAuthoritativeInformation
     let invalidPhoneNumber = Abort(.nonAuthoritativeInformation, reason: "The phone number is invalid",identifier: "invalidPhoneNumber")
+    let phoneNumberHasExisted = Abort(.nonAuthoritativeInformation, reason: "Phone number has existed",identifier: "phoneNumberHasExisted")
     let invalidActivationCode = Abort(.nonAuthoritativeInformation, reason: "The activation code is invalid",identifier: "invalidActivationCode")
     let wrongUserId = Abort(.nonAuthoritativeInformation, reason: "User id is wrong",identifier: "wrongUserId")
     let pushPayloadIsNotValid = Abort(.nonAuthoritativeInformation ,reason: "Push payload is not valid",identifier: "pushPayloadIsNotValid")
@@ -56,6 +57,7 @@ class ErrorConstants {
     //MARK: forbidden
     let userAccessIsDenied = Abort(.forbidden, reason: "User access is denied",identifier: "userAccessIsDenied")
     let chatHasBlocked = Abort(.forbidden, reason: "Chat has blocked",identifier: "chatHasBlocked")
+    let chatHasBlockedByUser = Abort(.forbidden, reason: "Chat has blocked by user",identifier: "chatHasBlockedByUser")
     
     //MARK: alreadyReported
     let redundentAck = Abort(.alreadyReported, reason: "Ack is redundent",identifier: "redundentAck")

@@ -34,8 +34,7 @@ final class UserController {
                 
                 let activationCode = User.generateActivationCode()
                 user.activationCode = activationCode
-                print("User Activation Code: \(activationCode)") //
-//                self.sendActivationCodeSMS(phoneNumber: phoneNumber, activationCode: activationCode)
+                self.sendActivationCode(phoneNumber: phoneNumber, activationCode: activationCode)
                 return user.save(on: req).transform(to: .ok)
                 
             })
@@ -106,6 +105,84 @@ final class UserController {
         })
     }
     
+    func changePhoneNumberRequest(_ req: Request) throws -> Future<HTTPStatus> {
+        
+        let auth = try req.requireAuthenticated(User.self)
+        
+        return try req.content.decode(User.Input.self).flatMap({ inputUser in
+            
+            let toPhoneNumber = try UserController.checkPhoneNumber(inputUser: inputUser)
+            
+            let activationCode = User.generateActivationCode()
+            self.sendActivationCode(phoneNumber: toPhoneNumber, activationCode: activationCode)
+            
+            let requestedPhoneNumberLog = UserPhoneNumberLog(userId: try auth.getId(), fromPhoneNumber: auth.phoneNumber, toPhoneNumber: toPhoneNumber, status: .requested)
+            
+            let foundPhoneNumberLog = UserPhoneNumberLog.getLast(phoneNumberLog: requestedPhoneNumberLog, conn: req)
+            
+            return foundPhoneNumberLog.flatMap({ foundPhoneNumberLog in
+                
+                let phoneNumberLog = foundPhoneNumberLog ?? requestedPhoneNumberLog
+                
+                phoneNumberLog.activationCode = activationCode
+                return phoneNumberLog.save(on:req).transform(to: .ok)
+                
+            })
+            
+        })
+        
+    }
+    
+    func changePhoneNumberValidate(_ req: Request) throws -> Future<HTTPStatus> {
+        
+        let auth = try req.requireAuthenticated(User.self)
+        
+        return try req.content.decode(User.Input.self).flatMap({ inputUser in
+            
+            let toPhoneNumber = try UserController.checkPhoneNumber(inputUser: inputUser)
+            
+            return User.phoneNumberHasExisted(phoneNumber: toPhoneNumber, conn: req).flatMap({ hasExisted in
+                guard !hasExisted else {
+                    throw Constants.errors.phoneNumberHasExisted
+                }
+                
+                let requestedPhoneNumberLog = UserPhoneNumberLog(userId: try auth.getId(), fromPhoneNumber: auth.phoneNumber, toPhoneNumber: toPhoneNumber, status: .requested)
+                
+                let phoneNumberLog = UserPhoneNumberLog.getLast(phoneNumberLog: requestedPhoneNumberLog, conn: req)
+                
+                return phoneNumberLog.flatMap({ phoneNumberLog in
+                    guard let phoneNumberLog = phoneNumberLog else {
+                        throw Constants.errors.invalidPhoneNumber
+                    }
+                    
+                    guard let activationCode = inputUser.activationCode,
+                        phoneNumberLog.activationCode == activationCode
+                        else { throw Constants.errors.invalidActivationCode }
+                    
+                    auth.phoneNumber = toPhoneNumber
+                    return auth.save(on: req).flatMap({ _ in
+                        
+                        phoneNumberLog.activationCode = nil
+                        phoneNumberLog.setStatus(status: .completed)
+                        
+                        return phoneNumberLog.save(on: req).flatMap({ _ in
+                            return try UserController.logoutAllDevices(req: req, user: auth)
+                        })
+                    })
+                    
+                })
+                
+            })
+            
+        })
+        
+    } 
+    
+    private func sendActivationCode(phoneNumber:String,activationCode:String){
+        print("User Activation Code: \(activationCode)") //
+//        self.sendActivationCodeSMS(phoneNumber: phoneNumber, activationCode: activationCode)
+    }
+    
     private func sendActivationCodeSMS(phoneNumber:String,activationCode:String){
         guard let url = URIs().getSMSUrl(apiKey: Constants.appInfo.smsConfig.apiKey, receptor: phoneNumber, template: Constants.appInfo.smsConfig.activationCodeTemplate, token: activationCode) else {
             return
@@ -116,6 +193,19 @@ final class UserController {
                 print(error.localizedDescription)
             }
         }
+        
+    }
+    
+    
+    func logoutAllDevices(_ req: Request) throws -> Future<HTTPStatus> {
+
+        let auth = try req.requireAuthenticated(User.self)
+        return try UserController.logoutAllDevices(req: req, user: auth)
+    }
+    
+    static func logoutAllDevices(req: Request, user:User) throws -> Future<HTTPStatus> {
+        
+        return try user.authTokens.query(on: req).delete().transform(to: .ok)
         
     }
     

@@ -37,6 +37,15 @@ class URIs {
     var login_admin_access : String {
         return "\(apiRoute)/login/admin/access" 
     }
+    var register_phoneNumberChange_request : String {
+        return "\(apiRoute)/register/phoneNumberChange/request"
+    }
+    var register_phoneNumberChange_validate : String {
+        return "\(apiRoute)/register/phoneNumberChange/validate"
+    }
+    var logout_allDevices : String {
+        return "\(apiRoute)/logout/allDevices" 
+    }
     var chat : String {
         return "\(apiRoute)/chat"
     }

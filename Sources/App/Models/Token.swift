@@ -14,12 +14,22 @@ final class Token: PostgreSQLModel {
     var token: String
     var userID: User.ID
     
+    var createdAt: Date?
+    var updatedAt: Date?
+    var deletedAt: Date?
+    
     init(token: String, userID: User.ID) {
         self.token = token
         self.userID = userID
     }
 
 }
+
+extension Token {
+    static let createdAtKey: TimestampKey? = \.createdAt
+    static let updatedAtKey: TimestampKey? = \.updatedAt
+    static let deletedAtKey: TimestampKey? = \.deletedAt
+} 
 
 extension Token {
     static func generate(for user: User) throws -> Token {

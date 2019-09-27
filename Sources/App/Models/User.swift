@@ -62,6 +62,15 @@ extension User {
 }
 
 extension User {
+    static func phoneNumberHasExisted(phoneNumber:String,conn:DatabaseConnectable)->Future<Bool>{
+        return User.query(on: conn, withSoftDeleted: true).filter(\User.phoneNumber == phoneNumber).count().map { count in
+            if count != 0 { return true }
+            else { return false }
+        }
+    }
+} 
+
+extension User {
     static func allActiveUsers(conn:DatabaseConnectable,requestInput:RequestInput?) -> Future<[User]> {
         let query =  User.query(on: conn)
         return self.getUsersWithRequestFilter(query: query, requestInput: requestInput)
@@ -119,17 +128,4 @@ extension User : Content {}
 
 extension User : Parameter {}
 
-final class UserStatistic:Content{
-    
-    var user:User
-    var registeredGifts:Int?
-    var rejectedGifts:Int?
-    var donatedGifts:Int?
-    var receivedGifts:Int?
-    var blockedChats:Int?
-    
-    init(user:User) {
-        self.user = user
-    }
-    
-}
+

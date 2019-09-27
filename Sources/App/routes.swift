@@ -38,12 +38,16 @@ public func routes(_ router: Router) throws {
     let tokenProtected = router.grouped(tokenAuthMiddleware, guardAuthMiddleware)
     let adminProtected = router.grouped(tokenAuthMiddleware, guardAuthMiddleware, guardAdminMiddleware)
     let guardianProtected = router.grouped(guardianMiddleware)
+    let guardianTokenProtected = tokenProtected.grouped(guardianMiddleware)
     
     
     //Routes Login
     guardianProtected.post(uris.register, use: userController.registerHandler)
     router.post(uris.login, use: userController.loginHandler)
     adminProtected.post(uris.login_admin_access, use: userController.adminAccessActivationCode)
+    guardianTokenProtected.post(uris.register_phoneNumberChange_request, use: userController.changePhoneNumberRequest)
+    tokenProtected.post(uris.register_phoneNumberChange_validate, use: userController.changePhoneNumberValidate)
+    tokenProtected.get(uris.logout_allDevices, use: userController.logoutAllDevices)
     
     //Routes User Profile
     tokenProtected.get(uris.profile,User.parameter, use: userProfileController.show)
