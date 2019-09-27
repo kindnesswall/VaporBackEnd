@@ -29,6 +29,7 @@ class ErrorConstants {
     //MARK: notAcceptable
     let unreviewedGift = Abort(.notAcceptable, reason: "Gift is not reviewed",identifier: "unreviewedGift")
     let unrequestedGift = Abort(.notAcceptable, reason: "Gift is not requested",identifier: "unrequestedGift")
+    let giftCannotBeDonatedToTheOwner = Abort(.notAcceptable, reason: "Gift can not be donated to the owner", identifier: "giftCannotBeDonatedToTheOwner")
     let giftIsAlreadyDonated = Abort(.notAcceptable, reason: "Gift has already been donated",identifier: "giftIsAlreadyDonated")
     let charityInfoAlreadyExists = Abort(.notAcceptable ,reason: "Charity information already exists",identifier: "charityInfoAlreadyExists")
     

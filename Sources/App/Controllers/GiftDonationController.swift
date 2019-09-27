@@ -51,7 +51,13 @@ class GiftDonationController {
     
     func donate(_ req: Request) throws -> Future<Gift> {
         let user = try req.requireAuthenticated(User.self)
+        let userId = try user.getId()
+        
         return try req.content.decode(Donate.self).flatMap({ donate -> Future<Gift> in
+            
+            guard userId != donate.donatedToUserId else {
+                throw Constants.errors.giftCannotBeDonatedToTheOwner
+            }
             
             return GiftRequest.hasExisted(requestUserId: donate.donatedToUserId, giftId: donate.giftId, conn: req).flatMap({ giftRequestHasExisted in
                 guard giftRequestHasExisted else {
@@ -62,7 +68,8 @@ class GiftDonationController {
                     guard let gift = gift else {
                         throw Constants.errors.giftNotFound
                     }
-                    guard let userId = user.id , userId == gift.userId else {
+                    
+                    guard userId == gift.userId else {
                         throw Constants.errors.unauthorizedGift
                     }
                     
