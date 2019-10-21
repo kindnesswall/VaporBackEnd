@@ -23,6 +23,18 @@ final class GiftRequestController{
                 throw Constants.errors.nilGiftUserId
             }
             
+            guard userId != giftOwnerId else {
+                throw Constants.errors.giftCannotBeDonatedToTheOwner
+            }
+            
+            guard gift.isReviewed == true else {
+                throw Constants.errors.unreviewedGift
+            }
+            
+            guard gift.donatedToUserId == nil else {
+                throw Constants.errors.giftIsAlreadyDonated
+            }
+            
             return GiftRequest.hasExisted(requestUserId: userId, giftId: giftId, conn: req).flatMap({ giftRequestHasExisted in
                 
                 if giftRequestHasExisted {
