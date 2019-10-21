@@ -65,25 +65,29 @@ class ChatRestfulController {
         let requestInfo = try getRequestInfo(req: req) 
         
         let chatId = textMessage.chatId
-        return requestInfo.dataBase.isChatUnblock(chatId: chatId).flatMap { chatIsUnblock in
+        
+        let chat = requestInfo.dataBase.getChat(chatId: chatId)
+        
+        return chat.flatMap { chat in
+            let chatIsUnblock = chat.isChatUnblock()
             guard chatIsUnblock else {
                 throw Constants.errors.chatHasBlocked
             }
             
-            return requestInfo.getChatContacts(chatId:chatId).flatMap { chatContacts in
-                return try self.chatController.saveTextMessage(requestInfo: requestInfo, textMessage: textMessage, chatContacts: chatContacts, receiverId: chatContacts.contactId).map({ textMessage in
-                    
-                    try self.sendPushNotification(req, toUserId: chatContacts.contactId, textMessage: textMessage)
-                    
-                    // send message to other user active devices
-                    //                    try self.sendPushNotification(req, toUserId: chatContacts.userId, textMessage: textMessage)
-                    
-                    guard let ackMessage = AckMessage(textMessage: textMessage) else {
-                        throw Constants.errors.nilMessageId
-                    }
-                    return ackMessage
-                })
-            }
+            let chatContacts = try chat.getChatContacts(userId: requestInfo.userId)
+            
+            return try self.chatController.saveTextMessage(requestInfo: requestInfo, textMessage: textMessage, chatContacts: chatContacts, receiverId: chatContacts.contactId).map({ textMessage in
+                
+                try self.sendPushNotification(req, toUserId: chatContacts.contactId, textMessage: textMessage)
+                
+                // send message to other user active devices
+                //                    try self.sendPushNotification(req, toUserId: chatContacts.userId, textMessage: textMessage)
+                
+                guard let ackMessage = AckMessage(textMessage: textMessage) else {
+                    throw Constants.errors.nilMessageId
+                }
+                return ackMessage
+            })
             
         }
     }

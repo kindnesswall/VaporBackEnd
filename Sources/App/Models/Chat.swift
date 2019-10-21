@@ -13,6 +13,8 @@ final class Chat : PostgreSQLModel {
     var id:Int?
     var firstId:Int
     var secondId:Int
+    var firstIsBlocked:Bool = false
+    var secondIsBlocked:Bool = false
     
     init(firstId:Int,secondId:Int) {
         self.firstId=firstId
@@ -57,12 +59,15 @@ extension Chat {
         }.all()
     }
     
-    static func isUserChat(userId:Int,chat:Chat)->Bool {
-        if chat.firstId == userId || chat.secondId == userId {
-            return true
+    static func getChat(chatId:Int,conn:DatabaseConnectable) -> Future<Chat> {
+        return Chat.find(chatId, on: conn).map { chat in
+            guard let chat = chat else {
+                throw Constants.errors.chatNotFound
+            }
+            return chat
         }
-        return false
     }
+    
 }
 
 extension Chat {
@@ -77,31 +82,67 @@ extension Chat {
         }
     }
     
-    static func getChatContacts(userId:Int,chatId:Int,conn:DatabaseConnectable)->Future<ChatContacts> {
-        return Chat.find(chatId, on: conn).map { chat in
-            guard let chat = chat else {
-                throw Constants.errors.chatNotFound
-            }
-            return try Chat.getChatContacts(userId: userId, chat: chat)
-            
+    func isUserChat(userId:Int)->Bool {
+        if self.firstId == userId || self.secondId == userId {
+            return true
         }
+        return false
     }
     
-    
-    static func getChatContacts(userId:Int,chat:Chat) throws -> ChatContacts {
+    func getChatContacts(userId:Int) throws -> ChatContacts {
         
-        guard isUserChat(userId: userId, chat: chat) else {
+        guard self.isUserChat(userId: userId) else {
             throw Constants.errors.unauthorizedRequest
         }
         
-        guard let chatId = chat.id else { throw Constants.errors.nilChatId }
+        let chatId = try self.getId()
         
-        if chat.firstId == userId {
-            return ChatContacts(chatId: chatId, userId: chat.firstId, contactId: chat.secondId)
+        if self.firstId == userId {
+            return ChatContacts(chatId: chatId, userId: self.firstId, contactId: self.secondId)
         }
-        return ChatContacts(chatId: chatId, userId: chat.secondId, contactId: chat.firstId)
+        return ChatContacts(chatId: chatId, userId: self.secondId, contactId: self.firstId)
     }
     
+}
+
+extension Chat {
+    
+    func setContactBlock(userId:Int , block:Bool, conn: DatabaseConnectable) throws -> Future<Chat> {
+        
+        guard self.isUserChat(userId: userId) else {
+            throw Constants.errors.unauthorizedRequest
+        }
+        
+        if userId == self.firstId {
+            self.secondIsBlocked = block
+        } else {
+            self.firstIsBlocked = block
+        }
+        
+        return self.save(on: conn)
+        
+    }
+    
+    func isChatUnblock() -> Bool {
+        if !self.firstIsBlocked && !self.secondIsBlocked {
+            return true
+        }
+        return false
+    }
+    
+    func getChatBlockStatus(userId:Int) throws -> BlockStatus {
+        
+        guard self.isUserChat(userId: userId) else {
+            throw Constants.errors.unauthorizedRequest
+        }
+        
+        if userId == self.firstId {
+            return BlockStatus(userIsBlocked: self.firstIsBlocked, contactIsBlocked: self.secondIsBlocked)
+        }
+        
+        return BlockStatus(userIsBlocked: self.secondIsBlocked, contactIsBlocked: self.firstIsBlocked)
+        
+    }
 }
 
 

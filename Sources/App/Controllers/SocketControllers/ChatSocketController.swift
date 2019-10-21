@@ -116,18 +116,19 @@ class ChatSocketController {
         for textMessage in textMessages {
             
             let chatId = textMessage.chatId
-            requestInfo.dataBase.isChatUnblock(chatId: chatId).flatMap { chatIsUnblock -> Future<Void> in
+            let chat = requestInfo.dataBase.getChat(chatId: chatId)
+            
+            chat.map { chat -> Void in
+                let chatIsUnblock = chat.isChatUnblock()
                 guard chatIsUnblock else {
                     throw Constants.errors.chatHasBlocked
                 }
+                let chatContacts = try chat.getChatContacts(userId: requestInfo.userId)
                 
-                return requestInfo.getChatContacts(chatId:chatId).map { chatContacts -> Void in
-                    return self.saveTextMessage(requestInfo: requestInfo, ws: ws, textMessage: textMessage, chatContacts: chatContacts, receiverId: chatContacts.contactId)
-                    }
+                return self.saveTextMessage(requestInfo: requestInfo, ws: ws, textMessage: textMessage, chatContacts: chatContacts, receiverId: chatContacts.contactId)
+                
             }.catch(AppErrorCatch.printError)
-            
         }
-        
     }
     
     

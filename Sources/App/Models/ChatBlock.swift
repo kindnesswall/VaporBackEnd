@@ -29,19 +29,6 @@ final class ChatBlock : PostgreSQLModel {
             .first()
     }
     
-    static func hasFound(chatId:Int,conn:DatabaseConnectable) -> Future<Bool> {
-        return ChatBlock.query(on: conn).filter(\.chatId == chatId).count().map({ count in
-            return count != 0
-        })
-    }
-    
-    static func isChatUnblock(chatId:Int,conn:DatabaseConnectable) throws -> Future<Bool> {
-        
-        return ChatBlock.hasFound(chatId: chatId, conn: conn).map({ hasFound in
-            return !hasFound
-        })
-    }
-    
     static func userBlockedChats(userId:Int,conn:DatabaseConnectable) -> Future<[ChatBlock]> {
         
         return ChatBlock.query(on: conn)
@@ -50,38 +37,17 @@ final class ChatBlock : PostgreSQLModel {
     }
 }
 
-extension ChatBlock {
-    final class BlockStatus: Content {
-        var blockedByUser: Bool?
-        var blockedByContact: Bool?
-        
-        init(blockedByUser:Bool?, blockedByContact:Bool?) {
-            self.blockedByUser = blockedByUser
-            self.blockedByContact = blockedByContact
-        }
-    }
-    
-    static func getChatBlockStatus(userId:Int, chatId:Int, conn:DatabaseConnectable) -> Future<BlockStatus> {
-        
-        return ChatBlock.query(on: conn)
-        .filter(\.chatId == chatId)
-        .all()
-        .map { chatBlocks in
-            
-            let blockStatus = BlockStatus(blockedByUser: false, blockedByContact: false)
-            
-            for chatBlock in chatBlocks {
-                if chatBlock.byUserId == userId {
-                    blockStatus.blockedByUser = true
-                } else {
-                    blockStatus.blockedByContact = true
-                }
-            }
-            return blockStatus
-        }
-    }
-}
-
 extension ChatBlock : Migration {}
 extension ChatBlock : Content {}
 extension ChatBlock : Parameter {}
+
+
+final class BlockStatus: Content {
+    var userIsBlocked: Bool?
+    var contactIsBlocked: Bool?
+    
+    init(userIsBlocked: Bool?,contactIsBlocked: Bool?) {
+        self.userIsBlocked = userIsBlocked
+        self.contactIsBlocked = contactIsBlocked
+    }
+}

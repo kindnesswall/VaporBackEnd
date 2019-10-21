@@ -18,10 +18,6 @@ class ChatRequestInfo {
         self.dataBase=dataBase
     }
     
-    func getChatContacts(chatId: Int)->Future<Chat.ChatContacts> {
-        return dataBase.getChatContacts(userId: self.userId, chatId: chatId)
-    }
-    
     func getUserBlockedChats()->Future<[ChatBlock]>{
         return dataBase.getUserBlockedChats(userId: self.userId)
     }
@@ -77,18 +73,6 @@ class ChatDataBase {
             return User.authenticate(token: token, on: conn)
         })
     }
-    
-    fileprivate func getChatContacts(userId:Int,chatId:Int)->Future<Chat.ChatContacts> {
-        return performQuery(query: { conn in
-            return Chat.getChatContacts(userId: userId, chatId: chatId, conn: conn)
-        })
-    }
-    
-    func isChatUnblock(chatId:Int) -> Future<Bool> {
-        return performQuery(query: { conn in
-            return try ChatBlock.isChatUnblock(chatId: chatId, conn: conn)
-        })
-    }
 
     fileprivate func getUserChats(userId:Int)->Future<[Chat]>{
         return performQuery(query: { conn in
@@ -120,9 +104,9 @@ class ChatDataBase {
         })
     }
     
-    func getChat(chatId:Int)->Future<Chat?>{
+    func getChat(chatId:Int)->Future<Chat>{
         return performQuery(query: { conn in
-            return Chat.find(chatId, on: conn)
+            return Chat.getChat(chatId: chatId, conn: conn) 
         })
     }
     
