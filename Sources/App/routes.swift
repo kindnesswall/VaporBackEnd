@@ -107,6 +107,7 @@ public func routes(_ router: Router) throws {
     
     //Routes Charity Admin
     adminProtected.get(uris.charity_review, use: charityAdminController.getUnreviewedList)
+    adminProtected.get(uris.charity_list_rejected, use: charityAdminController.getRejectedList)
     adminProtected.put(uris.charity_accept_user, User.parameter, use: charityAdminController.acceptCharity)
     adminProtected.put(uris.charity_reject_user, User.parameter, use: charityAdminController.rejectCharity)
     
