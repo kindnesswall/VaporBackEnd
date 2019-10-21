@@ -24,7 +24,6 @@ class ErrorConstants {
     let unauthorizedSocket = Abort(.methodNotAllowed, reason: "Socket is unauthorized",identifier: "unauthorizedSocket")
     let unauthorizedGift = Abort(.methodNotAllowed, reason: "Gift is unauthorized for this operation",identifier: "unauthorizedGift")
     let unauthorizedMessage = Abort(.methodNotAllowed, reason: "Message is unauthorized for this operation",identifier: "unauthorizedMessage")
-    let userIsNotCharity = Abort(.methodNotAllowed, reason: "User is not charity",identifier: "userIsNotCharity")
     
     //MARK: notAcceptable
     let unreviewedGift = Abort(.notAcceptable, reason: "Gift is not reviewed",identifier: "unreviewedGift")
@@ -64,6 +63,9 @@ class ErrorConstants {
     let redundentAck = Abort(.alreadyReported, reason: "Ack is redundent",identifier: "redundentAck")
     let userWasAlreadyBlocked = Abort(.alreadyReported, reason: "User was already blocked",identifier: "userWasAlreadyBlocked")
     let userWasAlreadyUnblocked = Abort(.alreadyReported ,reason: "User was already unblocked",identifier: "userWasAlreadyUnblocked")
+    
+    //MARK: badRequest
+    let userIsNotCharity = Abort(.badRequest, reason: "User is not charity",identifier: "userIsNotCharity") 
     
     //MARK: internalServerError
     let serverThrowsException = Abort(.internalServerError, reason: "Server throws exception", identifier: "serverThrowsException")

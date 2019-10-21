@@ -13,10 +13,17 @@ final class GiftAdminController {
     func rejectGift(_ req: Request) throws -> Future<HTTPStatus> {
         
         return try req.parameters.next(Gift.self).flatMap { (gift) -> Future<Void> in
-            gift.isRejected = true
-            gift.isReviewed = true
-            return gift.save(on: req).flatMap({ gift in
-                return gift.delete(on: req)
+            
+            return try req.content.decode(Inputs.RejectReason.self).flatMap({ input in 
+                
+                gift.isRejected = true
+                gift.rejectReason = input.rejectReason
+                gift.isReviewed = true
+                
+                return gift.save(on: req).flatMap({ gift in
+                    return gift.delete(on: req)
+                })
+                
             })
             }.transform(to: .ok)
     }
@@ -24,7 +31,11 @@ final class GiftAdminController {
     func acceptGift(_ req: Request) throws -> Future<HTTPStatus> {
         
         return try req.parameters.next(Gift.self).flatMap { (gift) -> Future<Gift> in
+            
             gift.isReviewed = true
+            gift.isRejected = false
+            gift.rejectReason = nil
+            
             return gift.save(on: req)
             }.transform(to: .ok)
     }

@@ -16,6 +16,7 @@ final class Gift : PostgreSQLModel {
     var isReviewed = false
     var isRejected = false
     var isDeleted = false
+    var rejectReason: String?
     var categoryTitle:String?
     
     var title:String

@@ -9,15 +9,14 @@ import Vapor
 
 final class CharityAdminController {
     
-    func getUnreviewedList(_ req: Request) throws -> Future<[Charity_UserProfile]> {
+    func getUnreviewedList(_ req: Request) throws -> Future<[Charity]> {
         
-        return Charity.getCharityReviewList(conn: req).map { result in
-            var list = [Charity_UserProfile]()
-            for each in result {
-                list.append(try Charity_UserProfile(charity: each.0, user: each.1, req: req))
-            }
-            return list
-        }
+        return Charity.getCharityReviewList(conn: req)
+    }
+    
+    func getRejectedList(_ req: Request) throws -> Future<[Charity]> {
+        
+        return Charity.getCharityRejectedList(conn: req)
     }
     
     func acceptCharity(_ req: Request) throws -> Future<HTTPStatus> {
@@ -25,6 +24,7 @@ final class CharityAdminController {
             
             return try Charity.get(userId: try user.getId(), conn: req).flatMap { foundCharity in
                 foundCharity.isRejected = false
+                foundCharity.rejectReason = nil
                 return foundCharity.save(on: req).flatMap({ _ in
                     user.isCharity = true
                     return user.save(on: req).transform(to: .ok)
@@ -35,13 +35,18 @@ final class CharityAdminController {
     
     func rejectCharity(_ req: Request) throws -> Future<HTTPStatus> {
         return try req.parameters.next(User.self).flatMap { user in
-            user.isCharity = false
-            return user.save(on: req).flatMap { _ in
-                return try Charity.get(userId: try user.getId(), conn: req).flatMap { foundCharity in
-                    foundCharity.isRejected = true
-                    return foundCharity.save(on: req).transform(to: .ok)
+            
+            return try req.content.decode(Inputs.RejectReason.self).flatMap({ input in 
+                
+                user.isCharity = false
+                return user.save(on: req).flatMap { _ in
+                    return try Charity.get(userId: try user.getId(), conn: req).flatMap { foundCharity in
+                        foundCharity.isRejected = true
+                        foundCharity.rejectReason = input.rejectReason
+                        return foundCharity.save(on: req).transform(to: .ok)
+                    }
                 }
-            }
+            })
         }
     }
 }

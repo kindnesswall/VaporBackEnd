@@ -13,6 +13,7 @@ final class Charity: PostgreSQLModel {
     var id: Int?
     var userId:Int?
     var isRejected:Bool? = false
+    var rejectReason: String?
     
     var imageUrl: String?
     var name: String
@@ -49,13 +50,20 @@ extension Charity {
             .all()
     }
     
-    static func getCharityReviewList(conn:DatabaseConnectable) -> Future<[(Charity,User)]> {
+    static func getCharityReviewList(conn:DatabaseConnectable) -> Future<[Charity]> {
         return Charity.query(on: conn)
             .filter(\.isRejected == false)
             .join(\User.id, to: \Charity.userId)
             .filter(\User.deletedAt == nil)
             .filter(\User.isCharity == false)
-            .alsoDecode(User.self)
+            .all()
+    }
+    
+    static func getCharityRejectedList(conn:DatabaseConnectable) -> Future<[Charity]> {
+        return Charity.query(on: conn)
+            .filter(\.isRejected == true)
+            .join(\User.id, to: \Charity.userId)
+            .filter(\User.deletedAt == nil)
             .all()
     }
 }
@@ -83,6 +91,7 @@ extension Charity {
         self.id = nil
         self.userId = userId
         self.isRejected = false
+        self.rejectReason = nil
         
         return self.save(on: conn)
     }
@@ -92,6 +101,7 @@ extension Charity {
         self.id = original.id
         self.userId = original.userId
         self.isRejected = false
+        //self.rejectReason = nil // Note: Commented because Reason of last rejection may help for next review
         
         return self.save(on: conn)
     }
@@ -120,19 +130,4 @@ enum CharityStatus: String, Content {
     case pending
     case rejected
     case isCharity
-}
-
-final class Charity_UserProfile: Content {
-    var charity: Charity
-    var userProfile: UserProfile
-    
-    init(charity: Charity, userProfile: UserProfile) {
-        self.charity = charity
-        self.userProfile = userProfile
-    }
-    
-    convenience init(charity: Charity, user: User, req:Request) throws {
-        let userProfile = try user.userProfile(req: req)
-        self.init(charity: charity, userProfile: userProfile)
-    }
 }
