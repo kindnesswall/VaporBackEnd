@@ -28,16 +28,12 @@ final class User : PostgreSQLModel {
         }
         return id
     }
+    
     func getIdFuture(req:Request) -> Future<Int> {
         guard let id = self.id else {
             return req.eventLoop.newFailedFuture(error: Constants.errors.nilUserId)
         }
         return req.eventLoop.newSucceededFuture(result: id)
-    }
-    
-    final class Input : Codable {
-        var phoneNumber:String
-        var activationCode:String?
     }
     
     init(phoneNumber:String) {

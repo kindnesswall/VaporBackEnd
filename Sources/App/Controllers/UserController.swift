@@ -15,9 +15,9 @@ final class UserController {
     
     func registerHandler(_ req: Request) throws -> Future<HTTPStatus> {
         
-        return try req.content.decode(User.Input.self).flatMap{ (inputUser)->Future<HTTPStatus> in
+        return try req.content.decode(Inputs.Login.self).flatMap{ (inputUser)->Future<HTTPStatus> in
             
-            let phoneNumber = try UserController.checkPhoneNumber(inputUser: inputUser)
+            let phoneNumber = try UserController.validatePhoneNumber(phoneNumber: inputUser.phoneNumber)
             
             return User.query(on: req, withSoftDeleted: true).filter(\User.phoneNumber == phoneNumber).first().flatMap({ (dBUser) -> Future<HTTPStatus> in
                 
@@ -45,9 +45,9 @@ final class UserController {
     
     func loginHandler(_ req: Request) throws -> Future<AuthOutput> {
         
-        return try req.content.decode(User.Input.self).flatMap{ inputUser in
+        return try req.content.decode(Inputs.Login.self).flatMap{ inputUser in
             
-            let phoneNumber = try UserController.checkPhoneNumber(inputUser: inputUser)
+            let phoneNumber = try UserController.validatePhoneNumber(phoneNumber: inputUser.phoneNumber)
 
             guard let activationCode = inputUser.activationCode else {
                 throw Constants.errors.invalidActivationCode
@@ -85,9 +85,9 @@ final class UserController {
             throw Constants.errors.unauthorizedRequest
         }
         
-        return try req.content.decode(User.Input.self).flatMap({ inputUser in
+        return try req.content.decode(Inputs.Login.self).flatMap({ inputUser in
             
-            let phoneNumber = try UserController.checkPhoneNumber(inputUser: inputUser)
+            let phoneNumber = try UserController.validatePhoneNumber(phoneNumber: inputUser.phoneNumber)
             
             return User.query(on: req).filter(\User.phoneNumber == phoneNumber).first().map({ user in
                 
@@ -109,23 +109,30 @@ final class UserController {
         
         let auth = try req.requireAuthenticated(User.self)
         
-        return try req.content.decode(User.Input.self).flatMap({ inputUser in
+        return try req.content.decode(Inputs.ChangePhoneNumber.self).flatMap({ input in
             
-            let toPhoneNumber = try UserController.checkPhoneNumber(inputUser: inputUser)
+            let toPhoneNumber = try UserController.validatePhoneNumber(phoneNumber: input.toPhoneNumber)
             
-            let activationCode = User.generateActivationCode()
-            self.sendActivationCode(phoneNumber: toPhoneNumber, activationCode: activationCode)
-            
-            let requestedPhoneNumberLog = UserPhoneNumberLog(userId: try auth.getId(), fromPhoneNumber: auth.phoneNumber, toPhoneNumber: toPhoneNumber, status: .requested)
-            
-            let foundPhoneNumberLog = UserPhoneNumberLog.getLast(phoneNumberLog: requestedPhoneNumberLog, conn: req)
-            
-            return foundPhoneNumberLog.flatMap({ foundPhoneNumberLog in
+            return User.phoneNumberHasExisted(phoneNumber: toPhoneNumber, conn: req).flatMap({ hasExisted in
+                guard !hasExisted else {
+                    throw Constants.errors.phoneNumberHasExisted
+                }
                 
-                let phoneNumberLog = foundPhoneNumberLog ?? requestedPhoneNumberLog
+                let activationCode = User.generateActivationCode()
+                self.sendActivationCode(phoneNumber: toPhoneNumber, activationCode: activationCode)
                 
-                phoneNumberLog.activationCode = activationCode
-                return phoneNumberLog.save(on:req).transform(to: .ok)
+                let requestedPhoneNumberLog = UserPhoneNumberLog(userId: try auth.getId(), fromPhoneNumber: auth.phoneNumber, toPhoneNumber: toPhoneNumber, status: .requested)
+                
+                let foundPhoneNumberLog = UserPhoneNumberLog.getLast(phoneNumberLog: requestedPhoneNumberLog, conn: req)
+                
+                return foundPhoneNumberLog.flatMap({ foundPhoneNumberLog in
+                    
+                    let phoneNumberLog = foundPhoneNumberLog ?? requestedPhoneNumberLog
+                    
+                    phoneNumberLog.activationCode = activationCode
+                    return phoneNumberLog.save(on:req).transform(to: .ok)
+                    
+                })
                 
             })
             
@@ -137,9 +144,9 @@ final class UserController {
         
         let auth = try req.requireAuthenticated(User.self)
         
-        return try req.content.decode(User.Input.self).flatMap({ inputUser in
+        return try req.content.decode(Inputs.ChangePhoneNumber.self).flatMap({ input in
             
-            let toPhoneNumber = try UserController.checkPhoneNumber(inputUser: inputUser)
+            let toPhoneNumber = try UserController.validatePhoneNumber(phoneNumber: input.toPhoneNumber)
             
             return User.phoneNumberHasExisted(phoneNumber: toPhoneNumber, conn: req).flatMap({ hasExisted in
                 guard !hasExisted else {
@@ -155,7 +162,7 @@ final class UserController {
                         throw Constants.errors.invalidPhoneNumber
                     }
                     
-                    guard let activationCode = inputUser.activationCode,
+                    guard let activationCode = input.activationCode,
                         phoneNumberLog.activationCode == activationCode
                         else { throw Constants.errors.invalidActivationCode }
                     
@@ -209,11 +216,11 @@ final class UserController {
         
     }
     
-    private static func checkPhoneNumber(inputUser:User.Input) throws -> String {
-        guard inputUser.phoneNumber.isCorrectPhoneNumber(),
-            let phoneNumber = inputUser.phoneNumber.castNumberToEnglish()  else {
-                throw Constants.errors.invalidPhoneNumber
-        }
+    private static func validatePhoneNumber(phoneNumber:String) throws -> String {
+        guard
+        phoneNumber.isCorrectPhoneNumber(),
+        let phoneNumber = phoneNumber.castNumberToEnglish()
+        else { throw Constants.errors.invalidPhoneNumber }
         return phoneNumber
     }
 }
