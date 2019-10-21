@@ -138,6 +138,9 @@ class URIs {
     var charity_review : String {
         return "\(apiRoute)/charity/review"
     }
+    var charity_list_rejected : String {
+        return "\(apiRoute)/charity/list/rejected"
+    }
     
     var gifts_request : String {
         return "\(apiRoute)/gifts/request"
