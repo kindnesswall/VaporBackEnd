@@ -10,7 +10,7 @@ import Foundation
 class URIs {
     private let apiRoute:String
     init() {
-        self.apiRoute=Constants.apiRoute
+        self.apiRoute=Constants.appInfo.apiRoute
     }
     
     var gifts : String {
