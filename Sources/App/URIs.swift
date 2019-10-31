@@ -145,6 +145,10 @@ class URIs {
     var gifts_request : String {
         return "\(apiRoute)/gifts/request"
     }
+    var gifts_request_status : String {
+        return "\(apiRoute)/gifts/request/status"
+    }
+    
     var donate : String {
         return "\(apiRoute)/donate"
     }

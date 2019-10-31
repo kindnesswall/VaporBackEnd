@@ -36,6 +36,19 @@ final class Gift : PostgreSQLModel {
     var updatedAt: Date?
     var deletedAt: Date?
     
+    func getId() throws -> Int {
+        guard let id = self.id else {
+            throw Constants.errors.nilGiftId
+        }
+        return id
+    }
+    
+    func getUserId() throws -> Int {
+        guard let userId = self.userId else {
+            throw Constants.errors.nilGiftUserId
+        }
+        return userId
+    }
     
     init(userId:Int?,gift:Gift.Input) {
         self.userId = userId

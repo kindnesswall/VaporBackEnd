@@ -72,6 +72,7 @@ public func routes(_ router: Router) throws {
     
     //Routes Gift Request
     tokenProtected.get(uris.gifts_request,Gift.parameter, use: giftRequestController.requestGift)
+    tokenProtected.get(uris.gifts_request_status, Gift.parameter, use: giftRequestController.requestStatus)
     
     //Routes Chat
     tokenProtected.get(uris.chat_contacts, use: chatRestfulController.fetchContacts)
