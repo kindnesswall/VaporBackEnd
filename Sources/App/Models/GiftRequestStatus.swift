@@ -1,5 +1,5 @@
 //
-//  RequestStatus.swift
+//  GiftRequestStatus.swift
 //  App
 //
 //  Created by Amir Hossein on 10/31/19.
@@ -7,7 +7,7 @@
 
 import Vapor
 
-final class RequestStatus: Content {
+final class GiftRequestStatus: Content {
     var isRequested: Bool
     var chat: Chat?
     

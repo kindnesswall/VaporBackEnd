@@ -49,7 +49,7 @@ final class GiftRequestController{
         }
     }
     
-    public func requestStatus(_ req: Request) throws -> Future<RequestStatus> {
+    public func requestStatus(_ req: Request) throws -> Future<GiftRequestStatus> {
         let user = try req.requireAuthenticated(User.self)
         let userId = try user.getId()
         
@@ -58,16 +58,16 @@ final class GiftRequestController{
             return GiftRequest.hasExisted(requestUserId: userId, giftId: giftId, conn: req).flatMap({ isRequested in
                 
                 guard isRequested else {
-                    let requestStatus = RequestStatus(isRequested: false, chat: nil)
+                    let requestStatus = GiftRequestStatus(isRequested: false, chat: nil)
                     return req.eventLoop.newSucceededFuture(result: requestStatus)
                 }
                 
                 let giftOwnerId = try gift.getUserId()
                 return Chat.findChat(userId: userId, contactId: giftOwnerId, conn: req).map({ chat in
                     guard let chat = chat else {
-                        return RequestStatus(isRequested: false, chat: nil)
+                        return GiftRequestStatus(isRequested: false, chat: nil)
                     }
-                    return RequestStatus(isRequested: true, chat: chat)
+                    return GiftRequestStatus(isRequested: true, chat: chat)
                 })
             })
         })
