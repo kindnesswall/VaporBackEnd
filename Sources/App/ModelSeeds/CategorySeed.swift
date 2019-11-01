@@ -16,7 +16,11 @@ final class CategorySeed: Migration {
         Category(title:"Others"),
         Category(title:"Laptop"),
         Category(title:"Phone"),
-        Category(title:"Tablet")
+        Category(title:"Tablet"),
+        Category(title:"Clothes"),
+        Category(title:"Shoes"),
+        Category(title:"Book"),
+        Category(title:"Home Appliance")
     ]
     
     static func prepare(on connection: PostgreSQLConnection) -> Future<Void> {
