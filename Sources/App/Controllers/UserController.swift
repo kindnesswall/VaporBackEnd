@@ -11,7 +11,7 @@ import Vapor
 import FluentPostgreSQL
 import Crypto
 
-final class UserController {
+final class UserController: UserControllerCore {
     
     func registerHandler(_ req: Request) throws -> Future<HTTPStatus> {
         
@@ -19,24 +19,12 @@ final class UserController {
             
             let phoneNumber = try UserController.validatePhoneNumber(phoneNumber: inputUser.phoneNumber)
             
-            return User.query(on: req, withSoftDeleted: true).filter(\User.phoneNumber == phoneNumber).first().flatMap({ (dBUser) -> Future<HTTPStatus> in
-                
-                guard dBUser?.deletedAt == nil else {
-                    throw Constants.errors.userAccessIsDenied
-                }
-                
-                var user:User
-                if let dBUser=dBUser {
-                    user = dBUser
-                } else {
-                    user = User(phoneNumber: phoneNumber)
-                }
+            return self.findOrCreateUser(req: req, phoneNumber: phoneNumber).flatMap({ user -> Future<HTTPStatus> in
                 
                 let activationCode = User.generateActivationCode()
                 user.activationCode = activationCode
                 self.sendActivationCode(phoneNumber: phoneNumber, activationCode: activationCode)
                 return user.save(on: req).transform(to: .ok)
-                
             })
         }
     }
@@ -67,11 +55,7 @@ final class UserController {
                 
                 user.activationCode = nil
                 return user.save(on: req).flatMap({ user in
-                    let token = try Token.generate(for: user)
-                    
-                    return token.save(on: req).map({ token in
-                        return AuthOutput(token: token, isAdmin: user.isAdmin, isCharity: user.isCharity)
-                    })
+                    return try self.getToken(req: req, user: user)
                 })
             })
         }

@@ -18,6 +18,14 @@ class Inputs {
         var activationCode:String?
     }
     
+    final class FirebaseLogin: Content {
+        var idToken: String
+        
+        init(idToken: String) {
+            self.idToken = idToken
+        }
+    }
+    
     final class ChangePhoneNumber: Content {
         var toPhoneNumber:String
         var activationCode:String?

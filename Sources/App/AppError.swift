@@ -31,6 +31,7 @@ class ErrorConstants {
     let giftCannotBeDonatedToTheOwner = Abort(.notAcceptable, reason: "Gift can not be donated to the owner", identifier: "giftCannotBeDonatedToTheOwner")
     let giftIsAlreadyDonated = Abort(.notAcceptable, reason: "Gift has already been donated",identifier: "giftIsAlreadyDonated")
     let charityInfoAlreadyExists = Abort(.notAcceptable ,reason: "Charity information already exists",identifier: "charityInfoAlreadyExists")
+    let firebaseAuthenticationError = Abort(.notAcceptable, reason: "Firebase authentication error", identifier: "firebaseAuthenticationError")
     
     //MARK: nonAuthoritativeInformation
     let invalidPhoneNumber = Abort(.nonAuthoritativeInformation, reason: "The phone number is invalid",identifier: "invalidPhoneNumber")
