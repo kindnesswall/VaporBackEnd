@@ -9,7 +9,7 @@ import Vapor
 import FluentPostgreSQL
 
 class UserControllerCore {
-    func findOrCreateUser(req: Request, phoneNumber: String) -> Future<User>{
+    func findOrInitializeUser(req: Request, phoneNumber: String) -> Future<User>{
         
         return User.query(on: req, withSoftDeleted: true).filter(\User.phoneNumber == phoneNumber).first().map({ (dBUser) -> User in
             

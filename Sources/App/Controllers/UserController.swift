@@ -19,7 +19,7 @@ final class UserController: UserControllerCore {
             
             let phoneNumber = try UserController.validatePhoneNumber(phoneNumber: inputUser.phoneNumber)
             
-            return self.findOrCreateUser(req: req, phoneNumber: phoneNumber).flatMap({ user -> Future<HTTPStatus> in
+            return self.findOrInitializeUser(req: req, phoneNumber: phoneNumber).flatMap({ user -> Future<HTTPStatus> in
                 
                 let activationCode = User.generateActivationCode()
                 user.activationCode = activationCode
