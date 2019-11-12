@@ -12,7 +12,7 @@ extension String {
         guard let number = self.castNumberToEnglish() else {
             return false
         }
-        guard number.starts(with: "9"), number.count == 10 else {
+        guard number.count >= 10 else {
             return false
         }
         return true

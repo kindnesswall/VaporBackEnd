@@ -202,12 +202,16 @@ final class UserController: UserControllerCore {
         
     }
     
-    private static func validatePhoneNumber(phoneNumber:String) throws -> String {
+    private static func validatePhoneNumber(phoneNumber phoneNumberWithPrefix:String) throws -> String {
+        
+        let phoneNumber = String(phoneNumberWithPrefix.dropFirst())
+        
         guard
         phoneNumber.isCorrectPhoneNumber(),
-        let phoneNumber = phoneNumber.castNumberToEnglish()
+        let englishPhoneNumber = phoneNumber.castNumberToEnglish()
         else { throw Constants.errors.invalidPhoneNumber }
-        return phoneNumber
+        
+        return "+\(englishPhoneNumber)"
     }
     
     private func isTestAccount(input: Inputs.Login) -> Bool {
