@@ -215,7 +215,7 @@ final class UserController: UserControllerCore {
     }
     
     private func isTestAccount(input: Inputs.Login) -> Bool {
-        if input.phoneNumber == "9000000000", input.activationCode == "12340" {
+        if input.phoneNumber == "+09000000000", input.activationCode == "12340" {
             return true
         }
         
