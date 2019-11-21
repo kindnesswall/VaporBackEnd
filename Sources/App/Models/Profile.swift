@@ -12,12 +12,19 @@ final class UserProfile : Content {
     var name:String?
     var image:String?
     var phoneNumber:String?
+    var isCharity:Bool
     
-    init(id:Int,name:String?,image:String?,phoneNumber:String?) {
+    init(id:Int,
+         name:String?,
+         image:String?,
+         phoneNumber:String?,
+         isCharity:Bool) {
+        
         self.id=id
         self.name=name
         self.image=image
         self.phoneNumber=phoneNumber
+        self.isCharity = isCharity
     }
     
     final class Input: Content {

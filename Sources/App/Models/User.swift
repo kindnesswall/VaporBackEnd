@@ -52,7 +52,7 @@ extension User {
         let id = try self.getId()
         let auth = try? req.requireAuthenticated(User.self)
         let phoneNumber = (auth?.isAdmin == true || auth?.isCharity == true || id == auth?.id) ? self.phoneNumber : nil
-        let userProfile = UserProfile(id: id, name: self.name, image: self.image, phoneNumber: phoneNumber)
+        let userProfile = UserProfile(id: id, name: self.name, image: self.image, phoneNumber: phoneNumber, isCharity: self.isCharity)
         return userProfile
     }
 }
