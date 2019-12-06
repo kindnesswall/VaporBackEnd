@@ -70,7 +70,9 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     services.register(wss, as: WebSocketServer.self)
     
     //Firebase
-    let fcm = FCM(pathToServiceAccountKey: AppInfo().firebaseConfig.keyPath)
+    let appInfo = AppInfo()
+    let path = "\(appInfo.rootPath)\(appInfo.firebaseConfig.keyPath)"
+    let fcm = FCM(pathToServiceAccountKey: path)
     fcm.androidDefaultConfig = FCMAndroidConfig(ttl: "86400s", restricted_package_name: AppInfo().firebaseConfig.restricted_package_name, notification: FCMAndroidNotification(sound: "default"))
     services.register(fcm, as: FCM.self)
 }

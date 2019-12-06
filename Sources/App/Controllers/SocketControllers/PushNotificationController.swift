@@ -70,10 +70,11 @@ class PushNotificationController {
         
         let shell = try req.make(Shell.self)
         
-        let bundleId = AppInfo().apnsConfig.bundleId
-        let apnsURL = AppInfo().apnsConfig.apnsURL
-        let certPath = AppInfo().apnsConfig.certPath
-        let certPass = AppInfo().apnsConfig.certPass
+        let appInfo = Constants.appInfo
+        let bundleId = appInfo.apnsConfig.bundleId
+        let apnsURL = appInfo.apnsConfig.apnsURL
+        let certPath = "\(appInfo.rootPath)\(appInfo.apnsConfig.certPath)"
+        let certPass = appInfo.apnsConfig.certPass
         
         let arguments = ["-d", payload, "-H", "apns-topic:\(bundleId)", "-H", "apns-expiration: 1", "-H", "apns-priority: 10", "--http2", "--cert", "\(certPath):\(certPass)", "\(apnsURL)\(token)"]
         
