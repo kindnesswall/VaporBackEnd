@@ -28,6 +28,7 @@ public func routes(_ router: Router) throws {
     let adminStatisticsController = AdminStatisticsController()
     
     //Middlewares
+    let logMiddleware = LogMiddleware()
     let tokenAuthMiddleware = User.tokenAuthMiddleware()
     let guardAuthMiddleware = User.guardAuthMiddleware()
     let guardAdminMiddleware = GuardAdminMiddleware()
@@ -36,20 +37,21 @@ public func routes(_ router: Router) throws {
     })
     
     //Groups
-    let tokenProtected = router.grouped(tokenAuthMiddleware, guardAuthMiddleware)
-    let adminProtected = router.grouped(tokenAuthMiddleware, guardAuthMiddleware, guardAdminMiddleware)
-    let guardianProtected = router.grouped(guardianMiddleware)
-    let guardianTokenProtected = tokenProtected.grouped(guardianMiddleware)
+    let publicRouter = router.grouped(logMiddleware)
+    let tokenProtected = router.grouped(tokenAuthMiddleware, guardAuthMiddleware, logMiddleware)
+    let adminProtected = router.grouped(tokenAuthMiddleware, guardAuthMiddleware, guardAdminMiddleware, logMiddleware)
+    let guardianProtected = router.grouped(guardianMiddleware, logMiddleware)
+    let guardianTokenProtected = router.grouped(tokenAuthMiddleware, guardAuthMiddleware, guardianMiddleware, logMiddleware)
     
     
     //Routes Login
     guardianProtected.post(uris.register, use: userController.registerHandler)
-    router.post(uris.login, use: userController.loginHandler)
+    publicRouter.post(uris.login, use: userController.loginHandler)
     adminProtected.post(uris.login_admin_access, use: userController.adminAccessActivationCode)
     guardianTokenProtected.post(uris.register_phoneNumberChange_request, use: userController.changePhoneNumberRequest)
     tokenProtected.post(uris.register_phoneNumberChange_validate, use: userController.changePhoneNumberValidate)
     tokenProtected.get(uris.logout_allDevices, use: userController.logoutAllDevices)
-    router.post(uris.login_firebase, use: userFirebaseController.loginUser)
+    publicRouter.post(uris.login_firebase, use: userFirebaseController.loginUser)
     
     //Routes User Profile
     tokenProtected.get(uris.profile,User.parameter, use: userProfileController.show)
@@ -57,7 +59,7 @@ public func routes(_ router: Router) throws {
     
     
     //Routes Gifts
-    router.post(uris.gifts,use: giftController.index)
+    publicRouter.post(uris.gifts,use: giftController.index)
     
     tokenProtected.post(uris.gifts_register,use: giftController.create)
     tokenProtected.put(uris.gifts,Gift.parameter, use: giftController.update)
@@ -100,8 +102,8 @@ public func routes(_ router: Router) throws {
     adminProtected.get(uris.users_list_chatBlocked, use: userAdminController.usersChatBlockedList)
     
     //Routes Charity
-    router.get(uris.charity_user, User.parameter, use: charityController.getCharityOfUser)
-    router.get(uris.charity_list, use: charityController.getCharityList)
+    publicRouter.get(uris.charity_user, User.parameter, use: charityController.getCharityOfUser)
+    publicRouter.get(uris.charity_list, use: charityController.getCharityList)
     
     tokenProtected.get(uris.charity_myInfo, use: charityController.show)
     tokenProtected.post(uris.charity_myInfo, use: charityController.create)
@@ -115,10 +117,10 @@ public func routes(_ router: Router) throws {
     adminProtected.put(uris.charity_reject_user, User.parameter, use: charityAdminController.rejectCharity)
     
     //Routes Categories
-    router.get(uris.categories, use: categoryController.index)
-    router.get(uris.province, use: locationController.getProvinces)
-    router.get(uris.city, Province.parameter, use: locationController.getCities)
-    router.get(uris.region, City.parameter, use: locationController.getRegions)
+    publicRouter.get(uris.categories, use: categoryController.index)
+    publicRouter.get(uris.province, use: locationController.getProvinces)
+    publicRouter.get(uris.city, Province.parameter, use: locationController.getCities)
+    publicRouter.get(uris.region, City.parameter, use: locationController.getRegions)
     
     //Routes Push Notification
     tokenProtected.post(uris.push_register, use: pushNotificationController.registerPush)
