@@ -58,6 +58,9 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     migrations.add(model: UserPushNotification.self, database: .psql)
     migrations.add(model: Charity.self, database: .psql)
     
+    //models extension
+    migrations.add(migration: AddUserCharityName.self, database: .psql)
+    
     //seeds
     migrations.add(migration: CategorySeed.self, database: .psql)
     

@@ -81,7 +81,13 @@ final class CharityController {
         return try Charity.get(userId: try user.getId(), conn: req).flatMap { foundCharity in
             
             return try req.content.decode(Charity.self).flatMap({ charityInput in
-                return charityInput.updateCharity(original: foundCharity, conn: req)
+                
+                if user.isCharity {
+                    user.charityName = charityInput.name
+                }
+                return user.save(on: req).flatMap { _ in
+                    return charityInput.updateCharity(original: foundCharity, conn: req)
+                }
             })
         }
     }
@@ -90,6 +96,7 @@ final class CharityController {
         
         let user = try req.requireAuthenticated(User.self)
         user.isCharity = false
+        user.charityName = nil
         return user.save(on: req).flatMap { _ in
             return try Charity.get(userId: try user.getId(), conn: req).flatMap({ foundCharity in
                 return foundCharity.delete(on: req).transform(to: .ok)

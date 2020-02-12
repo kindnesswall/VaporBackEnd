@@ -18,6 +18,9 @@ final class Gift : PostgreSQLModel {
     var isDeleted = false
     var rejectReason: String?
     var categoryTitle:String?
+    var provinceName:String?
+    var cityName:String?
+    var regionName:String?
     
     var title:String
     var description:String
@@ -28,9 +31,6 @@ final class Gift : PostgreSQLModel {
     var provinceId:Int
     var cityId:Int
     var regionId:Int?
-    var provinceName:String?
-    var cityName:String?
-    var regionName:String?
     
     var createdAt: Date?
     var updatedAt: Date?

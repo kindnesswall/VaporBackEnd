@@ -16,6 +16,9 @@ final class UserPhoneNumberLog: PostgreSQLModel {
     var status:String
     var activationCode:String?
     
+    var createdAt: Date?
+    var updatedAt: Date?
+    var deletedAt: Date?
     
     init(userId: Int, fromPhoneNumber: String, toPhoneNumber: String, status: ChangeStatus) {
         
@@ -28,12 +31,7 @@ final class UserPhoneNumberLog: PostgreSQLModel {
     
     func setStatus(status: ChangeStatus) {
         self.status = status.rawValue
-    } 
-    
-    var createdAt: Date?
-    var updatedAt: Date?
-    var deletedAt: Date?
-    
+    }
     
     enum ChangeStatus: String {
         case requested

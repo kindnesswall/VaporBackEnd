@@ -27,6 +27,7 @@ final class CharityAdminController {
                 foundCharity.rejectReason = nil
                 return foundCharity.save(on: req).flatMap({ _ in
                     user.isCharity = true
+                    user.charityName = foundCharity.name
                     return user.save(on: req).transform(to: .ok)
                 })
             }
@@ -39,6 +40,8 @@ final class CharityAdminController {
             return try req.content.decode(Inputs.RejectReason.self).flatMap({ input in 
                 
                 user.isCharity = false
+                user.charityName = nil
+                
                 return user.save(on: req).flatMap { _ in
                     return try Charity.get(userId: try user.getId(), conn: req).flatMap { foundCharity in
                         foundCharity.isRejected = true
