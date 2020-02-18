@@ -11,10 +11,12 @@ import FluentPostgreSQL
 final class Category : PostgreSQLModel {
     var id:Int?
     var title:String
+    var title_fa:String?
     
-    init(id:Int?=nil,title:String) {
+    init(id:Int?=nil,title:String, title_fa:String?) {
         self.id=id
         self.title=title
+        self.title_fa = title_fa
     }
 }
 

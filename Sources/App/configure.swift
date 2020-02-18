@@ -60,6 +60,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     
     //models extension
     migrations.add(migration: AddUserCharityName.self, database: .psql)
+    migrations.add(migration: AddCategoryFarsiTitle.self, database: .psql)
     
     //seeds
     migrations.add(migration: CategorySeed.self, database: .psql)
