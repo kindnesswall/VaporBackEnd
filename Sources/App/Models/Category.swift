@@ -18,6 +18,24 @@ final class Category : PostgreSQLModel {
         self.title=title
         self.title_fa = title_fa
     }
+    
+    final class Output: Content {
+        var id:Int?
+        var title:String
+        
+        init(id:Int?, title:String) {
+            self.id = id
+            self.title = title
+        }
+    }
+    
+    func localized(country: Country) -> Output {
+        return Output(id: id, title: localizedTitle(country: country))
+    }
+    
+    func localizedTitle(country: Country) -> String {
+        return country.isFarsi ? (title_fa ?? title) : title
+    }
 }
 
 extension Category {

@@ -54,6 +54,7 @@ class ErrorConstants {
     let chatNotificationNotFound = Abort(.notFound, reason: "Chat's Notification not found",identifier: "chatNotificationNotFound")
     let charityInfoNotFound = Abort(.notFound, reason: "Charity information not found",identifier: "charityInfoNotFound")
     let activationCodeNotFound = Abort(.notFound, reason: "Activation code not found", identifier: "activationCodeNotFound")
+    let countryNotFound = Abort(.notFound, reason: "Country not found", identifier: "countryNotFound")
     
     //MARK: forbidden
     let userAccessIsDenied = Abort(.forbidden, reason: "User access is denied",identifier: "userAccessIsDenied")

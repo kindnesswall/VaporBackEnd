@@ -31,4 +31,8 @@ class Inputs {
         var activationCode:String?
     }
     
+    final class Country: Content {
+        var country_id: Int
+    }
+    
 }
