@@ -12,7 +12,8 @@ import FluentPostgreSQL
 final class Province: PostgreSQLModel {
     var id:Int?
     var name:String
-    var sortIndex:Int? 
+    var country_id: Int
+    var sortIndex:Int?
 }
 
 extension Province {

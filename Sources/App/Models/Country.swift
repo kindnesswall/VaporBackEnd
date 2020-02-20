@@ -13,8 +13,6 @@ final class Country: PostgreSQLModel {
     var name:String
     var sortIndex:Int?
     var localization: String?
-    var exclusiveAddress: String?
-    
     
     var isFarsi: Bool {
         return localization == "fa"
