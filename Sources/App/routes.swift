@@ -118,7 +118,8 @@ public func routes(_ router: Router) throws {
     
     //Routes Categories
     publicRouter.get(uris.categories, use: categoryController.index)
-    publicRouter.get(uris.province, use: locationController.getProvinces)
+    publicRouter.get(uris.country, use: locationController.getCountries)
+    publicRouter.get(uris.province, Country.parameter, use: locationController.getProvinces)
     publicRouter.get(uris.city, Province.parameter, use: locationController.getCities)
     publicRouter.get(uris.region, City.parameter, use: locationController.getRegions)
     

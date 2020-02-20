@@ -19,6 +19,9 @@ class URIs {
     var categories : String {
         return "\(apiRoute)/categories"
     }
+    var country : String {
+        return "\(apiRoute)/countries"
+    }
     var province : String {
         return "\(apiRoute)/provinces"
     }

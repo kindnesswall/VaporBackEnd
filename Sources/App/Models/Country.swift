@@ -19,6 +19,12 @@ final class Country: PostgreSQLModel {
     }
 }
 
+extension Country {
+    var provinces: Children<Country, Province> {
+        return children(\.country_id)
+    }
+}
+
 extension Country : Migration {}
 
 extension Country : Content {}

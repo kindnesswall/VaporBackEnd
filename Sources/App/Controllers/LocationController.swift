@@ -10,11 +10,20 @@ import Vapor
 
 final class LocationController {
     
-    func getProvinces(_ req: Request) throws -> Future<[Province]> {
-        return Province.query(on: req)
+    func getCountries(_ req: Request) throws -> Future<[Country]> {
+        return Country.query(on: req)
             .sort(\.sortIndex, .ascending)
             .sort(\.id, .ascending)
             .all()
+    }
+    
+    func getProvinces(_ req: Request) throws -> Future<[Province]> {
+        return try req.parameters.next(Country.self).flatMap { country in
+            return try country.provinces.query(on: req)
+                .sort(\.sortIndex, .ascending)
+                .sort(\.id, .ascending)
+                .all()
+        }
     }
     
     func getCities(_ req: Request) throws -> Future<[City]> {
