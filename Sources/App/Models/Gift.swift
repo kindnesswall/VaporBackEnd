@@ -174,6 +174,10 @@ extension Gift {
             } else {
                 if let provinceId = requestInput?.provinceId {
                     query.filter(\.provinceId == provinceId)
+                } else {
+                    if let countryId = requestInput?.countryId {
+                        query.filter(\.countryId == countryId)
+                    }
                 }
             }
         }
