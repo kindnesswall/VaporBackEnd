@@ -62,7 +62,7 @@ final class GiftController {
         let user = try req.requireAuthenticated(User.self)
         return try req.content.decode(Gift.Input.self).flatMap { inputGift in
             let gift = Gift(userId: user.id, gift: inputGift)
-            return self.saveGift(gift: gift, req: req)
+            return try self.setNamesAndSave(req, gift: gift)
         }
     }
     
@@ -75,33 +75,38 @@ final class GiftController {
             
             return try req.content.decode(Gift.Input.self).flatMap { inputGift -> Future<Gift> in
                 gift.update(gift: inputGift)
-                return self.saveGift(gift: gift, req: req)
+                return try self.setNamesAndSave(req, gift: gift)
             }
             
         }
         
     }
     
-    private func saveGift(gift:Gift,req: Request)->Future<Gift>{
-        
-        return gift.category.get(on: req).flatMap { category in
-        return Province.find(gift.provinceId, on: req).flatMap{ province in
-        return City.find(gift.cityId, on: req).flatMap { city in
-            gift.categoryTitle = category.title
-            gift.provinceName = province?.name
-            gift.cityName = city?.name
-            
-            if let regionId = gift.regionId {
-                return Region.find(regionId, on: req).flatMap { region in
-                    gift.regionName = region?.name
-                    return gift.save(on: req)
+    private func setNamesAndSave(_ req: Request, gift: Gift) throws ->  Future<Gift> {
+        return try gift.getCountry(req).flatMap { country in
+            return gift.getCategoryTitle(req, country: country).flatMap { categoryTitle in
+                return gift.province.get(on: req).flatMap { province in
+                    return gift.city.get(on: req).flatMap { city in
+                        gift.categoryTitle = categoryTitle
+                        gift.provinceName = province.name
+                        gift.cityName = city.name
+                        return self.setRegionNameAndSave(req, gift: gift)
+                    }
                 }
-            } else {
-                gift.regionName = nil
+            }
+        }
+    }
+    
+    private func setRegionNameAndSave(_ req: Request, gift: Gift) -> Future<Gift> {
+        
+        if let region = gift.region {
+            return region.get(on: req).flatMap { region in
+                gift.regionName = region.name
                 return gift.save(on: req)
             }
-            
-            }}
+        } else {
+            gift.regionName = nil
+            return gift.save(on: req)
         }
     }
     

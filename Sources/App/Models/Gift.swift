@@ -18,6 +18,7 @@ final class Gift : PostgreSQLModel {
     var isDeleted = false
     var rejectReason: String?
     var categoryTitle:String?
+    var countryName: String?
     var provinceName:String?
     var cityName:String?
     var regionName:String?
@@ -28,6 +29,7 @@ final class Gift : PostgreSQLModel {
     var categoryId:Int
     var giftImages:[String]
     var isNew:Bool
+    var countryId: Int?
     var provinceId:Int
     var cityId:Int
     var regionId:Int?
@@ -59,6 +61,7 @@ final class Gift : PostgreSQLModel {
         self.categoryId=gift.categoryId
         self.giftImages=gift.giftImages
         self.isNew=gift.isNew
+        self.countryId=gift.countryId
         self.provinceId=gift.provinceId
         self.cityId=gift.cityId
         self.regionId=gift.regionId
@@ -71,6 +74,7 @@ final class Gift : PostgreSQLModel {
         self.categoryId=gift.categoryId
         self.giftImages=gift.giftImages
         self.isNew=gift.isNew
+        self.countryId=gift.countryId
         self.provinceId=gift.provinceId
         self.cityId=gift.cityId
         self.regionId=gift.regionId
@@ -86,6 +90,7 @@ final class Gift : PostgreSQLModel {
         var categoryId:Int
         var giftImages:[String]
         var isNew:Bool
+        var countryId: Int
         var provinceId:Int
         var cityId:Int
         var regionId:Int?
@@ -105,6 +110,35 @@ extension Gift {
     }
     var category : Parent<Gift,Category> {
         return parent(\.categoryId)
+    }
+    var province : Parent<Gift, Province> {
+        return parent(\.provinceId)
+    }
+    var city : Parent<Gift, City> {
+        return parent(\.cityId)
+    }
+    var region : Parent<Gift, Region>? {
+        return parent(\.regionId)
+    }
+}
+
+extension Gift {
+    func getCountry(_ req: Request) throws -> Future<Country>  {
+        guard let countryId = self.countryId else {
+            throw Constants.errors.nilCountryId
+        }
+        return Country.find(countryId, on: req).map { country in
+            guard let country = country else {
+                throw Constants.errors.countryNotFound
+            }
+            return country
+        }
+    }
+    
+    func getCategoryTitle(_ req: Request, country: Country) -> Future<String?> {
+        return category.get(on: req).map { category in
+            return category.localizedTitle(country: country)
+        }
     }
 }
 
