@@ -11,8 +11,9 @@ import FluentPostgreSQL
 final class Country: PostgreSQLModel {
     var id:Int?
     var name:String
-    var sortIndex:Int?
+    var phoneCode: String?
     var localization: String?
+    var sortIndex:Int?
     
     var isFarsi: Bool {
         return localization == "fa"
