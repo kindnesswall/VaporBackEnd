@@ -32,7 +32,7 @@ class Inputs {
     }
     
     final class Country: Content {
-        var country_id: Int
+        var countryId: Int
     }
     
 }

@@ -14,7 +14,7 @@ final class CategoryController {
         
         return try req.content.decode(Inputs.Country.self).flatMap { input in
             
-            return Country.find(input.country_id, on: req).flatMap { country in
+            return Country.find(input.countryId, on: req).flatMap { country in
                 
                 guard let country = country else {
                     throw Constants.errors.countryNotFound
