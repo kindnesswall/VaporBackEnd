@@ -117,7 +117,7 @@ public func routes(_ router: Router) throws {
     adminProtected.put(uris.charity_reject_user, User.parameter, use: charityAdminController.rejectCharity)
     
     //Routes Categories
-    publicRouter.get(uris.categories, use: categoryController.index)
+    publicRouter.post(uris.categories, use: categoryController.index)
     publicRouter.get(uris.country, use: locationController.getCountries)
     publicRouter.get(uris.province, Country.parameter, use: locationController.getProvinces)
     publicRouter.get(uris.city, Province.parameter, use: locationController.getCities)
