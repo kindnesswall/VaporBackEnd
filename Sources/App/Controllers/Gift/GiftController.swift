@@ -88,6 +88,7 @@ final class GiftController {
                 return gift.province.get(on: req).flatMap { province in
                     return gift.city.get(on: req).flatMap { city in
                         gift.categoryTitle = categoryTitle
+                        gift.countryName = country.name
                         gift.provinceName = province.name
                         gift.cityName = city.name
                         return self.setRegionNameAndSave(req, gift: gift)
