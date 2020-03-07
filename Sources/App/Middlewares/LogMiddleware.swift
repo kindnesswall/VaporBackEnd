@@ -49,7 +49,7 @@ final class LogMiddleware: Middleware {
     }
     
     private var filePath: URL {
-        let fileName = Constants.appInfo.logName
+        let fileName = "\(Constants.appInfo.logName)_\(replicaId)"
         let url = directoryPath.appendingPathComponent(fileName)
         return url
     }

@@ -11,8 +11,9 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     try services.register(AuthenticationProvider())
     
     services.register(Shell.self)
-    
-    let serverConfigure = NIOServerConfig.default(hostname: Constants.appInfo.hostName, port: Constants.appInfo.hostPort,maxBodySize:20_000_000)
+    let portOffset = replicaId - 1
+    let port = Constants.appInfo.hostPort + portOffset
+    let serverConfigure = NIOServerConfig.default(hostname: Constants.appInfo.hostName, port: port, maxBodySize:20_000_000)
     services.register(serverConfigure)
     
     /// Register routes to the router
@@ -77,7 +78,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     
     //Firebase
     let appInfo = AppInfo()
-    let path = "\(appInfo.rootPath)\(appInfo.firebaseConfig.keyPath)"
+    let path = "\(appInfo.fileDirPath)\(appInfo.firebaseConfig.keyPath)"
     let fcm = FCM(pathToServiceAccountKey: path)
     fcm.androidDefaultConfig = FCMAndroidConfig(ttl: "86400s", restricted_package_name: AppInfo().firebaseConfig.restricted_package_name, notification: FCMAndroidNotification(sound: "default"))
     services.register(fcm, as: FCM.self)

@@ -73,7 +73,7 @@ class PushNotificationController {
         let appInfo = Constants.appInfo
         let bundleId = appInfo.apnsConfig.bundleId
         let apnsURL = appInfo.apnsConfig.apnsURL
-        let certPath = "\(appInfo.rootPath)\(appInfo.apnsConfig.certPath)"
+        let certPath = "\(appInfo.fileDirPath)\(appInfo.apnsConfig.certPath)"
         let certPass = appInfo.apnsConfig.certPass
         
         let arguments = ["-d", payload, "-H", "apns-topic:\(bundleId)", "-H", "apns-expiration: 1", "-H", "apns-priority: 10", "--http2", "--cert", "\(certPath):\(certPass)", "\(apnsURL)\(token)"]
