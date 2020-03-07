@@ -41,15 +41,19 @@ final class LogMiddleware: Middleware {
         fileManager.saveFile(path: filePath, data: logData)
     }
     
+    private var logConfig: LogConfig {
+        return Constants.appInfo.logConfig
+    }
+    
     private var directoryPath: URL {
         let appInfo = Constants.appInfo
-        let path = "\(appInfo.rootPath)\(appInfo.logPath)"
+        let path = "\(appInfo.rootPath)\(logConfig.path)"
         let url = URL(fileURLWithPath: path)
         return url
     }
     
     private var filePath: URL {
-        let fileName = "\(Constants.appInfo.logName)_\(replicaId)"
+        let fileName = "\(logConfig.name)_\(replicaId).\(logConfig.fileExtension)"
         let url = directoryPath.appendingPathComponent(fileName)
         return url
     }
