@@ -12,39 +12,35 @@ class ChatRestfulController {
     
     let chatController = ChatController()
     
-    private func getRequestInfo(req: Request) throws -> ChatRequestInfo{
+    private func getRequestInfo(req: Request) throws -> RequestInfo {
         
         let user = try req.requireAuthenticated(User.self)
-        guard let userId = user.id else {
-            throw Constants.errors.nilUserId
-        }
-        let dataBase = ChatDataBase(req: req)
-        let requestInfo = ChatRequestInfo(userId: userId, dataBase: dataBase)
-        return requestInfo
+        let userId = try user.getId()
+        return RequestInfo(req: req, userId: userId)
     }
     
     func fetchContacts(_ req: Request) throws -> Future<[ContactMessage]> {
         
-        let requestInfo = try getRequestInfo(req: req)
-        return try chatController.fetchContacts(requestInfo: requestInfo)
+        let reqInfo = try getRequestInfo(req: req)
+        return try chatController.fetchContacts(reqInfo: reqInfo)
     }
     
     func fetchBlockedContacts(_ req: Request) throws -> Future<[ContactMessage]> {
         
-        let requestInfo = try getRequestInfo(req: req)
-        return try chatController.fetchBlockedContacts(requestInfo: requestInfo)
+        let reqInfo = try getRequestInfo(req: req)
+        return try chatController.fetchBlockedContacts(reqInfo: reqInfo)
     }
     
     func fetchMessages(_ req: Request) throws -> Future<ContactMessage> {
         
-        let requestInfo = try getRequestInfo(req: req)
+        let reqInfo = try getRequestInfo(req: req)
         return try req.content.decode(FetchMessagesInput.self).flatMap({ fetchMessagesInput in
             
-            return try self.chatController.fetchMessages(requestInfo: requestInfo, fetchMessagesInput: fetchMessagesInput).flatMap({ fetchResult in
+            return try self.chatController.fetchMessages(reqInfo: reqInfo, fetchMessagesInput: fetchMessagesInput).flatMap({ fetchResult in
                 
                 let contactMessage = ContactMessage(chatContacts: fetchResult.chatContacts, textMessages: fetchResult.textMessages, contactProfile: nil, notificationCount: nil, blockStatus: nil)
                 
-                return self.chatController.fetchContactProfile(requestInfo: requestInfo, contactId: fetchResult.chatContacts.contactId, contactMessage: contactMessage)
+                return self.chatController.fetchContactProfile(reqInfo: reqInfo, contactId: fetchResult.chatContacts.contactId, contactMessage: contactMessage)
             })
             
         })
@@ -62,11 +58,11 @@ class ChatRestfulController {
     
     private func sendMessage(req: Request, textMessage: TextMessage) throws -> Future<AckMessage> {
         
-        let requestInfo = try getRequestInfo(req: req) 
+        let reqInfo = try getRequestInfo(req: req) 
         
         let chatId = textMessage.chatId
         
-        let chat = requestInfo.dataBase.getChat(chatId: chatId)
+        let chat = Chat.getChat(chatId: chatId, conn: req)
         
         return chat.flatMap { chat in
             let chatIsUnblock = chat.isChatUnblock()
@@ -74,9 +70,9 @@ class ChatRestfulController {
                 throw Constants.errors.chatHasBlocked
             }
             
-            let chatContacts = try chat.getChatContacts(userId: requestInfo.userId)
+            let chatContacts = try chat.getChatContacts(userId: reqInfo.userId)
             
-            return try self.chatController.saveTextMessage(requestInfo: requestInfo, textMessage: textMessage, chatContacts: chatContacts, receiverId: chatContacts.contactId).map({ textMessage in
+            return try self.chatController.saveTextMessage(reqInfo: reqInfo, textMessage: textMessage, chatContacts: chatContacts, receiverId: chatContacts.contactId).map({ textMessage in
                 
                 try self.sendPushNotification(req, toUserId: chatContacts.contactId, textMessage: textMessage)
                 
@@ -105,9 +101,9 @@ class ChatRestfulController {
     
     func ackMessage(_ req: Request) throws -> Future<HTTPStatus> {
         
-        let requestInfo = try getRequestInfo(req: req)
+        let reqInfo = try getRequestInfo(req: req)
         return try req.content.decode(AckMessage.self).flatMap({ ackMessage in
-            return self.chatController.ackMessageIsReceived(requestInfo: requestInfo, ackMessage: ackMessage)
+            return self.chatController.ackMessageIsReceived(reqInfo: reqInfo, ackMessage: ackMessage)
         })
         
     }
