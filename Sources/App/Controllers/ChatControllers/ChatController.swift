@@ -51,15 +51,6 @@ class ChatController {
     
     //MARK: - Fetch Messages
     
-    class FetchMessagesResult {
-        let chatContacts:Chat.ChatContacts
-        let textMessages:[TextMessage]
-        init(chatContacts:Chat.ChatContacts,textMessages:[TextMessage]) {
-            self.chatContacts=chatContacts
-            self.textMessages=textMessages
-        }
-    }
-    
     func fetchContacts(reqInfo: RequestInfo) throws -> Future<[ContactMessage]> {
         
         return Chat.userChats(userId: reqInfo.userId, conn: reqInfo.req).flatMap { chats in
@@ -107,7 +98,7 @@ class ChatController {
         
         let chatContacts = try chat.getChatContacts(userId: reqInfo.userId)
         
-        let contactMessage = ContactMessage(chatContacts: chatContacts, textMessages: nil, contactProfile: nil, notificationCount: nil, blockStatus: blockStatus)
+        let contactMessage = ContactMessage(chatContacts: chatContacts, blockStatus: blockStatus)
         
         return self.fetchContactNotificationAndProfile(reqInfo: reqInfo, contactMessage: contactMessage)
     }
@@ -119,7 +110,7 @@ class ChatController {
 
             let blockStatus = BlockStatus(userIsBlocked: nil, contactIsBlocked: true)
 
-            let contactMessage = ContactMessage(chatContacts: chatContacts, textMessages: nil, contactProfile: nil, notificationCount: nil, blockStatus: blockStatus)
+            let contactMessage = ContactMessage(chatContacts: chatContacts, blockStatus: blockStatus)
 
             return self.fetchContactNotificationAndProfile(reqInfo: reqInfo, contactMessage: contactMessage)
         }
@@ -147,7 +138,7 @@ class ChatController {
     }
     
     
-    func fetchMessages(reqInfo: RequestInfo, fetchMessagesInput: FetchMessagesInput) throws -> Future<FetchMessagesResult> {
+    func fetchMessages(reqInfo: RequestInfo, fetchMessagesInput: FetchMessagesInput) throws -> Future<ContactMessage> {
         
         return Chat.getChat(chatId: fetchMessagesInput.chatId, conn: reqInfo.req).flatMap { chat in
             
@@ -156,7 +147,7 @@ class ChatController {
             let chatContacts = try chat.getChatContacts(userId: reqInfo.userId)
             
             return try TextMessage.getTextMessages(chat: chat, beforeId: fetchMessagesInput.beforeId, conn: reqInfo.req).map { textMessages in
-                return FetchMessagesResult(chatContacts:chatContacts,textMessages:textMessages)
+                return ContactMessage(chatContacts: chatContacts, textMessages: textMessages)
             }
         }
     }

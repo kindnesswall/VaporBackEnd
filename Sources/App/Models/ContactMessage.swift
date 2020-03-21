@@ -22,7 +22,7 @@ final class ContactMessage: Content {
         return chatContacts.contactId
     }
     
-    init(chatContacts: Chat.ChatContacts, textMessages: [TextMessage]?, contactProfile: UserProfile?, notificationCount: Int?, blockStatus: BlockStatus?) {
+    init(chatContacts: Chat.ChatContacts, textMessages: [TextMessage]? = nil, contactProfile: UserProfile? = nil, notificationCount: Int? = nil, blockStatus: BlockStatus? = nil) {
         self.chatContacts = chatContacts
         self.textMessages = textMessages
         self.contactProfile = contactProfile

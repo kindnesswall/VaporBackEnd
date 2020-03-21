@@ -36,13 +36,7 @@ class ChatRestfulController {
         let reqInfo = try getRequestInfo(req: req)
         return try req.content.decode(FetchMessagesInput.self).flatMap({ fetchMessagesInput in
             
-            return try self.chatController.fetchMessages(reqInfo: reqInfo, fetchMessagesInput: fetchMessagesInput).flatMap({ fetchResult in
-                
-                let contactMessage = ContactMessage(chatContacts: fetchResult.chatContacts, textMessages: fetchResult.textMessages, contactProfile: nil, notificationCount: nil, blockStatus: nil)
-                
-                return self.chatController.fetchContactProfile(reqInfo: reqInfo, contactMessage: contactMessage)
-            })
-            
+            return try self.chatController.fetchMessages(reqInfo: reqInfo, fetchMessagesInput: fetchMessagesInput)
         })
         
     }
