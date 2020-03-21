@@ -40,7 +40,7 @@ class ChatRestfulController {
                 
                 let contactMessage = ContactMessage(chatContacts: fetchResult.chatContacts, textMessages: fetchResult.textMessages, contactProfile: nil, notificationCount: nil, blockStatus: nil)
                 
-                return self.chatController.fetchContactProfile(reqInfo: reqInfo, contactId: fetchResult.chatContacts.contactId, contactMessage: contactMessage)
+                return self.chatController.fetchContactProfile(reqInfo: reqInfo, contactMessage: contactMessage)
             })
             
         })

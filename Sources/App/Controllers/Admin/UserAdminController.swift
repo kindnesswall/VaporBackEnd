@@ -81,15 +81,15 @@ extension UserAdminController {
     
     func getUserStatistics(req:Request,users:[User])->Future<[UserStatistic]> {
         
-        let arrayResult = CustomFutureList<UserStatistic>(req: req, count: users.count)
-        
+        var list = [Future<UserStatistic>]()
+
         for user in users {
-            self.getUserStatistic(req: req, user: user).map({
-                arrayResult.appendAndIncrementHead($0)
-            }).catch(arrayResult.catchAndIncrementHead)
+            let userFuture = self.getUserStatistic(req: req, user: user)
+            list.append(userFuture)
         }
-        
-        return arrayResult.futureResult()
+
+        let future = CustomFutureList(req: req, futures: list)
+        return future.futureResult()
     }
     
     func getUserStatistic(req:Request,user:User)->Future<UserStatistic> {

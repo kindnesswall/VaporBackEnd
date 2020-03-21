@@ -8,39 +8,44 @@
 import Vapor
 
 class CustomFutureList<T> {
-    private var array = [T]()
+    private var results = [T?]()
     private let promise:Promise<[T]>
-    private var count:Int
-    private var head:Int
+    private let futures: [Future<T>]
     
-    init(req:Request,count:Int) {
+    init(req:Request, futures: [Future<T>]) {
         self.promise = req.eventLoop.newPromise([T].self)
-        self.count = count
-        self.head = 0
-        
-        if count == 0 {
-            promise.succeed(result: [])
-        }
+        self.futures = futures
+        self.setFutures()
+    }
+    
+    deinit {
+//        print("deinit")
     }
     
     func futureResult()->Future<[T]>{
         return promise.futureResult
     }
     
-    func appendAndIncrementHead(_ value:T) {
-        self.array.append(value)
-        incrementHead()
+    private func setFutures(){
+        
+        guard futures.count != 0 else {
+            promise.succeed(result: [])
+            return
+        }
+        
+        for future in futures {
+            future.map {value in
+                self.arrived(value)
+            }.catch {error in
+                self.arrived(nil, error: error)
+            }
+        }
     }
     
-    func catchAndIncrementHead(error:Error) {
-//        AppErrorCatch.printError(error: error)
-        incrementHead()
-    }
-    
-    private func incrementHead(){
-        self.head += 1
-        if self.head == count {
-            promise.succeed(result: self.array)
+    func arrived(_ value: T?, error: Error? = nil) {
+        self.results.append(value)
+        if self.results.count == futures.count {
+            promise.succeed(result: self.results.compactMap({ $0 }))
         }
     }
 }

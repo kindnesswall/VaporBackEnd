@@ -63,84 +63,82 @@ class ChatController {
     func fetchContacts(reqInfo: RequestInfo) throws -> Future<[ContactMessage]> {
         
         return Chat.userChats(userId: reqInfo.userId, conn: reqInfo.req).flatMap { chats in
-            return try self.fetchContactsInfo(reqInfo: reqInfo, chats: chats)
+            return self.fetchContactsInfo(reqInfo: reqInfo, chats: chats)
         }
     }
     
     func fetchBlockedContacts(reqInfo: RequestInfo) throws -> Future<[ContactMessage]>{
         
         return ChatBlock.userBlockedChats(userId: reqInfo.userId, conn: reqInfo.req).flatMap { chatBlocks in
-            return try self.fetchBlockedContactsInfo(reqInfo: reqInfo, chatBlocks: chatBlocks)
+            return self.fetchBlockedContactsInfo(reqInfo: reqInfo, chatBlocks: chatBlocks)
         }
     }
     
-    func fetchContactsInfo(reqInfo: RequestInfo, chats: [Chat]) throws -> Future<[ContactMessage]> {
-        
-        let arrayResult = CustomFutureList<ContactMessage>(req: reqInfo.req, count: chats.count)
-        
+    func fetchContactsInfo(reqInfo: RequestInfo, chats: [Chat]) -> Future<[ContactMessage]> {
+        var list = [Future<ContactMessage>]()
         for chat in chats {
-            
-            chat.getIdFuture(req: reqInfo.req).flatMap { chatId -> Future<Void> in
-                
-                let blockStatus = try chat.getChatBlockStatus(userId: reqInfo.userId)
-                
-                guard blockStatus.contactIsBlocked != true else {
-                    throw Constants.errors.chatHasBlockedByUser
-                }
-                
-                let chatContacts = try chat.getChatContacts(userId: reqInfo.userId)
-                
-                let contactMessage = ContactMessage(chatContacts: chatContacts, textMessages: nil, contactProfile: nil, notificationCount: nil, blockStatus: blockStatus)
-                
-                return self.fetchContactProfileAndNotification(reqInfo: reqInfo, contactId: chatContacts.contactId, chatId: chatId, contactMessage: contactMessage).map({ contactMessage in
-                    
-                    arrayResult.appendAndIncrementHead(contactMessage)
-                })
-                
-                }.catch(arrayResult.catchAndIncrementHead)
-            
+            guard let chatFuture = try? fetchContactInfo(reqInfo: reqInfo, chat: chat) else { continue }
+            list.append(chatFuture)
         }
         
-        return arrayResult.futureResult()
+        let future = CustomFutureList(req: reqInfo.req, futures: list)
+        return future.futureResult()
     }
     
-    func fetchBlockedContactsInfo(reqInfo: RequestInfo, chatBlocks: [ChatBlock]) throws -> Future<[ContactMessage]> {
-        
-        let arrayResult = CustomFutureList<ContactMessage>(req: reqInfo.req, count: chatBlocks.count)
-        
+    func fetchBlockedContactsInfo(reqInfo: RequestInfo, chatBlocks: [ChatBlock]) -> Future<[ContactMessage]> {
+
+        var list = [Future<ContactMessage>]()
         for chatBlock in chatBlocks {
-            
-            Chat.getChat(chatId: chatBlock.chatId, conn: reqInfo.req).flatMap { chat -> Future<Void> in
-                let chatContacts = try chat.getChatContacts(userId: reqInfo.userId)
-                
-                let blockStatus = BlockStatus(userIsBlocked: nil, contactIsBlocked: true)
-                
-                let contactMessage = ContactMessage(chatContacts: chatContacts, textMessages: nil, contactProfile: nil, notificationCount: nil, blockStatus: blockStatus)
-                
-                return self.fetchContactProfileAndNotification(reqInfo: reqInfo, contactId: chatContacts.contactId, chatId: chatBlock.chatId, contactMessage: contactMessage).map({ contactMessage in
-                    arrayResult.appendAndIncrementHead(contactMessage)
-                })
-                
-            }.catch(arrayResult.catchAndIncrementHead)
+            let chatFuture = fetchBlockedContactInfo(reqInfo: reqInfo, chatBlock: chatBlock)
+            list.append(chatFuture)
         }
-        
-        return arrayResult.futureResult()
+
+        let future = CustomFutureList(req: reqInfo.req, futures: list)
+        return future.futureResult()
     }
     
-    func fetchContactProfileAndNotification(reqInfo: RequestInfo, contactId: Int, chatId: Int, contactMessage: ContactMessage) -> Future<ContactMessage> {
+    func fetchContactInfo(reqInfo: RequestInfo, chat: Chat) throws -> Future<ContactMessage> {
         
-        return ChatNotification.find(userId: reqInfo.userId, chatId: chatId, conn: reqInfo.req).flatMap { chatNotification in
+        let blockStatus = try chat.getChatBlockStatus(userId: reqInfo.userId)
+        
+        guard blockStatus.contactIsBlocked != true else {
+            throw Constants.errors.chatHasBlockedByUser
+        }
+        
+        let chatContacts = try chat.getChatContacts(userId: reqInfo.userId)
+        
+        let contactMessage = ContactMessage(chatContacts: chatContacts, textMessages: nil, contactProfile: nil, notificationCount: nil, blockStatus: blockStatus)
+        
+        return self.fetchContactNotificationAndProfile(reqInfo: reqInfo, contactMessage: contactMessage)
+    }
+    
+    func fetchBlockedContactInfo(reqInfo: RequestInfo, chatBlock: ChatBlock) -> Future<ContactMessage> {
+        
+        return Chat.getChat(chatId: chatBlock.chatId, conn: reqInfo.req).flatMap { chat in
+            let chatContacts = try chat.getChatContacts(userId: reqInfo.userId)
+
+            let blockStatus = BlockStatus(userIsBlocked: nil, contactIsBlocked: true)
+
+            let contactMessage = ContactMessage(chatContacts: chatContacts, textMessages: nil, contactProfile: nil, notificationCount: nil, blockStatus: blockStatus)
+
+            return self.fetchContactNotificationAndProfile(reqInfo: reqInfo, contactMessage: contactMessage)
+        }
+    }
+    
+    func fetchContactNotificationAndProfile(reqInfo: RequestInfo, contactMessage: ContactMessage) -> Future<ContactMessage> {
+        
+        return ChatNotification.find(userId: reqInfo.userId, chatId: contactMessage.chatId, conn: reqInfo.req).flatMap { chatNotification in
             
             let notificationCount = chatNotification?.notificationCount ?? 0
             contactMessage.notificationCount = notificationCount
             
-            return self.fetchContactProfile(reqInfo: reqInfo, contactId: contactId, contactMessage: contactMessage)
+            return self.fetchContactProfile(reqInfo: reqInfo, contactMessage: contactMessage)
         }
     }
     
-    func fetchContactProfile(reqInfo: RequestInfo, contactId: Int, contactMessage: ContactMessage)->Future<ContactMessage> {
+    func fetchContactProfile(reqInfo: RequestInfo, contactMessage: ContactMessage)->Future<ContactMessage> {
         
-        return User.find(contactId, on: reqInfo.req).map { contactUser in
+        return User.find(contactMessage.contactId, on: reqInfo.req).map { contactUser in
             guard let contactUser = contactUser else { throw Constants.errors.contactNotFound }
             let contactProfile = try contactUser.userProfile(req: reqInfo.req)
             contactMessage.contactProfile = contactProfile
