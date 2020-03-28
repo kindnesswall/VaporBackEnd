@@ -10,7 +10,7 @@ import Vapor
 
 final class GiftRequestController{
     
-    public func requestGift(_ req: Request) throws -> Future<Chat> {
+    public func requestGift(_ req: Request) throws -> Future<Chat.ChatContacts> {
         let user = try req.requireAuthenticated(User.self)
         guard let userId = user.id else {
             throw Constants.errors.nilUserId
@@ -38,10 +38,10 @@ final class GiftRequestController{
             return GiftRequest.hasExisted(requestUserId: userId, giftId: giftId, conn: req).flatMap({ giftRequestHasExisted in
                 
                 if giftRequestHasExisted {
-                    return try self.getChatId(userId: userId, contactId: giftOwnerId, conn: req)
+                    return try self.getChatContacts(userId: userId, contactId: giftOwnerId, conn: req)
                 } else {
                     return GiftRequest.create(requestUserId: userId, giftId: giftId, giftOwnerId: giftOwnerId, conn: req).flatMap({ _ in
-                        return try self.getChatId(userId: userId, contactId: giftOwnerId, conn: req)
+                        return try self.getChatContacts(userId: userId, contactId: giftOwnerId, conn: req)
                     })
                 }
             })
@@ -67,13 +67,24 @@ final class GiftRequestController{
                     guard let chat = chat else {
                         return GiftRequestStatus(isRequested: false, chat: nil)
                     }
-                    return GiftRequestStatus(isRequested: true, chat: chat)
+                    let chatContacts = try chat.getChatContacts(userId: userId)
+                    return GiftRequestStatus(isRequested: true, chat: chatContacts)
                 })
             })
         })
     }
     
-    private func getChatId(userId:Int,contactId:Int,conn:DatabaseConnectable) throws -> Future<Chat> {
+    private func getChatContacts(userId: Int, contactId: Int, conn: DatabaseConnectable) throws -> Future<Chat.ChatContacts> {
+        
+        let chat = getChat(userId: userId, contactId: contactId, conn: conn)
+        
+        return chat.map { chat in
+            return try chat.getChatContacts(userId: userId)
+        }
+        
+    }
+    
+    private func getChat(userId: Int, contactId: Int, conn: DatabaseConnectable) -> Future<Chat> {
         
         return Chat.findChat(userId: userId, contactId: contactId, conn: conn).flatMap({ chat -> Future<Chat> in
             
@@ -87,7 +98,5 @@ final class GiftRequestController{
             }
             
         })
-        
-        
     }
 }

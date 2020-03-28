@@ -98,7 +98,7 @@ class ChatController {
         
         let chatContacts = try chat.getChatContacts(userId: reqInfo.userId)
         
-        let contactMessage = ContactMessage(chatContacts: chatContacts, blockStatus: blockStatus)
+        let contactMessage = ContactMessage(chat: chatContacts, blockStatus: blockStatus)
         
         return self.fetchContactNotificationAndProfile(reqInfo: reqInfo, contactMessage: contactMessage)
     }
@@ -110,7 +110,7 @@ class ChatController {
 
             let blockStatus = BlockStatus(userIsBlocked: nil, contactIsBlocked: true)
 
-            let contactMessage = ContactMessage(chatContacts: chatContacts, blockStatus: blockStatus)
+            let contactMessage = ContactMessage(chat: chatContacts, blockStatus: blockStatus)
 
             return self.fetchContactNotificationAndProfile(reqInfo: reqInfo, contactMessage: contactMessage)
         }
@@ -147,7 +147,7 @@ class ChatController {
             let chatContacts = try chat.getChatContacts(userId: reqInfo.userId)
             
             return try TextMessage.getTextMessages(chat: chat, beforeId: fetchMessagesInput.beforeId, conn: reqInfo.req).map { textMessages in
-                return ContactMessage(chatContacts: chatContacts, textMessages: textMessages)
+                return ContactMessage(chat: chatContacts, textMessages: textMessages)
             }
         }
     }

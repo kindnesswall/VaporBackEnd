@@ -9,21 +9,21 @@ import Vapor
 
 
 final class ContactMessage: Content {
-    var chatContacts: Chat.ChatContacts
+    var chat: Chat.ChatContacts
     var textMessages: [TextMessage]?
     var contactProfile: UserProfile?
     var notificationCount: Int?
     var blockStatus: BlockStatus?
     
     var chatId: Int {
-        return chatContacts.chatId
+        return chat.chatId
     }
     var contactId: Int {
-        return chatContacts.contactId
+        return chat.contactId
     }
     
-    init(chatContacts: Chat.ChatContacts, textMessages: [TextMessage]? = nil, contactProfile: UserProfile? = nil, notificationCount: Int? = nil, blockStatus: BlockStatus? = nil) {
-        self.chatContacts = chatContacts
+    init(chat: Chat.ChatContacts, textMessages: [TextMessage]? = nil, contactProfile: UserProfile? = nil, notificationCount: Int? = nil, blockStatus: BlockStatus? = nil) {
+        self.chat = chat
         self.textMessages = textMessages
         self.contactProfile = contactProfile
         self.notificationCount = notificationCount
