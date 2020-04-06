@@ -173,7 +173,7 @@ final class UserController: UserControllerCore {
     
     private func sendActivationCode(phoneNumber:String,activationCode:String){
         print("User Activation Code: \(activationCode)") //
-//        self.sendActivationCodeSMS(phoneNumber: phoneNumber, activationCode: activationCode)
+        self.sendActivationCodeSMS(phoneNumber: phoneNumber, activationCode: activationCode)
     }
     
     private func sendActivationCodeSMS(phoneNumber:String,activationCode:String){
