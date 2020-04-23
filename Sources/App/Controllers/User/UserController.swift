@@ -61,19 +61,18 @@ final class UserController: UserControllerCore {
             
             let phoneNumber = try UserController.validatePhoneNumber(phoneNumber: inputUser.phoneNumber)
             
-            return User.query(on: req).filter(\User.phoneNumber == phoneNumber).first().map({ user in
+            return PhoneNumberActivationCode.find(req: req, phoneNumber: phoneNumber).map { item in
                 
-                guard let user = user else {
+                guard let item = item else {
                     throw Constants.errors.invalidPhoneNumber
                 }
                 
-                guard let activationCode = user.activationCode else {
+                guard let activationCode = item.activationCode else {
                     throw Constants.errors.activationCodeNotFound
                 }
                 
                 return AuthAdminAccessOutput(activationCode: activationCode)
-            })
-            
+            }
         })
     }
     
