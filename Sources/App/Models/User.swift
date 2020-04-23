@@ -61,6 +61,23 @@ extension User {
 }
 
 extension User {
+    
+    static func find(req: Request, phoneNumber: String) -> Future<User?> {
+        
+        return User.query(on: req, withSoftDeleted: true).filter(\User.phoneNumber == phoneNumber).first().map({ foundUser in
+            
+            guard foundUser?.deletedAt == nil else {
+                throw Constants.errors.userAccessIsDenied
+            }
+            
+            return foundUser
+        })
+    }
+    
+    static func isNotDeleted(req: Request, phoneNumber: String) -> Future<HTTPStatus> {
+        return User.find(req: req, phoneNumber: phoneNumber).transform(to: .ok)
+    }
+    
     static func phoneNumberHasExisted(phoneNumber:String,conn:DatabaseConnectable)->Future<Bool>{
         return User.query(on: conn, withSoftDeleted: true).filter(\User.phoneNumber == phoneNumber).count().map { count in
             if count != 0 { return true }

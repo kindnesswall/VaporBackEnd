@@ -20,10 +20,8 @@ class UserFirebaseController: UserControllerCore {
                     throw Constants.errors.firebaseAuthenticationError
                 }
                 
-                return self.findOrInitializeUser(req: req, phoneNumber: phoneNumber).flatMap({ user in
-                    return user.save(on: req).flatMap({ user in
-                        return try self.getToken(req: req, user: user)
-                    })
+                return self.findOrCreateUser(req: req, phoneNumber: phoneNumber).flatMap({ user in
+                    return try self.getToken(req: req, user: user)
                 })
             })
 

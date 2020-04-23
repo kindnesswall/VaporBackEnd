@@ -9,24 +9,42 @@ import Vapor
 import FluentPostgreSQL
 
 class UserControllerCore {
-    func findOrInitializeUser(req: Request, phoneNumber: String) -> Future<User>{
+    func findOrCreateUser(req: Request, phoneNumber: String) -> Future<User> {
         
-        return User.query(on: req, withSoftDeleted: true).filter(\User.phoneNumber == phoneNumber).first().map({ (dBUser) -> User in
+        return User.find(req: req, phoneNumber: phoneNumber).flatMap { foundUser in
             
-            guard dBUser?.deletedAt == nil else {
-                throw Constants.errors.userAccessIsDenied
+            let user = foundUser ?? User(phoneNumber: phoneNumber)
+            return user.save(on: req)
+        }
+    }
+    
+    func setActvatioCode(req: Request, phoneNumber: String, activationCode: String) -> Future<HTTPStatus> {
+        return User.isNotDeleted(req: req, phoneNumber: phoneNumber).flatMap { _ in
+            
+            return PhoneNumberActivationCode.find(req: req, phoneNumber: phoneNumber).flatMap { foundItem in
+                
+                let item = self.setActvatioCode(req: req, foundItem: foundItem, phoneNumber: phoneNumber, activationCode: activationCode)
+                
+                return item.save(on: req).transform(to: .ok)
             }
-            
-            var user:User
-            if let dBUser=dBUser {
-                user = dBUser
-            } else {
-                user = User(phoneNumber: phoneNumber)
-            }
-            
-            return user
-        })
+        }
+    }
+    
+    private func setActvatioCode(req: Request, foundItem: PhoneNumberActivationCode?, phoneNumber: String, activationCode: String) -> PhoneNumberActivationCode {
         
+        if let foundItem = foundItem {
+            foundItem.activationCode = activationCode
+            return foundItem
+        }
+        
+        let item = PhoneNumberActivationCode(phoneNumber: phoneNumber, activationCode: activationCode)
+        return item
+    }
+    
+    
+    func checkActivationCode(req: Request, phoneNumber: String, activationCode: String) -> Future<HTTPStatus> {
+        
+        return PhoneNumberActivationCode.check(req: req, phoneNumber: phoneNumber, activationCode: activationCode)
     }
     
     func getToken(req: Request, user: User) throws -> Future<AuthOutput> {

@@ -19,13 +19,12 @@ final class UserController: UserControllerCore {
             
             let phoneNumber = try UserController.validatePhoneNumber(phoneNumber: inputUser.phoneNumber)
             
-            return self.findOrInitializeUser(req: req, phoneNumber: phoneNumber).flatMap({ user -> Future<HTTPStatus> in
-                
-                let activationCode = User.generateActivationCode()
-                user.activationCode = activationCode
+            let activationCode = User.generateActivationCode()
+            
+            return self.setActvatioCode(req: req, phoneNumber: phoneNumber, activationCode: activationCode).map { status in
                 self.sendActivationCode(phoneNumber: phoneNumber, activationCode: activationCode)
-                return user.save(on: req).transform(to: .ok)
-            })
+                return status
+            }
         }
     }
     
@@ -40,27 +39,14 @@ final class UserController: UserControllerCore {
             guard let activationCode = inputUser.activationCode else {
                 throw Constants.errors.invalidActivationCode
             }
-
-            return User.query(on: req).filter(\User.phoneNumber == phoneNumber).first().flatMap({ user in
+            
+            return self.checkActivationCode(req: req, phoneNumber: phoneNumber, activationCode: activationCode).flatMap { _ in
                 
-                guard let user = user else {
-                     throw Constants.errors.invalidPhoneNumber
-                }
-                
-                let testAccount = self.isTestAccount(input: inputUser)
-                
-                guard user.activationCode == activationCode || testAccount  else {
-                    throw Constants.errors.invalidActivationCode
-                }
-                
-                user.activationCode = nil
-                return user.save(on: req).flatMap({ user in
+                return self.findOrCreateUser(req: req, phoneNumber: phoneNumber).flatMap { user in
                     return try self.getToken(req: req, user: user)
-                })
-            })
+                }
+            }
         }
-        
-        
     }
     
     func adminAccessActivationCode(_ req: Request) throws -> Future<AuthAdminAccessOutput> {
@@ -204,6 +190,8 @@ final class UserController: UserControllerCore {
     
     private static func validatePhoneNumber(phoneNumber phoneNumberWithPrefix:String) throws -> String {
         
+        //TODO: Must be checked
+        
         let phoneNumber = String(phoneNumberWithPrefix.dropFirst())
         
         guard
@@ -214,11 +202,4 @@ final class UserController: UserControllerCore {
         return "+\(englishPhoneNumber)"
     }
     
-    private func isTestAccount(input: Inputs.Login) -> Bool {
-        if input.phoneNumber == "+09000000000", input.activationCode == "12340" {
-            return true
-        }
-        
-        return false
-    }
 }

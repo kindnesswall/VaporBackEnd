@@ -46,6 +46,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     migrations.add(model: Category.self, database: .psql)
     migrations.add(model: User.self, database: .psql)
     migrations.add(model: UserPhoneNumberLog.self, database: .psql) 
+    migrations.add(model: PhoneNumberActivationCode.self, database: .psql)
     migrations.add(model: Token.self, database: .psql)
     migrations.add(model: TextMessage.self, database: .psql)
     migrations.add(model: Country.self, database: .psql)
