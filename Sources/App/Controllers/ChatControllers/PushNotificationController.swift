@@ -41,30 +41,43 @@ class PushNotificationController {
     
     func sendPush(_ req: Request) throws -> Future<HTTPStatus> {
         return try req.content.decode(SendPushInput.self).map { input in
-            try PushNotificationController.sendPush(req, userId: input.userId, title: input.title, body: input.body, data: nil)
+            let payload = SamplePushPayload()
+            try PushNotificationController.sendPush(req, userId: input.userId, title: input.title, body: input.body, payload: payload)
             return .ok
         }
     }
     
-    static func sendPush(_ req: Request, userId:Int, title:String?, body:String, data: String?) throws {
+    
+    static func sendPush<T: PushPayloadable>(_ req: Request, userId:Int, title:String?, body:String, payload: T) throws {
         
         UserPushNotification.findAllTokens(userId: userId, conn: req).map { allTokens in
+            
             for token in allTokens {
-                
-                guard let pushType = PushNotificationType(rawValue: token.type) else { continue }
-                switch pushType {
-                case .APNS:
-                    try sendAPNSPush(req, token: token.devicePushToken, title: title, body: body, data: data)
-                case .Firebase:
-                    try sendFirebasePush(req, token: token.devicePushToken, title: title, body: body, data: data)
-                }
+                try? sendPush(req, token: token, title: title, body: body, payload: payload)
             }
-        }.catch(AppErrorCatch.printError)
+        }
     }
     
-    private static func sendAPNSPush(_ req: Request,token: String,title:String?, body:String, data: String?) throws {
+    static func sendPush<T: PushPayloadable>(_ req: Request, token: UserPushNotification, title:String?, body:String, payload: T) throws -> Future<HTTPStatus>? {
         
-        guard let payload = APNSPayload(title: title, body: body, data: data).textFormat else {
+        guard let pushType = PushNotificationType(rawValue: token.type) else { return nil }
+        
+        let click_action = payload.getClickAction(type: pushType)
+        
+        return try payload.getContent(on: req).flatMap { content in
+            switch pushType {
+            case .APNS:
+                return try sendAPNSPush(req, token: token.devicePushToken, title: title, body: body, content: content)
+            case .Firebase:
+                return try sendFirebasePush(req, token: token.devicePushToken, title: title, body: body, content: content, click_action: click_action)
+            }
+        }
+        
+    }
+    
+    private static func sendAPNSPush(_ req: Request, token: String, title: String?, body: String, content: PushPayloadContent?) throws -> Future<HTTPStatus> {
+        
+        guard let payload = APNSPayload(title: title, body: body, data: content?.data).textFormat else {
             throw Constants.errors.pushPayloadIsNotValid
         }
         
@@ -78,21 +91,29 @@ class PushNotificationController {
         
         let arguments = ["-d", payload, "-H", "apns-topic:\(bundleId)", "-H", "apns-expiration: 1", "-H", "apns-priority: 10", "--http2", "--cert", "\(certPath):\(certPass)", "\(apnsURL)\(token)"]
         
-        try shell.execute(commandName: "curl", arguments: arguments).map({ output in
+        return try shell.execute(commandName: "curl", arguments: arguments).map({ output in
             let text = String(data: output, encoding: .utf8)
             print(text ?? "")
-        }).catch(AppErrorCatch.printError)
+        }).transform(to: .ok)
     }
     
-    private static func sendFirebasePush(_ req:Request,token: String, title:String?, body:String, data:String?) throws {
+    private static func sendFirebasePush(_ req: Request, token: String, title: String?, body: String, content: PushPayloadContent?, click_action: String?) throws -> Future<HTTPStatus> {
         let fcm = try req.make(FCM.self)
         let notification = FCMNotification(title: title ?? "", body: body)
-        let message = FCMMessage(token: token, notification: notification)
-        if let data = data {
-            message.data["message"] = data
+        
+        let androidNotification = FCMAndroidNotification(title: title, body: body, sound: "default", click_action: click_action)
+        
+        let info = Constants.appInfo.firebaseConfig
+        let androidConfig = FCMAndroidConfig(ttl: "86400s", restricted_package_name: info.bundleId, notification: androidNotification)
+        
+        let message = FCMMessage(token: token, notification: notification, android: androidConfig)
+        
+        if let content = content {
+            message.data[content.name] = content.data
         }
-        try fcm.sendMessage(req.client(), message: message).catch({ error in
-            print(error)
-        })
+
+        return try fcm.sendMessage(req.client(), message: message).map({ output in
+            print(output)
+        }).transform(to: .ok)
     }
 }

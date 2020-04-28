@@ -76,6 +76,5 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     let appInfo = AppInfo()
     let path = "\(appInfo.fileDirPath)\(appInfo.firebaseConfig.keyPath)"
     let fcm = FCM(pathToServiceAccountKey: path)
-    fcm.androidDefaultConfig = FCMAndroidConfig(ttl: "86400s", restricted_package_name: AppInfo().firebaseConfig.restricted_package_name, notification: FCMAndroidNotification(sound: "default"))
     services.register(fcm, as: FCM.self)
 }

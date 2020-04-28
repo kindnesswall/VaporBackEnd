@@ -23,6 +23,13 @@ extension TextMessage {
     static let createdAtKey: TimestampKey? = \.createdAt
 }
 
+extension TextMessage: PushPayloadable {
+    var pushMainPath: String { return "chat" }
+    var pushSupplementPath: String? { return "/message" }
+    var pushQueryItems: [URLQueryItem] { return [] }
+    var pushContentName: String? { return "message" }
+}
+
 extension TextMessage {
     
     static func getTextMessages(chat:Chat,beforeId:Int?,conn:DatabaseConnectable) throws ->Future<[TextMessage]>   {
