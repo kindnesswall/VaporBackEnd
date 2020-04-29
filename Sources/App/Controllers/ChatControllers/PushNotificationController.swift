@@ -53,8 +53,12 @@ class PushNotificationController {
         UserPushNotification.findAllTokens(userId: userId, conn: req).map { allTokens in
             
             for token in allTokens {
-                try? sendPush(req, token: token, title: title, body: body, payload: payload)
+                try sendPush(req, token: token, title: title, body: body, payload: payload)?.catch({ error in
+                    print(error)
+                })
             }
+        }.catch { error in
+            print(error)
         }
     }
     
