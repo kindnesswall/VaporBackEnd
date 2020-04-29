@@ -35,4 +35,9 @@ class Inputs {
         var countryId: Int
     }
     
+    final class UserPushNotification : Content {
+        var type: String
+        var devicePushToken: String
+    }
+    
 }

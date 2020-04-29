@@ -11,26 +11,19 @@ import FluentPostgreSQL
 final class UserPushNotification: PostgreSQLModel {
     var id: Int?
     var userId: Int
-    var deviceIdentifier: String
+    var userTokenId: Int
     var type: String
     var devicePushToken: String
     
-    final class Input : Content {
-        var deviceIdentifier: String
-        var type: String
-        var devicePushToken: String
-    }
-    
-    init(userId:Int,input:Input) {
+    init(userId: Int, userTokenId: Int, input: Inputs.UserPushNotification) {
         self.userId = userId
-        self.deviceIdentifier = input.deviceIdentifier
+        self.userTokenId = userTokenId
         self.type = input.type
         self.devicePushToken = input.devicePushToken
     }
     
-    static func hasFound(input:Input,conn:DatabaseConnectable)->Future<UserPushNotification?> {
+    static func hasFound(input: Inputs.UserPushNotification, conn: DatabaseConnectable)->Future<UserPushNotification?> {
         return UserPushNotification.query(on: conn)
-            .filter(\.deviceIdentifier == input.deviceIdentifier)
             .filter(\.type == input.type)
             .filter(\.devicePushToken == input.devicePushToken)
             .first()

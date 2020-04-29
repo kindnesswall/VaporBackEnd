@@ -12,28 +12,27 @@ class PushNotificationController {
     
     func registerPush(_ req: Request) throws -> Future<HTTPStatus> {
         let user = try req.requireAuthenticated(User.self)
-        guard let userId = user.id else {
-            throw Constants.errors.nilUserId
-        }
+        let userId = try user.getId()
+        let userToken = try req.requireAuthenticated(Token.self)
+        let userTokenId = try userToken.getId()
         
-        return try req.content.decode(UserPushNotification.Input.self).flatMap { input in
+        return try req.content.decode(Inputs.UserPushNotification.self).flatMap { input in
             
             guard let _ = PushNotificationType(rawValue: input.type) else {
                 throw Constants.errors.wrongPushNotificationType
             }
             
-            return UserPushNotification.hasFound(input: input, conn: req).flatMap({ foundPushNotification -> Future<UserPushNotification> in
+            return UserPushNotification.hasFound(input: input, conn: req).flatMap({ found -> Future<UserPushNotification> in
                 
-                if let foundPushNotification = foundPushNotification {
-                    foundPushNotification.userId = userId
-                    return foundPushNotification.save(on: req)
+                if let found = found {
+                    found.userId = userId
+                    found.userTokenId = userTokenId
+                    return found.save(on: req)
                 } else {
-                    let pushNotification = UserPushNotification(userId: userId, input: input)
-                    return pushNotification.save(on: req)
+                    let item = UserPushNotification(userId: userId, userTokenId: userTokenId, input: input)
+                    return item.save(on: req)
                 }
-            }).map({ _ in
-                return .ok
-            })
+            }).transform(to: .ok)
             
         }
     }

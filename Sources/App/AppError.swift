@@ -43,6 +43,7 @@ class ErrorConstants {
     
     //MARK: notFound
     let nilUserId = Abort(.notFound, reason: "User id is nil",identifier: "nilUserId")
+    let nilTokenId = Abort(.notFound, reason: "Token id is nil",identifier: "nilTokenId")
     let nilGiftId = Abort(.notFound, reason: "Gift id is nil",identifier: "nilGiftId")
     let nilGiftUserId = Abort(.notFound, reason: "Gift user id is nil",identifier: "nilGiftUserId")
     let messageNotFound = Abort(.notFound, reason: "Message not found",identifier: "messageNotFound")

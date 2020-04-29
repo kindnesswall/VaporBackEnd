@@ -26,6 +26,15 @@ final class Token: PostgreSQLModel {
 }
 
 extension Token {
+    func getId() throws -> Int {
+        guard let id = self.id else {
+            throw Constants.errors.nilTokenId
+        }
+        return id
+    }
+}
+
+extension Token {
     static let createdAtKey: TimestampKey? = \.createdAt
     static let updatedAtKey: TimestampKey? = \.updatedAt
     static let deletedAtKey: TimestampKey? = \.deletedAt
