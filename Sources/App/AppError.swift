@@ -8,11 +8,6 @@
 import Foundation
 import Vapor
 
-class AppErrorCatch {
-    public static func printError(error:Error){
-        print(error)
-    }
-}
 
 class ErrorConstants {
     
@@ -37,6 +32,7 @@ class ErrorConstants {
     let invalidPhoneNumber = Abort(.nonAuthoritativeInformation, reason: "The phone number is invalid",identifier: "invalidPhoneNumber")
     let phoneNumberHasExisted = Abort(.nonAuthoritativeInformation, reason: "Phone number has existed",identifier: "phoneNumberHasExisted")
     let invalidActivationCode = Abort(.nonAuthoritativeInformation, reason: "The activation code is invalid",identifier: "invalidActivationCode")
+    let invalidActivationCodes = Abort(.nonAuthoritativeInformation, reason: "The activation codes is invalid",identifier: "invalidActivationCodes")
     let wrongUserId = Abort(.nonAuthoritativeInformation, reason: "User id is wrong",identifier: "wrongUserId")
     let pushPayloadIsNotValid = Abort(.nonAuthoritativeInformation ,reason: "Push payload is not valid",identifier: "pushPayloadIsNotValid")
     let wrongPushNotificationType = Abort(.nonAuthoritativeInformation, reason: "Push Notification Type is wrong",identifier: "wrongPushNotificationType")
@@ -56,6 +52,7 @@ class ErrorConstants {
     let chatNotificationNotFound = Abort(.notFound, reason: "Chat's Notification not found",identifier: "chatNotificationNotFound")
     let charityInfoNotFound = Abort(.notFound, reason: "Charity information not found",identifier: "charityInfoNotFound")
     let activationCodeNotFound = Abort(.notFound, reason: "Activation code not found", identifier: "activationCodeNotFound")
+    let activationCodesNotFound = Abort(.notFound, reason: "Activation codes not found", identifier: "activationCodesNotFound")
     let countryNotFound = Abort(.notFound, reason: "Country not found", identifier: "countryNotFound")
     
     //MARK: forbidden
@@ -74,5 +71,6 @@ class ErrorConstants {
     //MARK: internalServerError
     let serverThrowsException = Abort(.internalServerError, reason: "Server throws exception", identifier: "serverThrowsException")
     let objectEncodingFailed = Abort(.internalServerError, reason: "Object encoding failed", identifier: "objectEncodingFailed")
+    let smsSendingFailed = Abort(.internalServerError, reason: "SMS sending failed", identifier: "smsSendingFailed")
 }
 

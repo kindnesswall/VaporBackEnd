@@ -54,4 +54,18 @@ class UserControllerCore {
             return AuthOutput(token: token, isAdmin: user.isAdmin, isCharity: user.isCharity)
         })
     }
+    
+    static func validatePhoneNumber(phoneNumber phoneNumberWithPrefix:String) throws -> String {
+        
+        //TODO: Must be checked
+        
+        let phoneNumber = String(phoneNumberWithPrefix.dropFirst())
+        
+        guard
+        phoneNumber.isCorrectPhoneNumber(),
+        let englishPhoneNumber = phoneNumber.castNumberToEnglish()
+        else { throw Constants.errors.invalidPhoneNumber }
+        
+        return "+\(englishPhoneNumber)"
+    }
 }

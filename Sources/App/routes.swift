@@ -16,6 +16,7 @@ public func routes(_ router: Router) throws {
     let categoryController = CategoryController()
     let locationController = LocationController()
     let userController = UserController()
+    let phoneChangeController = PhoneChangeController()
     let userFirebaseController = UserFirebaseController()
     let userProfileController = UserProfileController()
     let userAdminController = UserAdminController()
@@ -48,8 +49,8 @@ public func routes(_ router: Router) throws {
     guardianProtected.post(uris.register, use: userController.registerHandler)
     publicRouter.post(uris.login, use: userController.loginHandler)
     adminProtected.post(uris.login_admin_access, use: userController.adminAccessActivationCode)
-    guardianTokenProtected.post(uris.register_phoneNumberChange_request, use: userController.changePhoneNumberRequest)
-    tokenProtected.post(uris.register_phoneNumberChange_validate, use: userController.changePhoneNumberValidate)
+    guardianTokenProtected.post(uris.register_phoneNumberChange_request, use: phoneChangeController.changePhoneNumberRequest)
+    tokenProtected.post(uris.register_phoneNumberChange_validate, use: phoneChangeController.changePhoneNumberValidate)
     tokenProtected.get(uris.logout_allDevices, use: userController.logoutAllDevices)
     publicRouter.post(uris.login_firebase, use: userFirebaseController.loginUser)
     

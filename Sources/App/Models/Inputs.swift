@@ -28,7 +28,8 @@ class Inputs {
     
     final class ChangePhoneNumber: Content {
         var toPhoneNumber:String
-        var activationCode:String?
+        var activationCode_from:String?
+        var activationCode_to:String?
     }
     
     final class Country: Content {

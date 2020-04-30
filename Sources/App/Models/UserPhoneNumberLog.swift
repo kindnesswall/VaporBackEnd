@@ -14,7 +14,8 @@ final class UserPhoneNumberLog: PostgreSQLModel {
     var fromPhoneNumber:String
     var toPhoneNumber:String
     var status:String
-    var activationCode:String?
+    var activationCode_from:String?
+    var activationCode_to:String?
     
     var createdAt: Date?
     var updatedAt: Date?
@@ -37,9 +38,93 @@ final class UserPhoneNumberLog: PostgreSQLModel {
         case requested
         case completed
     }
+    
+    func complete(on conn: DatabaseConnectable) -> Future<HTTPStatus> {
+        activationCode_from = nil
+        activationCode_to = nil
+        setStatus(status: .completed)
+        return save(on: conn).transform(to: .ok)
+    }
+    
+    func check(activationCode: ActivationCode) -> Bool {
+        guard activationCode_from == activationCode.from,
+            activationCode_to == activationCode.to
+        else {
+            return false
+        }
+        return true
+    }
+    
+    func set(activationCode: ActivationCode, on conn: DatabaseConnectable) -> Future<HTTPStatus> {
+        activationCode_from = activationCode.from
+        activationCode_to = activationCode.to
+        return save(on: conn).transform(to: .ok)
+    }
+    
+    struct ActivationCode {
+        var from: String
+        var to: String
+        
+        init(from: String, to: String) {
+            self.from = from
+            self.to = to
+        }
+        
+        init?(from: String?, to: String?) {
+            guard let from = from else { return nil }
+            guard let to = to else { return nil }
+            self.init(from: from, to: to)
+        }
+        
+        static func generate() -> ActivationCode {
+            let from = User.generateActivationCode()
+            let to = User.generateActivationCode()
+            return ActivationCode(from: from, to: to)
+        }
+    }
 }
 
 extension UserPhoneNumberLog {
+    
+    static func setActivationCode(req: Request, auth: User, toPhoneNumber: String, activationCode: ActivationCode) throws -> Future<HTTPStatus> {
+        
+        let futureItem = try UserPhoneNumberLog.findOrCreate(req: req, auth: auth, toPhoneNumber: toPhoneNumber)
+        
+        return futureItem.flatMap { item in
+            return item.set(activationCode: activationCode, on: req)
+        }
+    }
+    
+    static func findOrCreate(req: Request, auth: User, toPhoneNumber: String) throws -> Future<UserPhoneNumberLog> {
+        
+        let requested = UserPhoneNumberLog(userId: try auth.getId(), fromPhoneNumber: auth.phoneNumber, toPhoneNumber: toPhoneNumber, status: .requested)
+        
+        return UserPhoneNumberLog.getLast(phoneNumberLog: requested, conn: req).map { found in
+            let phoneNumberLog = found ?? requested
+            return phoneNumberLog
+        }
+        
+    }
+    
+    static func check(req: Request, auth: User, toPhoneNumber: String, activationCode: ActivationCode) throws ->  Future<UserPhoneNumberLog> {
+        
+        let requested = UserPhoneNumberLog(userId: try auth.getId(), fromPhoneNumber: auth.phoneNumber, toPhoneNumber: toPhoneNumber, status: .requested)
+        return UserPhoneNumberLog.getLast(phoneNumberLog: requested, conn: req).map { item in
+            
+            guard let item = item else {
+                throw Constants.errors.invalidPhoneNumber
+            }
+            
+            guard item.check(activationCode: activationCode) else {
+                throw Constants.errors.invalidActivationCodes
+            }
+            
+            return item
+        }
+        
+    }
+    
+    
     static func getLast(phoneNumberLog: UserPhoneNumberLog, conn:DatabaseConnectable) -> Future<UserPhoneNumberLog?> {
         return UserPhoneNumberLog.query(on: conn)
             .filter(\.userId == phoneNumberLog.userId)

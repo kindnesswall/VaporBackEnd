@@ -61,6 +61,13 @@ extension User {
 }
 
 extension User {
+    func change(toPhoneNumber: String, on conn: DatabaseConnectable) -> Future<User> {
+        self.phoneNumber = toPhoneNumber
+        return save(on: conn)
+    }
+}
+
+extension User {
     
     static func find(req: Request, phoneNumber: String) -> Future<User?> {
         
