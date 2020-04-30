@@ -11,13 +11,13 @@ import Vapor
 import FluentPostgreSQL
 import Crypto
 
-final class UserController: UserControllerCore {
+final class UserController: UserControllerCore, PhoneNumberValidator {
     
     func registerHandler(_ req: Request) throws -> Future<HTTPStatus> {
         
         return try req.content.decode(Inputs.Login.self).flatMap{ (inputUser)->Future<HTTPStatus> in
             
-            let phoneNumber = try UserController.validatePhoneNumber(phoneNumber: inputUser.phoneNumber)
+            let phoneNumber = try self.validate(phoneNumber: inputUser.phoneNumber)
             
             let activationCode = User.generateActivationCode()
             
@@ -33,7 +33,7 @@ final class UserController: UserControllerCore {
         
         return try req.content.decode(Inputs.Login.self).flatMap{ inputUser in
             
-            let phoneNumber = try UserController.validatePhoneNumber(phoneNumber: inputUser.phoneNumber)
+            let phoneNumber = try self.validate(phoneNumber: inputUser.phoneNumber)
 
             guard let activationCode = inputUser.activationCode else {
                 throw Constants.errors.invalidActivationCode
@@ -58,7 +58,7 @@ final class UserController: UserControllerCore {
         
         return try req.content.decode(Inputs.Login.self).flatMap({ inputUser in
             
-            let phoneNumber = try UserController.validatePhoneNumber(phoneNumber: inputUser.phoneNumber)
+            let phoneNumber = try self.validate(phoneNumber: inputUser.phoneNumber)
             
             return PhoneNumberActivationCode.find(req: req, phoneNumber: phoneNumber).map { item in
                 
@@ -73,18 +73,6 @@ final class UserController: UserControllerCore {
                 return AuthAdminAccessOutput(activationCode: activationCode)
             }
         })
-    }
-    
-    func logoutAllDevices(_ req: Request) throws -> Future<HTTPStatus> {
-
-        let auth = try req.requireAuthenticated(User.self)
-        return try UserController.logoutAllDevices(req: req, user: auth)
-    }
-    
-    static func logoutAllDevices(req: Request, user:User) throws -> Future<HTTPStatus> {
-        
-        return try user.authTokens.query(on: req).delete().transform(to: .ok)
-        
     }
     
 }

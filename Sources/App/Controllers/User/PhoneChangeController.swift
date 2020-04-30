@@ -7,14 +7,14 @@
 
 import Vapor
 
-final class PhoneChangeController: UserControllerCore {
+final class PhoneChangeController: PhoneNumberValidator {
     func changePhoneNumberRequest(_ req: Request) throws -> Future<HTTPStatus> {
         
         let auth = try req.requireAuthenticated(User.self)
         
         return try req.content.decode(Inputs.ChangePhoneNumber.self).flatMap({ input in
             
-            let toPhoneNumber = try UserController.validatePhoneNumber(phoneNumber: input.toPhoneNumber)
+            let toPhoneNumber = try self.validate(phoneNumber: input.toPhoneNumber)
             
             return User.phoneNumberHasExisted(phoneNumber: toPhoneNumber, conn: req).flatMap({ hasExisted in
                 guard !hasExisted else {
@@ -46,7 +46,7 @@ final class PhoneChangeController: UserControllerCore {
         
         return try req.content.decode(Inputs.ChangePhoneNumber.self).flatMap({ input in
             
-            let toPhoneNumber = try UserController.validatePhoneNumber(phoneNumber: input.toPhoneNumber)
+            let toPhoneNumber = try self.validate(phoneNumber: input.toPhoneNumber)
             
             guard let activationCode = UserPhoneNumberLog.ActivationCode(from: input.activationCode_from, to: input.activationCode_to) else {
                 throw Constants.errors.activationCodesNotFound
@@ -61,7 +61,7 @@ final class PhoneChangeController: UserControllerCore {
                     
                     return auth.change(toPhoneNumber: toPhoneNumber, on: req).flatMap({ _ in
                         return phoneNumberLog.complete(on: req).flatMap { _ in
-                            return try UserController.logoutAllDevices(req: req, user: auth)
+                            return try LogoutController.logoutAllDevices(req: req, user: auth)
                         }
                     })
                 }

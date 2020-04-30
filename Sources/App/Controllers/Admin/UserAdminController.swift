@@ -71,7 +71,7 @@ final class UserAdminController {
     func userDenyAccess(_ req: Request) throws -> Future<HTTPStatus> {
         return try req.parameters.next(User.self).flatMap({ user in
             return user.delete(on: req).flatMap({ _ in
-                return try UserController.logoutAllDevices(req: req, user: user) 
+                return try LogoutController.logoutAllDevices(req: req, user: user) 
             })
         })
     }

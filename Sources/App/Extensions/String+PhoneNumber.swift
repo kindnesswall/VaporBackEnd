@@ -17,4 +17,9 @@ extension String {
         }
         return true
     }
+    mutating func dropPlus() {
+        if let plusIndex = firstIndex(of: "+") {
+            remove(at: plusIndex)
+        }
+    }
 }
