@@ -71,6 +71,5 @@ class ErrorConstants {
     //MARK: internalServerError
     let serverThrowsException = Abort(.internalServerError, reason: "Server throws exception", identifier: "serverThrowsException")
     let objectEncodingFailed = Abort(.internalServerError, reason: "Object encoding failed", identifier: "objectEncodingFailed")
-    let smsSendingFailed = Abort(.internalServerError, reason: "SMS sending failed", identifier: "smsSendingFailed")
 }
 

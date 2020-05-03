@@ -11,14 +11,14 @@ final class SMSController {
     
     static func send(phoneNumber: String, code: String, template: SMSTemplates, on req: Request) throws -> Future<HTTPStatus> {
         
-            let smsConfig = Constants.appInfo.smsConfig
-            guard let url = URIs().getSMSUrl(apiKey: smsConfig.apiKey, receptor: phoneNumber, template: template.rawValue, token: code) else {
-                throw Constants.errors.smsSendingFailed
-            }
-            
-            return try APICurl.curl(req: req, url: url, httpMethod: .POST).map({ _ in
-    //            APICurl.log(data: data)
-            }).transform(to: .ok)
-            
-        }
+        let url = URIs().getSMSUrl(receptor: phoneNumber, template: template.rawValue, token: code)
+        
+        return try req.make(Client.self).get(url, headers: [:]).map({ _ in
+//            guard let data = response.http.body.data else {
+//                return
+//            }
+//            let text = String(data: data, encoding: .utf8)
+//            print(text)
+        }).transform(to: .ok)
+    }
 }

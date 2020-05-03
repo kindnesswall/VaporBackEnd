@@ -171,9 +171,9 @@ class URIs {
         return "\(apiRoute)/statistics"
     }
     
-    func getSMSUrl(apiKey:String,receptor:String,template:String,token:String)->String?{
-        let rawUrl = "https://saharsms.com/api/\(apiKey)/json/SendVerify?receptor=\(receptor)&template=\(template)&token=\(token)"
-        let encodedURL = rawUrl.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
-        return encodedURL
+    func getSMSUrl(receptor: String, template: String, token: String) -> String {
+        let apiKey = Constants.appInfo.smsConfig.apiKey
+        let url = "https://saharsms.com/api/\(apiKey)/json/SendVerify?receptor=\(receptor)&template=\(template)&token=\(token)"
+        return url
     }
 }
