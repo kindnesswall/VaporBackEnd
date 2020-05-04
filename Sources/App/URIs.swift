@@ -49,6 +49,9 @@ class URIs {
     var register_phoneNumberChange_validate : String {
         return "\(apiRoute)/register/phoneNumberChange/validate"
     }
+    var logout : String {
+        return "\(apiRoute)/logout"
+    }
     var logout_allDevices : String {
         return "\(apiRoute)/logout/allDevices" 
     }

@@ -52,6 +52,7 @@ public func routes(_ router: Router) throws {
     adminProtected.post(uris.login_admin_access, use: userController.adminAccessActivationCode)
     guardianTokenProtected.post(uris.register_phoneNumberChange_request, use: phoneChangeController.changePhoneNumberRequest)
     tokenProtected.post(uris.register_phoneNumberChange_validate, use: phoneChangeController.changePhoneNumberValidate)
+    tokenProtected.get(uris.logout, use: logoutController.logout)
     tokenProtected.get(uris.logout_allDevices, use: logoutController.logoutAllDevices)
     publicRouter.post(uris.login_firebase, use: userFirebaseController.loginUser)
     

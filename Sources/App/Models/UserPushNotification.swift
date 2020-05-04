@@ -23,16 +23,30 @@ final class UserPushNotification: PostgreSQLModel {
     }
     
     static func hasFound(input: Inputs.UserPushNotification, conn: DatabaseConnectable)->Future<UserPushNotification?> {
-        return UserPushNotification.query(on: conn)
+        return query(on: conn)
             .filter(\.type == input.type)
             .filter(\.devicePushToken == input.devicePushToken)
             .first()
     }
     
     static func findAllTokens(userId:Int, conn: DatabaseConnectable) -> Future<[UserPushNotification]>{
-        return UserPushNotification.query(on: conn)
+        return query(on: conn)
             .filter(\.userId == userId)
             .all()
+    }
+    
+    static func deleteAll(userId: Int, conn: DatabaseConnectable) -> Future<HTTPStatus> {
+        return query(on: conn)
+            .filter(\.userId == userId)
+            .delete()
+            .transform(to: .ok)
+    }
+    
+    static func delete(userTokenId: Int, conn: DatabaseConnectable) -> Future<HTTPStatus> {
+        return query(on: conn)
+            .filter(\.userTokenId == userTokenId)
+            .delete()
+            .transform(to: .ok)
     }
     
 }

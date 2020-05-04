@@ -9,6 +9,11 @@ import Vapor
 
 class LogoutController {
     
+    func logout(_ req: Request) throws -> Future<HTTPStatus> {
+        let authToken = try req.requireAuthenticated(Token.self)
+        return try LogoutController.logout(req: req, userToken: authToken)
+    }
+    
     func logoutAllDevices(_ req: Request) throws -> Future<HTTPStatus> {
 
         let auth = try req.requireAuthenticated(User.self)
@@ -17,7 +22,16 @@ class LogoutController {
     
     static func logoutAllDevices(req: Request, user:User) throws -> Future<HTTPStatus> {
         
-        return try user.authTokens.query(on: req).delete().transform(to: .ok)
-        
+        let userId = try user.getId()
+        return try user.authTokens.query(on: req).delete().flatMap({ _ in
+            return UserPushNotification.deleteAll(userId: userId, conn: req)
+        })
+    }
+    
+    static func logout(req: Request, userToken: Token) throws -> Future<HTTPStatus> {
+        let userTokenId = try userToken.getId()
+        return userToken.delete(on: req).flatMap { _ in
+            return UserPushNotification.delete(userTokenId: userTokenId, conn: req)
+        }
     }
 }
