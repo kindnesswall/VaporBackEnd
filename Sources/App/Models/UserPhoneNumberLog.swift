@@ -88,7 +88,7 @@ extension UserPhoneNumberLog {
     
     static func setActivationCode(req: Request, auth: User, toPhoneNumber: String, activationCode: ActivationCode) throws -> Future<HTTPStatus> {
         
-        let futureItem = try UserPhoneNumberLog.findOrCreate(req: req, auth: auth, toPhoneNumber: toPhoneNumber)
+        let futureItem = try findOrCreate(req: req, auth: auth, toPhoneNumber: toPhoneNumber)
         
         return futureItem.flatMap { item in
             return item.set(activationCode: activationCode, on: req)
@@ -99,7 +99,7 @@ extension UserPhoneNumberLog {
         
         let requested = UserPhoneNumberLog(userId: try auth.getId(), fromPhoneNumber: auth.phoneNumber, toPhoneNumber: toPhoneNumber, status: .requested)
         
-        return UserPhoneNumberLog.getLast(phoneNumberLog: requested, conn: req).map { found in
+        return getLatest(phoneNumberLog: requested, conn: req).map { found in
             let phoneNumberLog = found ?? requested
             return phoneNumberLog
         }
@@ -109,7 +109,8 @@ extension UserPhoneNumberLog {
     static func check(req: Request, auth: User, toPhoneNumber: String, activationCode: ActivationCode) throws ->  Future<UserPhoneNumberLog> {
         
         let requested = UserPhoneNumberLog(userId: try auth.getId(), fromPhoneNumber: auth.phoneNumber, toPhoneNumber: toPhoneNumber, status: .requested)
-        return UserPhoneNumberLog.getLast(phoneNumberLog: requested, conn: req).map { item in
+        
+        return getLatest(phoneNumberLog: requested, conn: req).map { item in
             
             guard let item = item else {
                 throw Constants.errors.invalidPhoneNumber
@@ -125,8 +126,8 @@ extension UserPhoneNumberLog {
     }
     
     
-    static func getLast(phoneNumberLog: UserPhoneNumberLog, conn:DatabaseConnectable) -> Future<UserPhoneNumberLog?> {
-        return UserPhoneNumberLog.query(on: conn)
+    static func getLatest(phoneNumberLog: UserPhoneNumberLog, conn:DatabaseConnectable) -> Future<UserPhoneNumberLog?> {
+        return query(on: conn)
             .filter(\.userId == phoneNumberLog.userId)
             .filter(\.fromPhoneNumber == phoneNumberLog.fromPhoneNumber)
             .filter(\.toPhoneNumber == phoneNumberLog.toPhoneNumber)
