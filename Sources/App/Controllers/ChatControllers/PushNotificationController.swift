@@ -104,7 +104,7 @@ class PushNotificationController {
         let fcm = try req.make(FCM.self)
         let notification = FCMNotification(title: title ?? "", body: body)
         
-        let androidNotification = FCMAndroidNotification(title: title, body: body, sound: "default", click_action: click_action)
+        let androidNotification = FCMAndroidNotification(title: title, body: body, sound: "default")
         
         let info = Constants.appInfo.firebaseConfig
         let androidConfig = FCMAndroidConfig(ttl: "86400s", restricted_package_name: info.bundleId, notification: androidNotification)
@@ -113,6 +113,9 @@ class PushNotificationController {
         
         if let content = content {
             message.data[content.name] = content.data
+        }
+        if let click_action = click_action {
+            message.data["click_action"] = click_action
         }
 
         return try fcm.sendMessage(req.client(), message: message).map({ output in
