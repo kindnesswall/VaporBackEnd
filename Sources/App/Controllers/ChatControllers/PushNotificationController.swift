@@ -102,15 +102,15 @@ class PushNotificationController {
     
     private static func sendFirebasePush(_ req: Request, token: String, title: String?, body: String, content: PushPayloadContent?, click_action: String?) throws -> Future<HTTPStatus> {
         let fcm = try req.make(FCM.self)
-        let notification = FCMNotification(title: title ?? "", body: body)
         
-        let androidNotification = FCMAndroidNotification(title: title, body: body, sound: "default")
+        //TODO: More study about restricted_package_name field in FCMMessage (Android only)
         
-        let info = Constants.appInfo.firebaseConfig
-        let androidConfig = FCMAndroidConfig(ttl: "86400s", restricted_package_name: info.bundleId, notification: androidNotification)
+        let message = FCMMessage(token: token, notification: nil)
         
-        let message = FCMMessage(token: token, notification: notification, android: androidConfig)
-        
+        message.data["body"] = body
+        if let title = title {
+            message.data["title"] = title
+        }
         if let content = content {
             message.data[content.name] = content.data
         }
