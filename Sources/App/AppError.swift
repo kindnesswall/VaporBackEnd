@@ -67,6 +67,7 @@ class ErrorConstants {
     
     //MARK: badRequest
     let userIsNotCharity = Abort(.badRequest, reason: "User is not charity",identifier: "userIsNotCharity") 
+    let contactIsNotCharity = Abort(.badRequest, reason: "Contact is not charity",identifier: "contactIsNotCharity")
     
     //MARK: internalServerError
     let serverThrowsException = Abort(.internalServerError, reason: "Server throws exception", identifier: "serverThrowsException")

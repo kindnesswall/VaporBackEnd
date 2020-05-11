@@ -8,7 +8,7 @@
 import Vapor
 
 
-final class GiftRequestController{
+final class GiftRequestController: ChatInitializer {
     
     public func requestGift(_ req: Request) throws -> Future<Chat.ChatContacts> {
         let user = try req.requireAuthenticated(User.self)
@@ -38,10 +38,10 @@ final class GiftRequestController{
             return GiftRequest.hasExisted(requestUserId: userId, giftId: giftId, conn: req).flatMap({ giftRequestHasExisted in
                 
                 if giftRequestHasExisted {
-                    return try self.getChatContacts(userId: userId, contactId: giftOwnerId, conn: req)
+                    return try self.findOrCreateContacts(userId: userId, contactId: giftOwnerId, on: req)
                 } else {
                     return GiftRequest.create(requestUserId: userId, giftId: giftId, giftOwnerId: giftOwnerId, conn: req).flatMap({ _ in
-                        return try self.getChatContacts(userId: userId, contactId: giftOwnerId, conn: req)
+                        return try self.findOrCreateContacts(userId: userId, contactId: giftOwnerId, on: req)
                     })
                 }
             })
@@ -74,29 +74,4 @@ final class GiftRequestController{
         })
     }
     
-    private func getChatContacts(userId: Int, contactId: Int, conn: DatabaseConnectable) throws -> Future<Chat.ChatContacts> {
-        
-        let chat = getChat(userId: userId, contactId: contactId, conn: conn)
-        
-        return chat.map { chat in
-            return try chat.getChatContacts(userId: userId)
-        }
-        
-    }
-    
-    private func getChat(userId: Int, contactId: Int, conn: DatabaseConnectable) -> Future<Chat> {
-        
-        return Chat.findChat(userId: userId, contactId: contactId, conn: conn).flatMap({ chat -> Future<Chat> in
-            
-            if let chat = chat {
-                
-                return conn.eventLoop.newSucceededFuture(result: chat)
-                
-            } else {
-                let newChat = Chat(firstId: contactId, secondId: userId)
-                return newChat.save(on: conn)
-            }
-            
-        })
-    }
 }

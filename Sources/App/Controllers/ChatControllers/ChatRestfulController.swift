@@ -8,7 +8,7 @@
 import Vapor
 
 
-class ChatRestfulController {
+class ChatRestfulController: ChatInitializer {
     
     let chatController = ChatController()
     
@@ -17,6 +17,16 @@ class ChatRestfulController {
         let user = try req.requireAuthenticated(User.self)
         let userId = try user.getId()
         return RequestInfo(req: req, userId: userId)
+    }
+    
+    func startChat(_ req: Request) throws -> Future<Chat.ChatContacts> {
+        let user = try req.requireAuthenticated(User.self)
+        return try req.parameters.next(User.self).flatMap({ contact in
+            guard contact.isCharity else {
+                throw Constants.errors.contactIsNotCharity
+            }
+            return try self.findOrCreateContacts(user: user, contact: contact, on: req)
+        })
     }
     
     func fetchContacts(_ req: Request) throws -> Future<[ContactMessage]> {

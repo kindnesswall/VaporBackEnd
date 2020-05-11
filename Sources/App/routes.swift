@@ -82,6 +82,7 @@ public func routes(_ router: Router) throws {
     tokenProtected.get(uris.gifts_request_status, Gift.parameter, use: giftRequestController.requestStatus)
     
     //Routes Chat
+    tokenProtected.get(uris.chat_start, User.parameter, use: chatRestfulController.startChat)
     tokenProtected.get(uris.chat_contacts, use: chatRestfulController.fetchContacts)
     tokenProtected.post(uris.chat_messages, use: chatRestfulController.fetchMessages)
     tokenProtected.post(uris.chat_send, use: chatRestfulController.sendMessage)

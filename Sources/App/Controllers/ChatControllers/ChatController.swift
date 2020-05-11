@@ -49,7 +49,7 @@ class ChatController {
     }
     
     
-    //MARK: - Fetch Messages
+    //MARK: - Fetch Contacts
     
     func fetchContacts(reqInfo: RequestInfo) throws -> Future<[ContactMessage]> {
         
@@ -137,6 +137,7 @@ class ChatController {
         }
     }
     
+    //MARK: - Fetch Messages
     
     func fetchMessages(reqInfo: RequestInfo, fetchMessagesInput: FetchMessagesInput) throws -> Future<ContactMessage> {
         
