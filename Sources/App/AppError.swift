@@ -27,15 +27,13 @@ class ErrorConstants {
     let giftIsAlreadyDonated = Abort(.notAcceptable, reason: "Gift has already been donated",identifier: "giftIsAlreadyDonated")
     let charityInfoAlreadyExists = Abort(.notAcceptable ,reason: "Charity information already exists",identifier: "charityInfoAlreadyExists")
     let firebaseAuthenticationError = Abort(.notAcceptable, reason: "Firebase authentication error", identifier: "firebaseAuthenticationError")
-    
-    //MARK: nonAuthoritativeInformation
-    let invalidPhoneNumber = Abort(.nonAuthoritativeInformation, reason: "The phone number is invalid",identifier: "invalidPhoneNumber")
-    let phoneNumberHasExisted = Abort(.nonAuthoritativeInformation, reason: "Phone number has existed",identifier: "phoneNumberHasExisted")
-    let invalidActivationCode = Abort(.nonAuthoritativeInformation, reason: "The activation code is invalid",identifier: "invalidActivationCode")
-    let invalidActivationCodes = Abort(.nonAuthoritativeInformation, reason: "The activation codes is invalid",identifier: "invalidActivationCodes")
-    let wrongUserId = Abort(.nonAuthoritativeInformation, reason: "User id is wrong",identifier: "wrongUserId")
-    let pushPayloadIsNotValid = Abort(.nonAuthoritativeInformation ,reason: "Push payload is not valid",identifier: "pushPayloadIsNotValid")
-    let wrongPushNotificationType = Abort(.nonAuthoritativeInformation, reason: "Push Notification Type is wrong",identifier: "wrongPushNotificationType")
+    let invalidPhoneNumber = Abort(.notAcceptable, reason: "The phone number is invalid",identifier: "invalidPhoneNumber")
+    let phoneNumberHasExisted = Abort(.notAcceptable, reason: "Phone number has existed",identifier: "phoneNumberHasExisted")
+    let invalidActivationCode = Abort(.notAcceptable, reason: "The activation code is invalid",identifier: "invalidActivationCode")
+    let invalidActivationCodes = Abort(.notAcceptable, reason: "The activation codes is invalid",identifier: "invalidActivationCodes")
+    let wrongUserId = Abort(.notAcceptable, reason: "User id is wrong",identifier: "wrongUserId")
+    let pushPayloadIsNotValid = Abort(.notAcceptable ,reason: "Push payload is not valid",identifier: "pushPayloadIsNotValid")
+    let wrongPushNotificationType = Abort(.notAcceptable, reason: "Push Notification Type is wrong",identifier: "wrongPushNotificationType")
     
     //MARK: notFound
     let nilUserId = Abort(.notFound, reason: "User id is nil",identifier: "nilUserId")
