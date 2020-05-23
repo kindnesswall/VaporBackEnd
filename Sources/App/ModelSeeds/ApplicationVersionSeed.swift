@@ -24,5 +24,6 @@ final class ApplicationVersionSeed: Migration {
     }
     
     static func revert(on conn: PostgreSQLConnection) -> EventLoopFuture<Void> {
+        return conn.eventLoop.newSucceededFuture(result: Void())
     }
 }
