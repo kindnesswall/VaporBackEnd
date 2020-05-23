@@ -28,6 +28,7 @@ public func routes(_ router: Router) throws {
     let charityController = CharityController()
     let charityAdminController = CharityAdminController()
     let adminStatisticsController = AdminStatisticsController()
+    let versionController = ApplicationVersionController()
     
     //Middlewares
     let logMiddleware = LogMiddleware()
@@ -133,6 +134,13 @@ public func routes(_ router: Router) throws {
     
     //Statistics
     adminProtected.get(uris.statistics, use: adminStatisticsController.getStatistics)
+    
+    //Application Version
+    tokenProtected.get(uris.application_ios_version, use: versionController.getIOSVersion)
+    tokenProtected.get(uris.application_android_version, use: versionController.getAndroidVersion)
+    
+    adminProtected.post(uris.application_ios_version, use: versionController.setIOSVersion)
+    adminProtected.post(uris.application_android_version, use: versionController.setAndroidVersion)
     
 }
 

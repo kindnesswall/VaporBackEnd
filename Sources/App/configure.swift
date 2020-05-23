@@ -60,6 +60,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     migrations.add(model: GiftRequest.self, database: .psql)
     migrations.add(model: UserPushNotification.self, database: .psql)
     migrations.add(model: Charity.self, database: .psql)
+    migrations.add(model: ApplicationVersion.self, database: .psql)
     
     //models extension
     migrations.add(migration: AddUserCharityName.self, database: .psql)
@@ -68,6 +69,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     
     //seeds
     migrations.add(migration: CategorySeed.self, database: .psql)
+    migrations.add(migration: ApplicationVersionSeed.self, database: .psql)
     
     services.register(migrations)
     

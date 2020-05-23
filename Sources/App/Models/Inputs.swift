@@ -41,4 +41,10 @@ class Inputs {
         var devicePushToken: String
     }
     
+    struct ApplicationVersion: Content {
+        var availableVersion: String
+        var requiredVersion: String
+        var downloadLink: String
+    }
+    
 }

@@ -43,6 +43,7 @@ class ErrorConstants {
     let messageNotFound = Abort(.notFound, reason: "Message not found",identifier: "messageNotFound")
     let nilMessageId = Abort(.notFound, reason: "Message id is nil",identifier: "nilMessageId")
     let nilCountryId = Abort(.notFound, reason: "Country id is nil", identifier: "nilCountryId")
+    let notFound = Abort(.notFound, reason: "The item has not been found", identifier: "notFound")
     let giftNotFound = Abort(.notFound, reason: "Gift not found",identifier: "giftNotFound")
     let chatNotFound = Abort(.notFound, reason: "Chat not found",identifier: "chatNotFound")
     let nilChatId = Abort(.notFound, reason: "Chat id is nil",identifier: "nilChatId")

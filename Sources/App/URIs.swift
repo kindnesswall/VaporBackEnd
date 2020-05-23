@@ -176,6 +176,12 @@ class URIs {
     var statistics : String {
         return "\(apiRoute)/statistics"
     }
+    var application_ios_version : String {
+        return "\(apiRoute)/application/ios/version"
+    }
+    var application_android_version : String {
+        return "\(apiRoute)/application/android/version"
+    }
     
     func getSMSUrl(receptor: String, template: String, token: String) -> String {
         let apiKey = Constants.appInfo.smsConfig.apiKey
