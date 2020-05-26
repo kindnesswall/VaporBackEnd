@@ -42,9 +42,9 @@ class Inputs {
     }
     
     struct ApplicationVersion: Content {
-        var availableVersion: String
+        var availableVersionName: String
         var availableVersionCode: Int
-        var requiredVersion: String
+        var requiredVersionName: String
         var requiredVersionCode: Int
         var downloadLink: String?
     }
