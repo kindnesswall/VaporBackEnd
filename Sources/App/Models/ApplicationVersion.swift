@@ -12,20 +12,26 @@ final class ApplicationVersion: PostgreSQLModel {
     var id: Int?
     var platform: String
     var availableVersion: String
+    var availableVersionCode: Int
     var requiredVersion: String
-    var downloadLink: String
+    var requiredVersionCode: Int
+    var downloadLink: String?
     
     
     init(platform: PlatformType, input: Inputs.ApplicationVersion) {
         self.platform = platform.rawValue
         self.availableVersion = input.availableVersion
+        self.availableVersionCode = input.availableVersionCode
         self.requiredVersion = input.requiredVersion
+        self.requiredVersionCode = input.requiredVersionCode
         self.downloadLink = input.downloadLink
     }
     
     func update(input: Inputs.ApplicationVersion, on conn: DatabaseConnectable) -> Future<ApplicationVersion> {
         self.availableVersion = input.availableVersion
+        self.availableVersionCode = input.availableVersionCode
         self.requiredVersion = input.requiredVersion
+        self.requiredVersionCode = input.requiredVersionCode
         self.downloadLink = input.downloadLink
         return save(on: conn)
     }

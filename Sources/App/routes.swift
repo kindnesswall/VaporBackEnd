@@ -136,8 +136,8 @@ public func routes(_ router: Router) throws {
     adminProtected.get(uris.statistics, use: adminStatisticsController.getStatistics)
     
     //Application Version
-    tokenProtected.get(uris.application_ios_version, use: versionController.getIOSVersion)
-    tokenProtected.get(uris.application_android_version, use: versionController.getAndroidVersion)
+    publicRouter.get(uris.application_ios_version, use: versionController.getIOSVersion)
+    publicRouter.get(uris.application_android_version, use: versionController.getAndroidVersion)
     
     adminProtected.post(uris.application_ios_version, use: versionController.setIOSVersion)
     adminProtected.post(uris.application_android_version, use: versionController.setAndroidVersion)

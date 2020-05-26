@@ -43,8 +43,10 @@ class Inputs {
     
     struct ApplicationVersion: Content {
         var availableVersion: String
+        var availableVersionCode: Int
         var requiredVersion: String
-        var downloadLink: String
+        var requiredVersionCode: Int
+        var downloadLink: String?
     }
     
 }
