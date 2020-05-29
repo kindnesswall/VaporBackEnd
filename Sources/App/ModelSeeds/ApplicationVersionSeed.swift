@@ -12,8 +12,8 @@ final class ApplicationVersionSeed: Migration {
     typealias Database = PostgreSQLDatabase
     
     static let seeds = [
-        ApplicationVersion(platform: .iOS, input: Inputs.ApplicationVersion(availableVersionName: "1.0.0", availableVersionCode: 1, requiredVersionName: "1.0.0", requiredVersionCode: 1)),
-        ApplicationVersion(platform: .android, input: Inputs.ApplicationVersion(availableVersionName: "1.0.0", availableVersionCode: 1, requiredVersionName: "1.0.0", requiredVersionCode: 1))
+        ApplicationVersion(platform: .iOS, input: Inputs.ApplicationVersion(availableVersionName: "1.0.0", availableVersionCode: 1, requiredVersionName: "1.0.0", requiredVersionCode: 1, downloadLink: nil)),
+        ApplicationVersion(platform: .android, input: Inputs.ApplicationVersion(availableVersionName: "1.0.0", availableVersionCode: 1, requiredVersionName: "1.0.0", requiredVersionCode: 1, downloadLink: nil))
     ]
     
     static func prepare(on conn: PostgreSQLConnection) -> EventLoopFuture<Void> {
