@@ -54,4 +54,9 @@ UPDATE public."City" SET
 "sortIndex" = '1'::bigint WHERE
 id = '539';
 
+-- Tabriz
+UPDATE public."City" SET
+"sortIndex" = '1'::bigint WHERE
+id = '14';
+
 COMMIT;
