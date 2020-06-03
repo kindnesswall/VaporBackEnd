@@ -9,11 +9,11 @@ import Vapor
 
 
 final class ContactMessage: Content {
-    var chat: Chat.ChatContacts
+    var chat: ChatContacts
     var textMessages: [TextMessage]?
     var contactProfile: UserProfile?
-    var notificationCount: Int?
-    var blockStatus: BlockStatus?
+    var notificationCount: Int
+    var blockStatus: BlockStatus
     
     var chatId: Int {
         return chat.chatId
@@ -22,7 +22,11 @@ final class ContactMessage: Content {
         return chat.contactId
     }
     
-    init(chat: Chat.ChatContacts, textMessages: [TextMessage]? = nil, contactProfile: UserProfile? = nil, notificationCount: Int? = nil, blockStatus: BlockStatus? = nil) {
+    var isUnblock: Bool {
+        return blockStatus.isUnblock
+    }
+    
+    init(chat: ChatContacts, textMessages: [TextMessage]? = nil, contactProfile: UserProfile? = nil, notificationCount: Int, blockStatus: BlockStatus) {
         self.chat = chat
         self.textMessages = textMessages
         self.contactProfile = contactProfile

@@ -29,12 +29,6 @@ final class ChatBlock : PostgreSQLModel {
             .first()
     }
     
-    static func userBlockedChats(userId:Int,conn:DatabaseConnectable) -> Future<[ChatBlock]> {
-        
-        return ChatBlock.query(on: conn)
-            .filter(\.byUserId == userId)
-            .all()
-    }
 }
 
 extension ChatBlock : Migration {}
@@ -43,10 +37,14 @@ extension ChatBlock : Parameter {}
 
 
 final class BlockStatus: Content {
-    var userIsBlocked: Bool?
-    var contactIsBlocked: Bool?
+    var userIsBlocked: Bool
+    var contactIsBlocked: Bool
     
-    init(userIsBlocked: Bool?,contactIsBlocked: Bool?) {
+    var isUnblock: Bool {
+        return !userIsBlocked && !contactIsBlocked
+    }
+    
+    init(userIsBlocked: Bool, contactIsBlocked: Bool) {
         self.userIsBlocked = userIsBlocked
         self.contactIsBlocked = contactIsBlocked
     }

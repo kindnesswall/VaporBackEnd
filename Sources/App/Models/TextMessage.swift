@@ -32,17 +32,6 @@ extension TextMessage: PushPayloadable {
 
 extension TextMessage {
     
-    static func getTextMessages(chat:Chat,beforeId:Int?,conn:DatabaseConnectable) throws ->Future<[TextMessage]>   {
-        
-            let query = try chat.textMessages.query(on: conn)
-            if let beforeId = beforeId {
-                query.filter(\.id < beforeId)
-            }
-            let maximumCount = Constants.maximumRequestFetchResultsCount
-            return query.sort(\.id, .descending).range(0..<maximumCount).all()
-      
-    }
-    
     static func calculateNumberOfNotifications(userId:Int,chatId:Int,conn:DatabaseConnectable) -> Future<Int> {
         
         let query = TextMessage.query(on: conn)

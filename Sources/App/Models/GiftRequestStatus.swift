@@ -9,9 +9,9 @@ import Vapor
 
 final class GiftRequestStatus: Content {
     var isRequested: Bool
-    var chat: Chat.ChatContacts?
+    var chat: ContactMessage?
     
-    init(isRequested: Bool, chat: Chat.ChatContacts?) {
+    init(isRequested: Bool, chat: ContactMessage?) {
         self.isRequested = isRequested
         self.chat = chat
     }

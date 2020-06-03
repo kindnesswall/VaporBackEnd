@@ -10,7 +10,7 @@ import Vapor
 
 final class GiftRequestController: ChatInitializer {
     
-    public func requestGift(_ req: Request) throws -> Future<Chat.ChatContacts> {
+    public func requestGift(_ req: Request) throws -> Future<ContactMessage> {
         let user = try req.requireAuthenticated(User.self)
         guard let userId = user.id else {
             throw Constants.errors.nilUserId
@@ -37,11 +37,13 @@ final class GiftRequestController: ChatInitializer {
             
             return GiftRequest.hasExisted(requestUserId: userId, giftId: giftId, conn: req).flatMap({ giftRequestHasExisted in
                 
+                //TODO: Code redundency reduction
+                
                 if giftRequestHasExisted {
-                    return try self.findOrCreateContacts(userId: userId, contactId: giftOwnerId, on: req)
+                    return self.findOrCreateChat(userId: userId, contactId: giftOwnerId, on: req)
                 } else {
                     return GiftRequest.create(requestUserId: userId, giftId: giftId, giftOwnerId: giftOwnerId, conn: req).flatMap({ _ in
-                        return try self.findOrCreateContacts(userId: userId, contactId: giftOwnerId, on: req)
+                        return self.findOrCreateChat(userId: userId, contactId: giftOwnerId, on: req)
                     })
                 }
             })
@@ -63,12 +65,12 @@ final class GiftRequestController: ChatInitializer {
                 }
                 
                 let giftOwnerId = try gift.getUserId()
-                return Chat.findChat(userId: userId, contactId: giftOwnerId, conn: req).map({ chat in
+                return self.findChat(userId: userId, contactId: giftOwnerId, on: req).map({ chat in
                     guard let chat = chat else {
                         return GiftRequestStatus(isRequested: false, chat: nil)
                     }
-                    let chatContacts = try chat.getChatContacts(userId: userId)
-                    return GiftRequestStatus(isRequested: true, chat: chatContacts)
+                    
+                    return GiftRequestStatus(isRequested: true, chat: chat)
                 })
             })
         })

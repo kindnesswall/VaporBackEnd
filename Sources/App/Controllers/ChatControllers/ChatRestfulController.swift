@@ -19,13 +19,13 @@ class ChatRestfulController: ChatInitializer {
         return RequestInfo(req: req, userId: userId)
     }
     
-    func startChat(_ req: Request) throws -> Future<Chat.ChatContacts> {
+    func startChat(_ req: Request) throws -> Future<ContactMessage> {
         let user = try req.requireAuthenticated(User.self)
         return try req.parameters.next(User.self).flatMap({ contact in
             guard contact.isCharity else {
                 throw Constants.errors.contactIsNotCharity
             }
-            return try self.findOrCreateContacts(user: user, contact: contact, on: req)
+            return try self.findOrCreateChat(user: user, contact: contact, on: req)
         })
     }
     
@@ -46,7 +46,7 @@ class ChatRestfulController: ChatInitializer {
         let reqInfo = try getRequestInfo(req: req)
         return try req.content.decode(FetchMessagesInput.self).flatMap({ fetchMessagesInput in
             
-            return try self.chatController.fetchMessages(reqInfo: reqInfo, fetchMessagesInput: fetchMessagesInput)
+            return try self.chatController.fetchMessages(reqInfo: reqInfo, input: fetchMessagesInput)
         })
         
     }
@@ -62,30 +62,23 @@ class ChatRestfulController: ChatInitializer {
     
     private func sendMessage(req: Request, textMessage: TextMessage) throws -> Future<TextMessage> {
         
-        let reqInfo = try getRequestInfo(req: req) 
-        
+        let reqInfo = try getRequestInfo(req: req)
         let chatId = textMessage.chatId
         
-        let chat = Chat.getChat(chatId: chatId, conn: req)
-        
-        return chat.flatMap { chat in
-            let chatIsUnblock = chat.isChatUnblock()
-            guard chatIsUnblock else {
+        return DirectChat.findOrFail(authId: reqInfo.userId, chatId: chatId, on: req).flatMap { chat in
+            
+            guard chat.isUnblock else {
                 throw Constants.errors.chatHasBlocked
             }
             
-            let chatContacts = try chat.getChatContacts(userId: reqInfo.userId)
-            
-            return try self.chatController.saveTextMessage(reqInfo: reqInfo, textMessage: textMessage, chatContacts: chatContacts, receiverId: chatContacts.contactId).map({ textMessage in
+            return try self.chatController.saveTextMessage(reqInfo: reqInfo, textMessage: textMessage, chatId: chatId, receiverId: chat.contactId).map({ textMessage in
                 
-                try self.sendPushNotification(req, toUserId: chatContacts.contactId, textMessage: textMessage)
+                try self.sendPushNotification(req, toUserId: chat.contactId, textMessage: textMessage)
                 
-                // send message to other user active devices
-                //                    try self.sendPushNotification(req, toUserId: chatContacts.userId, textMessage: textMessage)
+                //TODO: Send message to other active devices of the user
                 
                 return textMessage
             })
-            
         }
     }
     

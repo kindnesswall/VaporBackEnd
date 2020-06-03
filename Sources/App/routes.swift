@@ -91,8 +91,8 @@ public func routes(_ router: Router) throws {
     
     //Routes Chat Block
     tokenProtected.get(uris.chat_contacts_block, use: chatRestfulController.fetchBlockedContacts)
-    tokenProtected.put(uris.chat_block, Chat.parameter, use: chatBlockController.blockUser)
-    tokenProtected.put(uris.chat_unblock, Chat.parameter, use: chatBlockController.unblockUser)
+    tokenProtected.put(uris.chat_block, Int.parameter, use: chatBlockController.blockUser)
+    tokenProtected.put(uris.chat_unblock, Int.parameter, use: chatBlockController.unblockUser)
     
     
     //Routes Admin
