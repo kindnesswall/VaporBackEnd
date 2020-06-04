@@ -22,8 +22,12 @@ final class ContactMessage: Content {
         return chat.contactId
     }
     
-    var isUnblock: Bool {
-        return blockStatus.isUnblock
+    var userIsBlocked: Bool {
+        return blockStatus.userIsBlocked
+    }
+    
+    var contactIsBlocked: Bool {
+        return blockStatus.contactIsBlocked
     }
     
     init(chat: ChatContacts, textMessages: [TextMessage]? = nil, contactProfile: UserProfile? = nil, notificationCount: Int, blockStatus: BlockStatus) {

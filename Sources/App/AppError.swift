@@ -34,6 +34,7 @@ class ErrorConstants {
     let wrongUserId = Abort(.notAcceptable, reason: "User id is wrong",identifier: "wrongUserId")
     let pushPayloadIsNotValid = Abort(.notAcceptable ,reason: "Push payload is not valid",identifier: "pushPayloadIsNotValid")
     let wrongPushNotificationType = Abort(.notAcceptable, reason: "Push Notification Type is wrong",identifier: "wrongPushNotificationType")
+    let chatHasBlockedByUser = Abort(.notAcceptable, reason: "Chat has blocked by user",identifier: "chatHasBlockedByUser")
     
     //MARK: notFound
     let nilUserId = Abort(.notFound, reason: "User id is nil",identifier: "nilUserId")
@@ -57,7 +58,6 @@ class ErrorConstants {
     //MARK: forbidden
     let userAccessIsDenied = Abort(.forbidden, reason: "User access is denied",identifier: "userAccessIsDenied")
     let chatHasBlocked = Abort(.forbidden, reason: "Chat has blocked",identifier: "chatHasBlocked")
-    let chatHasBlockedByUser = Abort(.forbidden, reason: "Chat has blocked by user",identifier: "chatHasBlockedByUser")
     
     //MARK: alreadyReported
     let redundentAck = Abort(.alreadyReported, reason: "Ack is redundent",identifier: "redundentAck")

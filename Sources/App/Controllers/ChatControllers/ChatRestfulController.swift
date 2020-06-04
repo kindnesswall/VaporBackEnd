@@ -67,8 +67,11 @@ class ChatRestfulController: ChatInitializer {
         
         return DirectChat.findOrFail(authId: reqInfo.userId, chatId: chatId, on: req).flatMap { chat in
             
-            guard chat.isUnblock else {
+            guard !chat.userIsBlocked else {
                 throw Constants.errors.chatHasBlocked
+            }
+            guard !chat.contactIsBlocked else {
+                throw Constants.errors.chatHasBlockedByUser
             }
             
             return try self.chatController.saveTextMessage(reqInfo: reqInfo, textMessage: textMessage, chatId: chatId, receiverId: chat.contactId).map({ textMessage in

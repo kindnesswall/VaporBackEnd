@@ -40,10 +40,6 @@ final class BlockStatus: Content {
     var userIsBlocked: Bool
     var contactIsBlocked: Bool
     
-    var isUnblock: Bool {
-        return !userIsBlocked && !contactIsBlocked
-    }
-    
     init(userIsBlocked: Bool, contactIsBlocked: Bool) {
         self.userIsBlocked = userIsBlocked
         self.contactIsBlocked = contactIsBlocked
