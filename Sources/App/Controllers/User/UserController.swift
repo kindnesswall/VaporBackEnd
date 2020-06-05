@@ -43,7 +43,7 @@ final class UserController: UserControllerCore, PhoneNumberValidator {
                 throw Constants.errors.invalidActivationCode
             }
             
-            return self.checkActivationCode(req: req, phoneNumber: phoneNumber, activationCode: activationCode).flatMap { _ in
+            return try self.checkActivationCode(req: req, phoneNumber: phoneNumber, activationCode: activationCode).flatMap { _ in
                 
                 return self.findOrCreateUser(req: req, phoneNumber: phoneNumber).flatMap { user in
                     return try self.getToken(req: req, user: user)

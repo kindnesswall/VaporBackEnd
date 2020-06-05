@@ -9,7 +9,7 @@ import Foundation
 
 protocol UserDemoAccountable {
     func isDemoAccount(phoneNumber: String) -> Bool
-    func validateDemoAccount(phoneNumber: String, activationCode: String) -> Bool
+    func validateDemoAccount(phoneNumber: String, activationCode: String) throws -> Bool
 }
 
 extension UserDemoAccountable {

@@ -43,9 +43,9 @@ class UserControllerCore: UserDemoAccountable {
     }
     
     
-    func checkActivationCode(req: Request, phoneNumber: String, activationCode: String) -> Future<HTTPStatus> {
+    func checkActivationCode(req: Request, phoneNumber: String, activationCode: String) throws -> Future<HTTPStatus> {
         
-        if validateDemoAccount(phoneNumber: phoneNumber, activationCode: activationCode) {
+        if try validateDemoAccount(phoneNumber: phoneNumber, activationCode: activationCode) {
             return req.eventLoop.newSucceededFuture(result: .ok)
         }
         
