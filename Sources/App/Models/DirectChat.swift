@@ -93,14 +93,14 @@ extension DirectChat {
     }
     
     static func find(userId: Int, contactId: Int, on conn: DatabaseConnectable) -> Future<ContactMessage?> {
-        return findItem(userId: userId, contactId: contactId, on: conn).map { item in
+        return _find(userId: userId, contactId: contactId, on: conn).map { item in
             return try item?.castFor(authId: userId)
         }
     }
     
     static func findOrCreate(userId: Int, contactId: Int, on conn: DatabaseConnectable) -> Future<ContactMessage> {
         let input = DirectChat(userId: userId, contactId: contactId)
-        return findOrCreateItem(input: input, on: conn).map { item in
+        return _findOrCreate(input: input, on: conn).map { item in
             return try item.castFor(authId: userId)
         }
         
@@ -147,9 +147,13 @@ extension DirectChat {
     }
 }
 
-extension DirectChat {
+extension DirectChat: FindOrCreatable {
     
-    static private func findItem(userId: Int, contactId: Int, on conn: DatabaseConnectable) -> Future<DirectChat?> {
+    static func _find(input: DirectChat, on conn: DatabaseConnectable) -> EventLoopFuture<DirectChat?> {
+        return _find(userId: input.userId, contactId: input.contactId, on: conn)
+    }
+    
+    static private func _find(userId: Int, contactId: Int, on conn: DatabaseConnectable) -> Future<DirectChat?> {
         return query(on: conn).group(.or) { query in
             query.group(.and, closure: { query in
                 query.filter(\.userId == userId).filter(\.contactId == contactId)
@@ -157,15 +161,6 @@ extension DirectChat {
                 query.filter(\.userId == contactId).filter(\.contactId == userId)
             })
         }.first()
-    }
-    
-    private static func findOrCreateItem(input: DirectChat, on conn: DatabaseConnectable) -> Future<DirectChat> {
-        
-        return findItem(userId: input.userId, contactId: input.contactId, on: conn).flatMap { foundItem in
-            let item = foundItem ?? input
-            return item.save(on: conn)
-        }
-        
     }
 }
 
@@ -250,6 +245,5 @@ extension DirectChat {
 extension DirectChat : Migration {}
 extension DirectChat : Content {}
 extension DirectChat : Parameter {}
-
 
 
