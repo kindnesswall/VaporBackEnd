@@ -49,7 +49,7 @@ final class PhoneChangeController: PhoneNumberValidator {
             let toPhoneNumber = try self.validate(phoneNumber: input.toPhoneNumber)
             
             guard let activationCode = UserPhoneNumberLog.ActivationCode(from: input.activationCode_from, to: input.activationCode_to) else {
-                throw Constants.errors.activationCodesNotFound
+                throw Constants.errors.invalidActivationCodes
             }
             
             return User.phoneNumberHasExisted(phoneNumber: toPhoneNumber, conn: req).flatMap({ hasExisted in

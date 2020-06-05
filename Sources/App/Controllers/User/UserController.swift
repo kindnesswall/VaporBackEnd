@@ -19,6 +19,10 @@ final class UserController: UserControllerCore, PhoneNumberValidator {
             
             let phoneNumber = try self.validate(phoneNumber: inputUser.phoneNumber)
             
+            if self.isDemoAccount(phoneNumber: phoneNumber) {
+                return req.eventLoop.newSucceededFuture(result: .ok)
+            }
+            
             let activationCode = User.generateActivationCode()
             
             return self.setActvatioCode(req: req, phoneNumber: phoneNumber, activationCode: activationCode).flatMap { _ in

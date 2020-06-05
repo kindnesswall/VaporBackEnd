@@ -8,7 +8,8 @@
 import Vapor
 import FluentPostgreSQL
 
-class UserControllerCore {
+class UserControllerCore: UserDemoAccountable {
+    
     func findOrCreateUser(req: Request, phoneNumber: String) -> Future<User> {
         
         return User.find(req: req, phoneNumber: phoneNumber).flatMap { foundUser in
@@ -43,6 +44,10 @@ class UserControllerCore {
     
     
     func checkActivationCode(req: Request, phoneNumber: String, activationCode: String) -> Future<HTTPStatus> {
+        
+        if validateDemoAccount(phoneNumber: phoneNumber, activationCode: activationCode) {
+            return req.eventLoop.newSucceededFuture(result: .ok)
+        }
         
         return PhoneNumberActivationCode.check(req: req, phoneNumber: phoneNumber, activationCode: activationCode)
     }
