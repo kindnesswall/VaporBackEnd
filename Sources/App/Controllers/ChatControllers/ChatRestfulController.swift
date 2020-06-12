@@ -53,16 +53,15 @@ class ChatRestfulController: ChatInitializer {
     
     func sendMessage(_ req: Request) throws -> Future<TextMessage> {
         
-        
-        return try req.content.decode(TextMessage.self).flatMap({ textMessage in
-            
-            return try self.sendMessage(req: req, textMessage: textMessage)
+        return try req.content.decode(Inputs.TextMessage.self).flatMap({ input in
+            return try self.sendMessage(req: req, input: input)
         })
     }
     
-    private func sendMessage(req: Request, textMessage: TextMessage) throws -> Future<TextMessage> {
+    private func sendMessage(req: Request, input: Inputs.TextMessage) throws -> Future<TextMessage> {
         
         let reqInfo = try getRequestInfo(req: req)
+        let textMessage = try TextMessage(input: input)
         let chatId = textMessage.chatId
         
         return DirectChat.findOrFail(authId: reqInfo.userId, chatId: chatId, on: req).flatMap { chat in

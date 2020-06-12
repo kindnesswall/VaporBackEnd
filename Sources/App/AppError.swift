@@ -35,6 +35,7 @@ class ErrorConstants {
     let pushPayloadIsNotValid = Abort(.notAcceptable ,reason: "Push payload is not valid",identifier: "pushPayloadIsNotValid")
     let wrongPushNotificationType = Abort(.notAcceptable, reason: "Push Notification Type is wrong",identifier: "wrongPushNotificationType")
     let chatHasBlockedByUser = Abort(.notAcceptable, reason: "Chat has blocked by user",identifier: "chatHasBlockedByUser")
+    let invalidType = Abort(.notAcceptable, reason: "The input type is invalid",identifier: "invalidType")
     
     //MARK: notFound
     let nilUserId = Abort(.notFound, reason: "User id is nil",identifier: "nilUserId")

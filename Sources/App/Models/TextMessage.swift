@@ -15,8 +15,28 @@ final class TextMessage : PostgreSQLModel {
     var senderId:Int?
     var receiverId:Int?
     var text:String
+    var type: String?
     var ack:Bool?
     var createdAt:Date?
+    
+    init(input: Inputs.TextMessage) throws {
+        self.chatId = input.chatId
+        self.text = input.text
+        
+        if let rawType = input.type {
+            guard let type = TypeCases(rawValue: rawType) else {
+                throw Constants.errors.invalidType
+            }
+            self.type = type.rawValue
+        }
+    }
+}
+
+extension TextMessage {
+    enum TypeCases: String {
+        case giftRequest
+        case giftDonation
+    }
 }
 
 extension TextMessage {
