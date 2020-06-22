@@ -18,8 +18,10 @@ extension FindOrCreatable {
     static func _findOrCreate(input: Self, on conn: DatabaseConnectable) -> Future<Self> {
         
         return _find(input: input, on: conn).flatMap { foundItem in
-            let item = foundItem ?? input
-            return item.save(on: conn)
+            if let foundItem = foundItem {
+                return conn.eventLoop.newSucceededFuture(result: foundItem)
+            }
+            return input.save(on: conn)
         }
         
     }
