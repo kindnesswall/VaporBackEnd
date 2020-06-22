@@ -49,7 +49,7 @@ class ErrorConstants {
     let giftNotFound = Abort(.notFound, reason: "Gift not found",identifier: "giftNotFound")
     let chatNotFound = Abort(.notFound, reason: "Chat not found",identifier: "chatNotFound")
     let nilChatId = Abort(.notFound, reason: "Chat id is nil",identifier: "nilChatId")
-    let contactNotFound = Abort(.notFound, reason: "Contact not found",identifier: "contactNotFound")
+    let profileNotFound = Abort(.notFound, reason: "Profile not found",identifier: "profileNotFound")
     let chatNotificationNotFound = Abort(.notFound, reason: "Chat's Notification not found",identifier: "chatNotificationNotFound")
     let charityInfoNotFound = Abort(.notFound, reason: "Charity information not found",identifier: "charityInfoNotFound")
     let activationCodeNotFound = Abort(.notFound, reason: "Activation code not found", identifier: "activationCodeNotFound")
