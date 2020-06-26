@@ -36,7 +36,7 @@ public func routes(_ router: Router) throws {
     let guardAuthMiddleware = User.guardAuthMiddleware()
     let guardAdminMiddleware = GuardAdminMiddleware()
     let guardianMiddleware = GuardianMiddleware(rate: Rate(limit: 3, interval: .minute),closure:{ _ in
-        throw Constants.errors.tryOneMinuteLater
+        throw Abort(.tryOneMinuteLater)
     })
     
     //Groups

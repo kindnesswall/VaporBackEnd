@@ -25,7 +25,7 @@ final class TextMessage : PostgreSQLModel {
         
         if let rawType = input.type {
             guard let type = TypeCases(rawValue: rawType) else {
-                throw Constants.errors.invalidType
+                throw Abort(.invalidType)
             }
             self.type = type.rawValue
         }

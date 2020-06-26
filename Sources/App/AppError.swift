@@ -9,67 +9,219 @@ import Foundation
 import Vapor
 
 
-class ErrorConstants {
-    
-    //MARK: tooManyRequests
-    let tryOneMinuteLater = Abort(.tooManyRequests, reason: "Please try one minute later", identifier: "tryOneMinuteLater")
-    
-    //MARK: methodNotAllowed
-    let unauthorizedRequest = Abort(.methodNotAllowed, reason: "Request is unauthorized",identifier: "unauthorizedRequest")
-    let unauthorizedSocket = Abort(.methodNotAllowed, reason: "Socket is unauthorized",identifier: "unauthorizedSocket")
-    let unauthorizedGift = Abort(.methodNotAllowed, reason: "Gift is unauthorized for this operation",identifier: "unauthorizedGift")
-    let unauthorizedMessage = Abort(.methodNotAllowed, reason: "Message is unauthorized for this operation",identifier: "unauthorizedMessage")
-    
-    //MARK: notAcceptable
-    let unreviewedGift = Abort(.notAcceptable, reason: "Gift is not reviewed",identifier: "unreviewedGift")
-    let unrequestedGift = Abort(.notAcceptable, reason: "Gift is not requested",identifier: "unrequestedGift")
-    let giftCannotBeDonatedToTheOwner = Abort(.notAcceptable, reason: "Gift can not be donated to the owner", identifier: "giftCannotBeDonatedToTheOwner")
-    let giftIsAlreadyDonated = Abort(.notAcceptable, reason: "Gift has already been donated",identifier: "giftIsAlreadyDonated")
-    let charityInfoAlreadyExists = Abort(.notAcceptable ,reason: "Charity information already exists",identifier: "charityInfoAlreadyExists")
-    let firebaseAuthenticationError = Abort(.notAcceptable, reason: "Firebase authentication error", identifier: "firebaseAuthenticationError")
-    let invalidPhoneNumber = Abort(.notAcceptable, reason: "The phone number is invalid",identifier: "invalidPhoneNumber")
-    let phoneNumberHasExisted = Abort(.notAcceptable, reason: "Phone number has existed",identifier: "phoneNumberHasExisted")
-    let invalidActivationCode = Abort(.notAcceptable, reason: "The activation code is invalid",identifier: "invalidActivationCode")
-    let invalidActivationCodes = Abort(.notAcceptable, reason: "The activation codes is invalid",identifier: "invalidActivationCodes")
-    let wrongUserId = Abort(.notAcceptable, reason: "User id is wrong",identifier: "wrongUserId")
-    let pushPayloadIsNotValid = Abort(.notAcceptable ,reason: "Push payload is not valid",identifier: "pushPayloadIsNotValid")
-    let wrongPushNotificationType = Abort(.notAcceptable, reason: "Push Notification Type is wrong",identifier: "wrongPushNotificationType")
-    let chatHasBlockedByUser = Abort(.notAcceptable, reason: "Chat has blocked by user",identifier: "chatHasBlockedByUser")
-    let invalidType = Abort(.notAcceptable, reason: "The input type is invalid",identifier: "invalidType")
-    
-    //MARK: notFound
-    let nilUserId = Abort(.notFound, reason: "User id is nil",identifier: "nilUserId")
-    let nilTokenId = Abort(.notFound, reason: "Token id is nil",identifier: "nilTokenId")
-    let nilGiftId = Abort(.notFound, reason: "Gift id is nil",identifier: "nilGiftId")
-    let nilGiftUserId = Abort(.notFound, reason: "Gift user id is nil",identifier: "nilGiftUserId")
-    let messageNotFound = Abort(.notFound, reason: "Message not found",identifier: "messageNotFound")
-    let nilMessageId = Abort(.notFound, reason: "Message id is nil",identifier: "nilMessageId")
-    let nilCountryId = Abort(.notFound, reason: "Country id is nil", identifier: "nilCountryId")
-    let notFound = Abort(.notFound, reason: "The item has not been found", identifier: "notFound")
-    let giftNotFound = Abort(.notFound, reason: "Gift not found",identifier: "giftNotFound")
-    let chatNotFound = Abort(.notFound, reason: "Chat not found",identifier: "chatNotFound")
-    let nilChatId = Abort(.notFound, reason: "Chat id is nil",identifier: "nilChatId")
-    let profileNotFound = Abort(.notFound, reason: "Profile not found",identifier: "profileNotFound")
-    let chatNotificationNotFound = Abort(.notFound, reason: "Chat's Notification not found",identifier: "chatNotificationNotFound")
-    let charityInfoNotFound = Abort(.notFound, reason: "Charity information not found",identifier: "charityInfoNotFound")
-    let activationCodeNotFound = Abort(.notFound, reason: "Activation code not found", identifier: "activationCodeNotFound")
-    let countryNotFound = Abort(.notFound, reason: "Country not found", identifier: "countryNotFound")
-    
-    //MARK: forbidden
-    let userAccessIsDenied = Abort(.forbidden, reason: "User access is denied",identifier: "userAccessIsDenied")
-    let chatHasBlocked = Abort(.forbidden, reason: "Chat has blocked",identifier: "chatHasBlocked")
-    
-    //MARK: alreadyReported
-    let redundentAck = Abort(.alreadyReported, reason: "Ack is redundent",identifier: "redundentAck")
-    let userWasAlreadyBlocked = Abort(.alreadyReported, reason: "User was already blocked",identifier: "userWasAlreadyBlocked")
-    let userWasAlreadyUnblocked = Abort(.alreadyReported ,reason: "User was already unblocked",identifier: "userWasAlreadyUnblocked")
-    
-    //MARK: badRequest
-    let userIsNotCharity = Abort(.badRequest, reason: "User is not charity",identifier: "userIsNotCharity") 
-    let contactIsNotCharity = Abort(.badRequest, reason: "Contact is not charity",identifier: "contactIsNotCharity")
-    
-    //MARK: internalServerError
-    let serverThrowsException = Abort(.internalServerError, reason: "Server throws exception", identifier: "serverThrowsException")
-    let objectEncodingFailed = Abort(.internalServerError, reason: "Object encoding failed", identifier: "objectEncodingFailed")
+extension Abort {
+    init(_ type: ErrorType) {
+        self.init(type.status, reason: type.reason, identifier: type.identifier)
+    }
+}
+
+
+enum ErrorType: String {
+    case tryOneMinuteLater
+    case unauthorizedRequest
+    case unauthorizedSocket
+    case unauthorizedGift
+    case unauthorizedMessage
+    case unreviewedGift
+    case unrequestedGift
+    case giftCannotBeDonatedToTheOwner
+    case giftIsAlreadyDonated
+    case charityInfoAlreadyExists
+    case firebaseAuthenticationError
+    case invalidPhoneNumber
+    case phoneNumberHasExisted
+    case invalidActivationCode
+    case wrongUserId
+    case pushPayloadIsNotValid
+    case wrongPushNotificationType
+    case chatHasBlockedByUser
+    case invalidType
+    case nilUserId
+    case nilTokenId
+    case nilGiftId
+    case nilGiftUserId
+    case messageNotFound
+    case nilMessageId
+    case nilCountryId
+    case notFound
+    case giftNotFound
+    case chatNotFound
+    case nilChatId
+    case profileNotFound
+    case chatNotificationNotFound
+    case charityInfoNotFound
+    case activationCodeNotFound
+    case countryNotFound
+    case userAccessIsDenied
+    case chatHasBlocked
+    case redundentAck
+    case userWasAlreadyBlocked
+    case userWasAlreadyUnblocked
+    case userIsNotCharity
+    case contactIsNotCharity
+    case serverThrowsException
+    case objectEncodingFailed
+}
+
+extension ErrorType {
+    var status: HTTPResponseStatus {
+        switch self {
+        case .tryOneMinuteLater:
+            return .tooManyRequests
+        case .unauthorizedRequest,
+             .unauthorizedSocket,
+             .unauthorizedGift,
+             .unauthorizedMessage:
+            return .methodNotAllowed
+        case .unreviewedGift,
+             .unrequestedGift,
+             .giftCannotBeDonatedToTheOwner,
+             .giftIsAlreadyDonated,
+             .charityInfoAlreadyExists,
+             .firebaseAuthenticationError,
+             .invalidPhoneNumber,
+             .phoneNumberHasExisted,
+             .invalidActivationCode,
+             .wrongUserId,
+             .pushPayloadIsNotValid,
+             .wrongPushNotificationType,
+             .chatHasBlockedByUser,
+             .invalidType:
+            return .notAcceptable
+        case .nilUserId,
+             .nilTokenId,
+             .nilGiftId,
+             .nilGiftUserId,
+             .messageNotFound,
+             .nilMessageId,
+             .nilCountryId,
+             .notFound,
+             .giftNotFound,
+             .chatNotFound,
+             .nilChatId,
+             .profileNotFound,
+             .chatNotificationNotFound,
+             .charityInfoNotFound,
+             .activationCodeNotFound,
+             .countryNotFound:
+            return .notFound
+        case .userAccessIsDenied,
+             .chatHasBlocked:
+            return .forbidden
+        case .redundentAck,
+             .userWasAlreadyBlocked,
+             .userWasAlreadyUnblocked:
+            return .alreadyReported
+        case .userIsNotCharity,
+             .contactIsNotCharity:
+            return .badRequest
+        case .serverThrowsException,
+             .objectEncodingFailed:
+            return .internalServerError
+        
+        }
+    }
+}
+
+extension ErrorType {
+    var reason: String {
+        switch self {
+        case .tryOneMinuteLater:
+            return "Please try one minute later"
+        case .unauthorizedRequest:
+            return "Request is unauthorized"
+        case .unauthorizedSocket:
+            return "Socket is unauthorized"
+        case .unauthorizedGift:
+            return "Gift is unauthorized for this operation"
+        case .unauthorizedMessage:
+            return "Message is unauthorized for this operation"
+        case .unreviewedGift:
+            return "Gift is not reviewed"
+        case .unrequestedGift:
+            return "Gift is not requested"
+        case .giftCannotBeDonatedToTheOwner:
+            return "Gift can not be donated to the owner"
+        case .giftIsAlreadyDonated:
+            return "Gift has already been donated"
+        case .charityInfoAlreadyExists:
+            return "Charity information already exists"
+        case .firebaseAuthenticationError:
+            return "Firebase authentication error"
+        case .invalidPhoneNumber:
+            return "The phone number is invalid"
+        case .phoneNumberHasExisted:
+            return "Phone number has existed"
+        case .invalidActivationCode:
+            return "The activation code is invalid"
+        case .wrongUserId:
+            return "User id is wrong"
+        case .pushPayloadIsNotValid:
+            return "Push payload is not valid"
+        case .wrongPushNotificationType:
+            return "Push Notification Type is wrong"
+        case .chatHasBlockedByUser:
+            return "Chat has blocked by user"
+        case .invalidType:
+            return "The input type is invalid"
+        case .nilUserId:
+            return "User id is nil"
+        case .nilTokenId:
+            return "Token id is nil"
+        case .nilGiftId:
+            return "Gift id is nil"
+        case .nilGiftUserId:
+            return "Gift user id is nil"
+        case .messageNotFound:
+            return "Message not found"
+        case .nilMessageId:
+            return "Message id is nil"
+        case .nilCountryId:
+            return "Country id is nil"
+        case .notFound:
+            return "The item has not been found"
+        case .giftNotFound:
+            return "Gift not found"
+        case .chatNotFound:
+            return "Chat not found"
+        case .nilChatId:
+            return "Chat id is nil"
+        case .profileNotFound:
+            return "Profile not found"
+        case .chatNotificationNotFound:
+            return "Chat's Notification not found"
+        case .charityInfoNotFound:
+            return "Charity information not found"
+        case .activationCodeNotFound:
+            return "Activation code not found"
+        case .countryNotFound:
+            return "Country not found"
+        case .userAccessIsDenied:
+            return "User access is denied"
+        case .chatHasBlocked:
+            return "Chat has blocked"
+        case .redundentAck:
+            return "Ack is redundent"
+        case .userWasAlreadyBlocked:
+            return "User was already blocked"
+        case .userWasAlreadyUnblocked:
+            return "User was already unblocked"
+        case .userIsNotCharity:
+            return "User is not charity"
+        case .contactIsNotCharity:
+            return "Contact is not charity"
+        case .serverThrowsException:
+            return "Server throws exception"
+        case .objectEncodingFailed:
+            return "Object encoding failed"
+        
+        }
+    }
+}
+
+extension ErrorType {
+    var identifier: String {
+        return self.rawValue
+    }
 }
 

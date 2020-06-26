@@ -40,14 +40,14 @@ final class Gift : PostgreSQLModel {
     
     func getId() throws -> Int {
         guard let id = self.id else {
-            throw Constants.errors.nilGiftId
+            throw Abort(.nilGiftId)
         }
         return id
     }
     
     func getUserId() throws -> Int {
         guard let userId = self.userId else {
-            throw Constants.errors.nilGiftUserId
+            throw Abort(.nilGiftUserId)
         }
         return userId
     }
@@ -125,11 +125,11 @@ extension Gift {
 extension Gift {
     func getCountry(_ req: Request) throws -> Future<Country>  {
         guard let countryId = self.countryId else {
-            throw Constants.errors.nilCountryId
+            throw Abort(.nilCountryId)
         }
         return Country.find(countryId, on: req).map { country in
             guard let country = country else {
-                throw Constants.errors.countryNotFound
+                throw Abort(.countryNotFound)
             }
             return country
         }

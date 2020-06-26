@@ -30,10 +30,10 @@ class ChatController {
         
         return TextMessage.find(ackMessage.messageId, on: reqInfo.req).flatMap { message in
             guard let message = message else {
-                throw Constants.errors.messageNotFound
+                throw Abort(.messageNotFound)
             }
             guard message.receiverId == reqInfo.userId else {
-                throw Constants.errors.unauthorizedMessage
+                throw Abort(.unauthorizedMessage)
             }
             if message.ack == false {
                 message.ack = true
@@ -43,7 +43,7 @@ class ChatController {
                 }).transform(to: .ok)
                 
             } else {
-                throw Constants.errors.redundentAck
+                throw Abort(.redundentAck)
             }
         }
     }

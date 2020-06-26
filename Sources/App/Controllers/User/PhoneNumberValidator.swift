@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Vapor
 
 protocol PhoneNumberValidator {
     func validate(phoneNumber: String) throws -> String
@@ -24,7 +25,7 @@ extension PhoneNumberValidator {
         guard phoneNumber.isCorrectPhoneNumber(),
             let englishPhoneNumber = phoneNumber.castNumberToEnglish()
             else {
-                throw Constants.errors.invalidPhoneNumber
+                throw Abort(.invalidPhoneNumber)
         }
         
         return "+\(englishPhoneNumber)"

@@ -21,7 +21,7 @@ class APICurl {
         guard let data = try? JSONEncoder().encode(input),
             let payload = String(data: data, encoding: .utf8) else
         {
-            throw Constants.errors.objectEncodingFailed
+            throw Abort(.objectEncodingFailed)
         }
         
         return try APICurl.curl(req: req, url: url, httpMethod: httpMethod, payload: payload)

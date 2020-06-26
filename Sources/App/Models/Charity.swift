@@ -80,7 +80,7 @@ extension Charity {
     static func get(userId:Int,conn:DatabaseConnectable) throws ->Future<Charity> {
         return find(userId: userId, conn: conn).map({ charity in
             guard let charity = charity else {
-                throw Constants.errors.charityInfoNotFound
+                throw Abort(.charityInfoNotFound)
             }
             return charity
         })

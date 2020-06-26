@@ -23,7 +23,7 @@ class ChatRestfulController: ChatInitializer {
         let user = try req.requireAuthenticated(User.self)
         return try req.parameters.next(User.self).flatMap({ contact in
             guard contact.isCharity else {
-                throw Constants.errors.contactIsNotCharity
+                throw Abort(.contactIsNotCharity)
             }
             return try self.findOrCreateChat(user: user, contact: contact, on: req)
         })
@@ -67,10 +67,10 @@ class ChatRestfulController: ChatInitializer {
         return DirectChat.findOrFail(authId: reqInfo.userId, chatId: chatId, on: req).flatMap { chat in
             
             guard !chat.userIsBlocked else {
-                throw Constants.errors.chatHasBlocked
+                throw Abort(.chatHasBlocked)
             }
             guard !chat.contactIsBlocked else {
-                throw Constants.errors.chatHasBlockedByUser
+                throw Abort(.chatHasBlockedByUser)
             }
             
             return try self.chatController.saveTextMessage(reqInfo: reqInfo, textMessage: textMessage, chatId: chatId, receiverId: chat.contactId).map({ textMessage in

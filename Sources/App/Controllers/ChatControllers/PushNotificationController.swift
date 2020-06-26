@@ -19,7 +19,7 @@ class PushNotificationController {
         return try req.content.decode(Inputs.UserPushNotification.self).flatMap { input in
             
             guard let _ = PushNotificationType(rawValue: input.type) else {
-                throw Constants.errors.wrongPushNotificationType
+                throw Abort(.wrongPushNotificationType)
             }
             
             return UserPushNotification.hasFound(input: input, conn: req).flatMap({ found -> Future<UserPushNotification> in
@@ -81,7 +81,7 @@ class PushNotificationController {
     private static func sendAPNSPush(_ req: Request, token: String, title: String?, body: String, content: PushPayloadContent?) throws -> Future<HTTPStatus> {
         
         guard let payload = APNSPayload(title: title, body: body, data: content?.data).textFormat else {
-            throw Constants.errors.pushPayloadIsNotValid
+            throw Abort(.pushPayloadIsNotValid)
         }
         
         let shell = try req.make(Shell.self)

@@ -113,11 +113,11 @@ extension UserPhoneNumberLog {
         return getLatest(phoneNumberLog: requested, conn: req).map { item in
             
             guard let item = item else {
-                throw Constants.errors.invalidPhoneNumber
+                throw Abort(.invalidPhoneNumber)
             }
             
             guard item.check(activationCode: activationCode) else {
-                throw Constants.errors.invalidActivationCodes
+                throw Abort(.invalidActivationCode)
             }
             
             return item

@@ -13,26 +13,26 @@ final class GiftRequestController: ChatInitializer {
     public func requestGift(_ req: Request) throws -> Future<ContactMessage> {
         let user = try req.requireAuthenticated(User.self)
         guard let userId = user.id else {
-            throw Constants.errors.nilUserId
+            throw Abort(.nilUserId)
         }
         return try req.parameters.next(Gift.self).flatMap { gift in
             guard let giftId = gift.id else {
-                throw Constants.errors.nilGiftId
+                throw Abort(.nilGiftId)
             }
             guard let giftOwnerId = gift.userId else {
-                throw Constants.errors.nilGiftUserId
+                throw Abort(.nilGiftUserId)
             }
             
             guard userId != giftOwnerId else {
-                throw Constants.errors.giftCannotBeDonatedToTheOwner
+                throw Abort(.giftCannotBeDonatedToTheOwner)
             }
             
             guard gift.isReviewed == true else {
-                throw Constants.errors.unreviewedGift
+                throw Abort(.unreviewedGift)
             }
             
             guard gift.donatedToUserId == nil else {
-                throw Constants.errors.giftIsAlreadyDonated
+                throw Abort(.giftIsAlreadyDonated)
             }
             
             return GiftRequest.hasExisted(requestUserId: userId, giftId: giftId, conn: req).flatMap({ giftRequestHasExisted in

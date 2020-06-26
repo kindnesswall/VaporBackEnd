@@ -24,7 +24,7 @@ final class CharityController {
     func getCharityOfUser(_ req: Request) throws -> Future<Charity> {
         return try req.parameters.next(User.self).flatMap { selectedUser in
             guard selectedUser.isCharity else {
-                throw Constants.errors.userIsNotCharity
+                throw Abort(.userIsNotCharity)
             }
             return try Charity.get(userId: try selectedUser.getId(), conn: req)
         }
@@ -65,7 +65,7 @@ final class CharityController {
         let userId = try user.getId()
         return Charity.hasFound(userId: userId, conn: req).flatMap { hasFound in
             guard !hasFound else {
-                throw Constants.errors.charityInfoAlreadyExists
+                throw Abort(.charityInfoAlreadyExists)
             }
             
             return try req.content.decode(Charity.self).flatMap({ charityInput in

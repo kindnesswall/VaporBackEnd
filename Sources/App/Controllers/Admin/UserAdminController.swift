@@ -61,7 +61,7 @@ final class UserAdminController {
         return try req.content.decode(UserAllowAccessInput.self).flatMap({ input in
             return User.query(on: req, withSoftDeleted: true).filter(\.id == input.userId).first().flatMap({ user in
                 guard let user = user else {
-                    throw Constants.errors.wrongUserId
+                    throw Abort(.wrongUserId)
                 }
                 return user.restore(on: req)
             })

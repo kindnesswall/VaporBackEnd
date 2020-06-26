@@ -17,7 +17,7 @@ final class CategoryController {
             return Country.find(input.countryId, on: req).flatMap { country in
                 
                 guard let country = country else {
-                    throw Constants.errors.countryNotFound
+                    throw Abort(.countryNotFound)
                 }
                 
                 return self.localizedCategories(req: req, country: country)

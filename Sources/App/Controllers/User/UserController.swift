@@ -40,7 +40,7 @@ final class UserController: UserControllerCore, PhoneNumberValidator {
             let phoneNumber = try self.validate(phoneNumber: inputUser.phoneNumber)
 
             guard let activationCode = inputUser.activationCode else {
-                throw Constants.errors.invalidActivationCode
+                throw Abort(.invalidActivationCode)
             }
             
             return try self.checkActivationCode(req: req, phoneNumber: phoneNumber, activationCode: activationCode).flatMap { _ in
@@ -58,7 +58,7 @@ final class UserController: UserControllerCore, PhoneNumberValidator {
         
         // Only accessable by admin!
         guard auth.isAdmin else {
-            throw Constants.errors.unauthorizedRequest
+            throw Abort(.unauthorizedRequest)
         }
         
         return try req.content.decode(Inputs.Login.self).flatMap({ inputUser in
@@ -68,11 +68,11 @@ final class UserController: UserControllerCore, PhoneNumberValidator {
             return PhoneNumberActivationCode.find(req: req, phoneNumber: phoneNumber).map { item in
                 
                 guard let item = item else {
-                    throw Constants.errors.invalidPhoneNumber
+                    throw Abort(.invalidPhoneNumber)
                 }
                 
                 guard let activationCode = item.activationCode else {
-                    throw Constants.errors.activationCodeNotFound
+                    throw Abort(.activationCodeNotFound)
                 }
                 
                 return AuthAdminAccessOutput(activationCode: activationCode)

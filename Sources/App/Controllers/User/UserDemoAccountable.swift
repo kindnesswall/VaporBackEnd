@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Vapor
 
 protocol UserDemoAccountable {
     func isDemoAccount(phoneNumber: String) -> Bool
@@ -27,7 +28,7 @@ extension UserDemoAccountable {
             if demo.activationCode == activationCode {
                 return true
             } else {
-                throw Constants.errors.invalidActivationCode
+                throw Abort(.invalidActivationCode)
             }
         }
         return false

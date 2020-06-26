@@ -46,7 +46,7 @@ extension ApplicationVersion {
     static func get(platform: PlatformType, on conn: DatabaseConnectable) -> Future<ApplicationVersion> {
         return query(on: conn).filter(\.platform == platform.rawValue).first().map { item in
             guard let item = item else {
-                throw Constants.errors.notFound
+                throw Abort(.notFound)
             }
             return item
         }

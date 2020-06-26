@@ -20,7 +20,7 @@ class ChatBlockController {
             return ChatBlock.find(chatBlock: chatBlock, conn: req).flatMap({ foundChatBlock in
                 
                 guard foundChatBlock == nil else {
-                    throw Constants.errors.userWasAlreadyBlocked
+                    throw Abort(.userWasAlreadyBlocked)
                 }
                 return chatBlock.save(on: req).map({ _ in
                     return HTTPStatus.ok
@@ -39,7 +39,7 @@ class ChatBlockController {
             return ChatBlock.find(chatBlock: chatBlock, conn: req).flatMap({ foundChatBlock in
                 
                 guard let foundChatBlock = foundChatBlock else {
-                    throw Constants.errors.userWasAlreadyUnblocked
+                    throw Abort(.userWasAlreadyUnblocked)
                 }
                 return foundChatBlock.delete(on: req).map({ _ in
                     return HTTPStatus.ok

@@ -28,7 +28,7 @@ final class GiftController {
         return try req.parameters.next(User.self).flatMap({ selectedUser in
             
             guard let selectedUserId = selectedUser.id else {
-                throw Constants.errors.nilUserId
+                throw Abort(.nilUserId)
             }
             
             let authUser = try req.requireAuthenticated(User.self)
@@ -70,7 +70,7 @@ final class GiftController {
         let user = try req.requireAuthenticated(User.self)
         return try req.parameters.next(Gift.self).flatMap { (gift) -> Future<Gift> in
             guard let userId = user.id , userId == gift.userId else {
-                throw Constants.errors.unauthorizedGift
+                throw Abort(.unauthorizedGift)
             }
             
             return try req.content.decode(Gift.Input.self).flatMap { inputGift -> Future<Gift> in
@@ -116,7 +116,7 @@ final class GiftController {
         let user = try req.requireAuthenticated(User.self)
         return try req.parameters.next(Gift.self).flatMap { (gift) -> Future<Void> in
             guard let userId = user.id , userId == gift.userId else {
-                throw Constants.errors.unauthorizedGift
+                throw Abort(.unauthorizedGift)
             }
             gift.isDeleted = true
             return gift.save(on: req).flatMap({ gift in

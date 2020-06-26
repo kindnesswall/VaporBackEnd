@@ -28,7 +28,7 @@ final class Token: PostgreSQLModel {
 extension Token {
     func getId() throws -> Int {
         guard let id = self.id else {
-            throw Constants.errors.nilTokenId
+            throw Abort(.nilTokenId)
         }
         return id
     }

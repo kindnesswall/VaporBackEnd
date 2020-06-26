@@ -18,7 +18,7 @@ final class PhoneChangeController: PhoneNumberValidator {
             
             return User.phoneNumberHasExisted(phoneNumber: toPhoneNumber, conn: req).flatMap({ hasExisted in
                 guard !hasExisted else {
-                    throw Constants.errors.phoneNumberHasExisted
+                    throw Abort(.phoneNumberHasExisted)
                 }
                 
                 let activationCode = UserPhoneNumberLog.ActivationCode.generate()
@@ -49,12 +49,12 @@ final class PhoneChangeController: PhoneNumberValidator {
             let toPhoneNumber = try self.validate(phoneNumber: input.toPhoneNumber)
             
             guard let activationCode = UserPhoneNumberLog.ActivationCode(from: input.activationCode_from, to: input.activationCode_to) else {
-                throw Constants.errors.invalidActivationCodes
+                throw Abort(.invalidActivationCode)
             }
             
             return User.phoneNumberHasExisted(phoneNumber: toPhoneNumber, conn: req).flatMap({ hasExisted in
                 guard !hasExisted else {
-                    throw Constants.errors.phoneNumberHasExisted
+                    throw Abort(.phoneNumberHasExisted)
                 }
                 
                 return try UserPhoneNumberLog.check(req: req, auth: auth, toPhoneNumber: toPhoneNumber, activationCode: activationCode).flatMap { phoneNumberLog in

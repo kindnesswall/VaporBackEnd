@@ -35,11 +35,11 @@ class GiftDonationController {
         
         let user = try req.requireAuthenticated(User.self)
         guard let userId = user.id else {
-            throw Constants.errors.nilUserId
+            throw Abort(.nilUserId)
         }
         return try req.parameters.next(User.self).flatMap({ contactUser in
             guard let contactUserId = contactUser.id else {
-                throw Constants.errors.nilUserId
+                throw Abort(.nilUserId)
             }
             return try req.content.decode(RequestInput.self).flatMap({ requestInput in
                 let userGifts = try user.gifts.query(on: req)
@@ -56,29 +56,29 @@ class GiftDonationController {
         return try req.content.decode(Donate.self).flatMap({ donate in
             
             guard userId != donate.donatedToUserId else {
-                throw Constants.errors.giftCannotBeDonatedToTheOwner
+                throw Abort(.giftCannotBeDonatedToTheOwner)
             }
             
             return GiftRequest.hasExisted(requestUserId: donate.donatedToUserId, giftId: donate.giftId, conn: req).flatMap({ giftRequestHasExisted in
                 guard giftRequestHasExisted else {
-                    throw Constants.errors.unrequestedGift
+                    throw Abort(.unrequestedGift)
                 }
                 
                 return Gift.find(donate.giftId, on: req).flatMap({ gift in
                     guard let gift = gift else {
-                        throw Constants.errors.giftNotFound
+                        throw Abort(.giftNotFound)
                     }
                     
                     guard userId == gift.userId else {
-                        throw Constants.errors.unauthorizedGift
+                        throw Abort(.unauthorizedGift)
                     }
                     
                     guard gift.isReviewed == true else {
-                        throw Constants.errors.unreviewedGift
+                        throw Abort(.unreviewedGift)
                     }
                     
                     guard gift.donatedToUserId == nil else {
-                        throw Constants.errors.giftIsAlreadyDonated
+                        throw Abort(.giftIsAlreadyDonated)
                     }
                     
                     gift.donatedToUserId = donate.donatedToUserId

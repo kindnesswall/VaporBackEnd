@@ -13,7 +13,7 @@ final class ImageController {
         
         let user = try req.requireAuthenticated(User.self)
         guard let userId = user.id else {
-            throw Constants.errors.nilUserId
+            throw Abort(.nilUserId)
         }
         
         return try req.content.decode(ImageInput.self).map({ (imageInput) -> ImageOutput in

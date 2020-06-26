@@ -26,14 +26,14 @@ final class User : PostgreSQLModel {
     
     func getId() throws -> Int {
         guard let id = self.id else {
-            throw Constants.errors.nilUserId
+            throw Abort(.nilUserId)
         }
         return id
     }
     
     func getIdFuture(req:Request) -> Future<Int> {
         guard let id = self.id else {
-            return req.eventLoop.newFailedFuture(error: Constants.errors.nilUserId)
+            return req.eventLoop.newFailedFuture(error: Abort(.nilUserId))
         }
         return req.eventLoop.newSucceededFuture(result: id)
     }
@@ -74,7 +74,7 @@ extension User {
         return User.query(on: req, withSoftDeleted: true).filter(\User.phoneNumber == phoneNumber).first().map({ foundUser in
             
             guard foundUser?.deletedAt == nil else {
-                throw Constants.errors.userAccessIsDenied
+                throw Abort(.userAccessIsDenied)
             }
             
             return foundUser

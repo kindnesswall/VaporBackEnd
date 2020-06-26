@@ -17,7 +17,7 @@ class UserFirebaseController: UserControllerCore {
             return try self.sendFirebaseRequest(req, idToken: input.idToken).flatMap({ phoneNumber in
                 
                 guard let phoneNumber = phoneNumber else {
-                    throw Constants.errors.firebaseAuthenticationError
+                    throw Abort(.firebaseAuthenticationError)
                 }
                 
                 return self.findOrCreateUser(req: req, phoneNumber: phoneNumber).flatMap({ user in

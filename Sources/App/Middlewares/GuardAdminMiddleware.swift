@@ -15,7 +15,7 @@ final class GuardAdminMiddleware : Middleware {
         let user = try request.requireAuthenticated(User.self)
         
         guard user.isAdmin == true else {
-            throw Constants.errors.unauthorizedRequest
+            throw Abort(.unauthorizedRequest)
         }
         
         return try next.respond(to: request)

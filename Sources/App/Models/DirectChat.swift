@@ -27,7 +27,7 @@ extension DirectChat {
     
     func getId() throws -> Int {
         guard let id = self.id else {
-            throw Constants.errors.nilChatId
+            throw Abort(.nilChatId)
         }
         return id
     }
@@ -58,7 +58,7 @@ extension DirectChat {
             notification = contactNotification
             
         default:
-            throw Constants.errors.unauthorizedRequest
+            throw Abort(.unauthorizedRequest)
         }
         
         return ContactMessage(chat: chat, notificationCount: notification, blockStatus: blockStatus)
@@ -86,7 +86,7 @@ extension DirectChat {
     static func findOrFail(authId: Int, chatId: Int, on conn: DatabaseConnectable) -> Future<ContactMessage> {
         return find(chatId, on: conn).map { item in
             guard let item = item else {
-                throw Constants.errors.chatNotFound
+                throw Abort(.chatNotFound)
             }
             return try item.castFor(authId: authId)
         }
@@ -130,10 +130,10 @@ extension DirectChat {
         return find(chatId, on: conn).flatMap { chat in
             
             guard let chat = chat else {
-                throw Constants.errors.chatNotFound
+                throw Abort(.chatNotFound)
             }
             guard chat.isAuthenticated(authId: authId) else {
-                throw Constants.errors.unauthorizedRequest
+                throw Abort(.unauthorizedRequest)
             }
             
             return try fetch(textMessages: chat.textMessages, beforeId: beforeId, on: conn).map({ textMessages in
@@ -198,7 +198,7 @@ extension DirectChat {
     static func set(notification: Int, receiverId: Int, chatId: Int, on conn: DatabaseConnectable) -> Future<HTTPStatus> {
         return find(chatId, on: conn).flatMap { item in
             guard let item = item else {
-                throw Constants.errors.chatNotFound
+                throw Abort(.chatNotFound)
             }
             switch receiverId {
             case item.userId:
@@ -206,7 +206,7 @@ extension DirectChat {
             case item.contactId:
                 item.contactNotification = notification
             default:
-                throw Constants.errors.unauthorizedRequest
+                throw Abort(.unauthorizedRequest)
             }
             return item.save(on: conn).transform(to: .ok)
         }
@@ -219,7 +219,7 @@ extension DirectChat {
         return find(chatId, on: conn).flatMap { item in
             
             guard let item = item else {
-                throw Constants.errors.chatNotFound
+                throw Abort(.chatNotFound)
             }
             
             let blockedUserId: Int
@@ -231,7 +231,7 @@ extension DirectChat {
                 item.userIsBlocked = block
                 blockedUserId = item.userId
             default:
-                throw Constants.errors.unauthorizedRequest
+                throw Abort(.unauthorizedRequest)
             }
             
             return item.save(on: conn).transform(to:

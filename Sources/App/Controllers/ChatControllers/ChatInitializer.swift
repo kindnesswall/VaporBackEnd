@@ -18,7 +18,7 @@ class ChatInitializer {
     
     func findOrCreateChat(userId: Int, contactId: Int, on req: Request) -> Future<ContactMessage> {
         return DirectChat.findOrCreate(userId: userId, contactId: contactId, on: req).flatMap { item in
-            return User.find(item.contactId, on: req).unwrap(or: Constants.errors.profileNotFound).map { contact in
+            return User.find(item.contactId, on: req).unwrap(or: Abort(.profileNotFound)).map { contact in
                 item.contactProfile = try contact.userProfile(req: req)
                 return item
             }

@@ -35,7 +35,7 @@ extension PhoneNumberActivationCode {
         
         return PhoneNumberActivationCode.query(on: req).filter(\.phoneNumber == phoneNumber).filter(\.activationCode == activationCode).first().flatMap { item in
             guard let item = item else {
-                throw Constants.errors.invalidActivationCode
+                throw Abort(.invalidActivationCode)
             }
             item.activationCode = nil
             return item.save(on: req).transform(to: .ok)
