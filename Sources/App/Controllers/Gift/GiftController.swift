@@ -21,6 +21,14 @@ final class GiftController {
         
     }
     
+    func itemAt(_ req: Request) throws -> Future<Gift> {
+        let giftId = try req.parameters.next(Int.self)
+        return Gift.find(giftId, on: req).unwrap(or: Abort(.giftNotFound)).map { gift in
+            guard gift.isReviewed else { throw Abort(.unreviewedGift) }
+            return gift
+        }
+    }
+    
     func registeredGifts(_ req: Request) throws -> Future<[Gift]> {
         
         
@@ -59,22 +67,21 @@ final class GiftController {
     
     /// Saves a decoded `Gift` to the database.
     func create(_ req: Request) throws -> Future<Gift> {
-        let user = try req.requireAuthenticated(User.self)
+        let authId = try req.requireAuthenticated(User.self).getId()
         return try req.content.decode(Gift.Input.self).flatMap { inputGift in
-            let gift = Gift(userId: user.id, gift: inputGift)
+            let gift = Gift(gift: inputGift, authId: authId)
             return try self.setNamesAndSave(req, gift: gift)
         }
     }
     
     func update(_ req: Request) throws -> Future<Gift> {
-        let user = try req.requireAuthenticated(User.self)
-        return try req.parameters.next(Gift.self).flatMap { (gift) -> Future<Gift> in
-            guard let userId = user.id , userId == gift.userId else {
-                throw Abort(.unauthorizedGift)
-            }
+        let authId = try req.requireAuthenticated(User.self).getId()
+        let giftId = try req.parameters.next(Int.self)
+        
+        return Gift.find(id: giftId, withSoftDeleted: true, on: req).flatMap { gift in
             
             return try req.content.decode(Gift.Input.self).flatMap { inputGift -> Future<Gift> in
-                gift.update(gift: inputGift)
+                try gift.update(gift: inputGift, authId: authId)
                 return try self.setNamesAndSave(req, gift: gift)
             }
             

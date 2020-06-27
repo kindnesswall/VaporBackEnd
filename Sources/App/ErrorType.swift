@@ -26,6 +26,7 @@ enum ErrorType: String {
     case unrequestedGift
     case giftCannotBeDonatedToTheOwner
     case giftIsAlreadyDonated
+    case deletedGift
     case charityInfoAlreadyExists
     case firebaseAuthenticationError
     case invalidPhoneNumber
@@ -77,6 +78,7 @@ extension ErrorType {
              .unrequestedGift,
              .giftCannotBeDonatedToTheOwner,
              .giftIsAlreadyDonated,
+             .deletedGift,
              .charityInfoAlreadyExists,
              .firebaseAuthenticationError,
              .invalidPhoneNumber,
@@ -144,6 +146,8 @@ extension ErrorType {
             return "Gift can not be donated to the owner"
         case .giftIsAlreadyDonated:
             return "Gift has already been donated"
+        case .deletedGift:
+            return "Gift has been deleted"
         case .charityInfoAlreadyExists:
             return "Charity information already exists"
         case .firebaseAuthenticationError:

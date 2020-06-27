@@ -52,8 +52,8 @@ final class Gift : PostgreSQLModel {
         return userId
     }
     
-    init(userId:Int?,gift:Gift.Input) {
-        self.userId = userId
+    init(gift: Gift.Input, authId: Int) {
+        self.userId = authId
         
         self.title=gift.title
         self.description=gift.description
@@ -67,7 +67,11 @@ final class Gift : PostgreSQLModel {
         self.regionId=gift.regionId
     }
     
-    func update(gift:Gift.Input) {
+    func update(gift: Gift.Input, authId: Int) throws {
+        
+        guard self.userId == authId else { throw Abort(.unauthorizedGift) }
+        guard !self.isDeleted else { throw Abort(.deletedGift) }
+        
         self.title=gift.title
         self.description=gift.description
         self.price=gift.price
@@ -79,7 +83,9 @@ final class Gift : PostgreSQLModel {
         self.cityId=gift.cityId
         self.regionId=gift.regionId
 
+        self.isRejected = false
         self.isReviewed = false
+        self.deletedAt = nil
     }
     
     
@@ -119,6 +125,12 @@ extension Gift {
     }
     var region : Parent<Gift, Region>? {
         return parent(\.regionId)
+    }
+}
+
+extension Gift {
+    static func find(id: Int, withSoftDeleted: Bool, on conn: DatabaseConnectable) -> Future<Gift> {
+        return query(on: conn, withSoftDeleted: withSoftDeleted).filter(\.id == id).first().unwrap(or: Abort(.giftNotFound))
     }
 }
 

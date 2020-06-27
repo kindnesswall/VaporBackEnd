@@ -63,9 +63,10 @@ public func routes(_ router: Router) throws {
     
     //Routes Gifts
     publicRouter.post(uris.gifts,use: giftController.index)
+    publicRouter.get(uris.gifts, Int.parameter, use: giftController.itemAt)
     
     tokenProtected.post(uris.gifts_register,use: giftController.create)
-    tokenProtected.put(uris.gifts,Gift.parameter, use: giftController.update)
+    tokenProtected.put(uris.gifts, Int.parameter, use: giftController.update)
     tokenProtected.delete(uris.gifts,Gift.parameter, use: giftController.delete)
     
     tokenProtected.post(uris.image_upload, use: imageController.uploadImage)
