@@ -52,41 +52,37 @@ final class Gift : PostgreSQLModel {
         return userId
     }
     
-    init(gift: Gift.Input, authId: Int) {
+    private init(input: Gift.Input, authId: Int) {
         self.userId = authId
         
-        self.title=gift.title
-        self.description=gift.description
-        self.price=gift.price
-        self.categoryId=gift.categoryId
-        self.giftImages=gift.giftImages
-        self.isNew=gift.isNew
-        self.countryId=gift.countryId
-        self.provinceId=gift.provinceId
-        self.cityId=gift.cityId
-        self.regionId=gift.regionId
+        self.title=input.title
+        self.description=input.description
+        self.price=input.price
+        self.categoryId=input.categoryId
+        self.giftImages=input.giftImages
+        self.isNew=input.isNew
+        self.countryId=input.countryId
+        self.provinceId=input.provinceId
+        self.cityId=input.cityId
+        self.regionId=input.regionId
     }
     
-    func update(gift: Gift.Input, authId: Int) throws {
+    private func update(input: Gift.Input) throws {
         
-        guard self.userId == authId else { throw Abort(.unauthorizedGift) }
-        guard !self.isDeleted else { throw Abort(.deletedGift) }
-        
-        self.title=gift.title
-        self.description=gift.description
-        self.price=gift.price
-        self.categoryId=gift.categoryId
-        self.giftImages=gift.giftImages
-        self.isNew=gift.isNew
-        self.countryId=gift.countryId
-        self.provinceId=gift.provinceId
-        self.cityId=gift.cityId
-        self.regionId=gift.regionId
+        self.title=input.title
+        self.description=input.description
+        self.price=input.price
+        self.categoryId=input.categoryId
+        self.giftImages=input.giftImages
+        self.isNew=input.isNew
+        self.countryId=input.countryId
+        self.provinceId=input.provinceId
+        self.cityId=input.cityId
+        self.regionId=input.regionId
 
         self.isRejected = false
 //        self.rejectReason = nil // Note: Commented because the reason may help for the next review
         self.isReviewed = false
-        self.deletedAt = nil
     }
     
     
@@ -130,25 +126,69 @@ extension Gift {
 }
 
 extension Gift {
+    
+    static func create(input: Gift.Input, authId: Int, on req: Request) throws -> Future<Gift> {
+        let gift = Gift(input: input, authId: authId)
+        return try gift.setNamesAndSave(on: req)
+    }
+    
+    func update(input: Gift.Input, authId: Int, on req: Request) throws -> Future<Gift> {
+        
+        guard self.userId == authId else { throw Abort(.unauthorizedGift) }
+        guard !self.isDeleted else { throw Abort(.deletedGift) }
+        
+        return self.restore(on: req).flatMap { gift in
+            try gift.update(input: input)
+            return try gift.setNamesAndSave(on: req)
+        }
+    }
+}
+
+extension Gift {
+    private func setNamesAndSave(on req: Request) throws ->  Future<Gift> {
+        return try getCountry(on: req).flatMap { country in
+            self.countryName = country.name
+            
+            return self.getCategoryTitle(on: req, country: country).flatMap { categoryTitle in
+                self.categoryTitle = categoryTitle
+                
+                return self.province.get(on: req).flatMap { province in
+                    self.provinceName = province.name
+                    
+                    return self.city.get(on: req).flatMap { city in
+                        self.cityName = city.name
+                        
+                        if let region = self.region {
+                            return region.get(on: req).flatMap { region in
+                                self.regionName = region.name
+                                return self.save(on: req)
+                            }
+                        } else {
+                            self.regionName = nil
+                            return self.save(on: req)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+extension Gift {
     static func find(id: Int, withSoftDeleted: Bool, on conn: DatabaseConnectable) -> Future<Gift> {
         return query(on: conn, withSoftDeleted: withSoftDeleted).filter(\.id == id).first().unwrap(or: Abort(.giftNotFound))
     }
 }
 
 extension Gift {
-    func getCountry(_ req: Request) throws -> Future<Country>  {
+    func getCountry(on req: Request) throws -> Future<Country>  {
         guard let countryId = self.countryId else {
             throw Abort(.nilCountryId)
         }
-        return Country.find(countryId, on: req).map { country in
-            guard let country = country else {
-                throw Abort(.countryNotFound)
-            }
-            return country
-        }
+        return Country.find(countryId, on: req).unwrap(or: Abort(.countryNotFound))
     }
     
-    func getCategoryTitle(_ req: Request, country: Country) -> Future<String?> {
+    func getCategoryTitle(on req: Request, country: Country) -> Future<String?> {
         return category.get(on: req).map { category in
             return category.localizedTitle(country: country)
         }
