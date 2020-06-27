@@ -84,6 +84,7 @@ final class Gift : PostgreSQLModel {
         self.regionId=gift.regionId
 
         self.isRejected = false
+//        self.rejectReason = nil // Note: Commented because the reason may help for the next review
         self.isReviewed = false
         self.deletedAt = nil
     }
