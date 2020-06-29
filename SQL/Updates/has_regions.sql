@@ -22,6 +22,11 @@ UPDATE public."City" SET
 "hasRegions" = true::boolean WHERE
 id = '727';
 
+-- Ahvaz
+UPDATE public."City" SET
+"hasRegions" = true::boolean WHERE
+id = '539';
+
 -- Tabriz
 UPDATE public."City" SET
 "hasRegions" = true::boolean WHERE
