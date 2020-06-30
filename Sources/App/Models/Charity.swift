@@ -15,8 +15,8 @@ final class Charity: PostgreSQLModel {
     var isRejected:Bool? = false
     var rejectReason: String?
     
-    var imageUrl: String?
     var name: String
+    var imageUrl: String?
     var registerId: String?
     var registerDate: String?
     var address: String?
@@ -31,6 +31,59 @@ final class Charity: PostgreSQLModel {
     var createdAt: Date?
     var updatedAt: Date?
     var deletedAt: Date?
+    
+    init(input: Input, userId:Int) {
+        
+        self.userId = userId
+        
+        self.name = input.name
+        self.imageUrl = input.imageUrl
+        self.registerId = input.registerId
+        self.registerDate = input.registerDate
+        self.address = input.address
+        self.telephoneNumber = input.telephoneNumber
+        self.mobileNumber = input.mobileNumber
+        self.website = input.website
+        self.email = input.email
+        self.instagram = input.instagram
+        self.telegram = input.telegram
+        self.description = input.description
+    }
+    
+    func update(input: Input) {
+        self.name = input.name
+        self.imageUrl = input.imageUrl
+        self.registerId = input.registerId
+        self.registerDate = input.registerDate
+        self.address = input.address
+        self.telephoneNumber = input.telephoneNumber
+        self.mobileNumber = input.mobileNumber
+        self.website = input.website
+        self.email = input.email
+        self.instagram = input.instagram
+        self.telegram = input.telegram
+        self.description = input.description
+        
+        self.isRejected = false
+//        self.rejectReason = nil // Note: Commented because the reason may be helpful for the next review
+        
+    }
+    
+    
+    final class Input : Codable {
+        var name: String
+        var imageUrl: String?
+        var registerId: String?
+        var registerDate: String?
+        var address: String?
+        var telephoneNumber: String?
+        var mobileNumber: String?
+        var website: String?
+        var email: String?
+        var instagram: String?
+        var telegram: String?
+        var description: String?
+    }
 }
 
 extension Charity {
@@ -69,41 +122,16 @@ extension Charity {
 }
 
 extension Charity {
-    static func find(userId:Int,conn:DatabaseConnectable)->Future<Charity?> {
+    static func find(userId: Int, on conn: DatabaseConnectable) -> Future<Charity?> {
         return Charity.query(on: conn).filter(\.userId == userId).first()
     }
-    static func hasFound(userId:Int,conn:DatabaseConnectable)->Future<Bool> {
-        return find(userId: userId, conn: conn).map { charity in
-            if let _ = charity { return true } else { return false }
-        }
-    }
-    static func get(userId:Int,conn:DatabaseConnectable) throws ->Future<Charity> {
-        return find(userId: userId, conn: conn).map({ charity in
-            guard let charity = charity else {
-                throw Abort(.charityInfoNotFound)
-            }
-            return charity
-        })
+    
+    static func hasFound(userId: Int, on conn: DatabaseConnectable) -> Future<Bool> {
+        return find(userId: userId, on: conn).map { $0 != nil }
     }
     
-    func createCharity(userId:Int,conn: DatabaseConnectable) -> Future<Charity> {
-        
-        self.id = nil
-        self.userId = userId
-        self.isRejected = false
-        self.rejectReason = nil
-        
-        return self.save(on: conn)
-    }
-    
-    func updateCharity(original:Charity,conn: DatabaseConnectable) -> Future<Charity> {
-        
-        self.id = original.id
-        self.userId = original.userId
-        self.isRejected = false
-        //self.rejectReason = nil // Note: Commented because Reason of last rejection may help for next review
-        
-        return self.save(on: conn)
+    static func get(userId: Int , on conn: DatabaseConnectable) throws -> Future<Charity> {
+        return find(userId: userId, on: conn).unwrap(or: Abort(.charityInfoNotFound))
     }
 }
 

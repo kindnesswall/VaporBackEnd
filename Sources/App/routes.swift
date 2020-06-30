@@ -26,6 +26,7 @@ public func routes(_ router: Router) throws {
     let chatBlockController = ChatBlockController()
     let pushNotificationController = PushNotificationController()
     let charityController = CharityController()
+    let charityInfo = CharityInfoController()
     let charityAdminController = CharityAdminController()
     let adminStatisticsController = AdminStatisticsController()
     let versionController = ApplicationVersionController()
@@ -107,13 +108,13 @@ public func routes(_ router: Router) throws {
     adminProtected.get(uris.users_list_chatBlocked, use: userAdminController.usersChatBlockedList)
     
     //Routes Charity
-    publicRouter.get(uris.charity_user, User.parameter, use: charityController.getCharityOfUser)
+    publicRouter.get(uris.charity_user, Int.parameter, use: charityController.getCharityOfUser)
     publicRouter.get(uris.charity_list, use: charityController.getCharityList)
     
-    tokenProtected.get(uris.charity_myInfo, use: charityController.show)
-    tokenProtected.post(uris.charity_myInfo, use: charityController.create)
-    tokenProtected.put(uris.charity_myInfo, use: charityController.update)
-    tokenProtected.delete(uris.charity_myInfo, use: charityController.delete)
+    tokenProtected.get(uris.charity_info_user, Int.parameter, use: charityInfo.show)
+    tokenProtected.post(uris.charity_info_user, Int.parameter, use: charityInfo.create)
+    tokenProtected.put(uris.charity_info_user, Int.parameter, use: charityInfo.update)
+    tokenProtected.delete(uris.charity_info_user, Int.parameter, use: charityInfo.delete)
     
     //Routes Charity Admin
     adminProtected.get(uris.charity_review, use: charityAdminController.getUnreviewedList)

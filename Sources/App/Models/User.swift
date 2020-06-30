@@ -68,6 +68,12 @@ extension User {
 }
 
 extension User {
+    static func get(_ id: Int, on conn: DatabaseConnectable) -> Future<User> {
+        return find(id, on: conn).unwrap(or: Abort(.notFound))
+    }
+}
+
+extension User {
     
     static func find(req: Request, phoneNumber: String) -> Future<User?> {
         

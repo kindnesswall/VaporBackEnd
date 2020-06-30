@@ -22,7 +22,7 @@ final class CharityAdminController {
     func acceptCharity(_ req: Request) throws -> Future<HTTPStatus> {
         return try req.parameters.next(User.self).flatMap { user in
             
-            return try Charity.get(userId: try user.getId(), conn: req).flatMap { foundCharity in
+            return try Charity.get(userId: try user.getId(), on: req).flatMap { foundCharity in
                 foundCharity.isRejected = false
                 foundCharity.rejectReason = nil
                 return foundCharity.save(on: req).flatMap({ _ in
@@ -43,7 +43,7 @@ final class CharityAdminController {
                 user.charityName = nil
                 
                 return user.save(on: req).flatMap { _ in
-                    return try Charity.get(userId: try user.getId(), conn: req).flatMap { foundCharity in
+                    return try Charity.get(userId: try user.getId(), on: req).flatMap { foundCharity in
                         foundCharity.isRejected = true
                         foundCharity.rejectReason = input.rejectReason
                         return foundCharity.save(on: req).transform(to: .ok)
