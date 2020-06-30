@@ -55,4 +55,10 @@ class Inputs {
         var type: String?
     }
     
+    struct UserQuery: Content {
+        var beforeId:Int?
+        var count:Int?
+        var phoneNumber:String?
+    }
+    
 }

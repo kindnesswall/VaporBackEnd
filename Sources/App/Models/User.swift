@@ -6,6 +6,7 @@
 //
 
 import Vapor
+import FluentSQL
 import FluentPostgreSQL
 import Authentication
 
@@ -69,7 +70,10 @@ extension User {
 
 extension User {
     static func get(_ id: Int, on conn: DatabaseConnectable) -> Future<User> {
-        return find(id, on: conn).unwrap(or: Abort(.notFound))
+        return find(id, on: conn).unwrap(or: Abort(.userNotFound))
+    }
+    static func get(_ id: Int, withSoftDeleted: Bool, on conn: DatabaseConnectable) -> Future<User> {
+        return query(on: conn, withSoftDeleted: withSoftDeleted).filter(\.id == id).first().unwrap(or: Abort(.userNotFound))
     }
 }
 
@@ -100,13 +104,13 @@ extension User {
 } 
 
 extension User {
-    static func allActiveUsers(conn:DatabaseConnectable,requestInput:RequestInput?) -> Future<[User]> {
+    static func allActiveUsers(on conn: DatabaseConnectable, queryParam: Inputs.UserQuery?) -> Future<[User]> {
         let query =  User.query(on: conn)
-        return self.getUsersWithRequestFilter(query: query, requestInput: requestInput)
+        return self.getUsersWithRequestFilter(query: query, queryParam: queryParam)
     }
-    static func allBlockedUsers(conn:DatabaseConnectable,requestInput:RequestInput?) -> Future<[User]> {
+    static func allBlockedUsers(on conn: DatabaseConnectable, queryParam: Inputs.UserQuery?) -> Future<[User]> {
         let query = User.query(on: conn, withSoftDeleted: true).filter(\.deletedAt != nil)
-        return self.getUsersWithRequestFilter(query: query, requestInput: requestInput)
+        return self.getUsersWithRequestFilter(query: query, queryParam: queryParam)
     }
     static func allChatBlockedUsers(conn:DatabaseConnectable) -> Future<[(User,ChatBlock)]> {
         return User.query(on: conn).join(\ChatBlock.blockedUserId, to: \User.id).alsoDecode(ChatBlock.self).all()
@@ -115,17 +119,17 @@ extension User {
 
 extension User {
     
-    static func getUsersWithRequestFilter(query:QueryBuilder<PostgreSQLDatabase, User>,requestInput:RequestInput?)->Future<[User]>{
+    static func getUsersWithRequestFilter(query: QueryBuilder<PostgreSQLDatabase, User>, queryParam: Inputs.UserQuery?) -> Future<[User]> {
         
-        if let beforeId = requestInput?.beforeId {
+        if let phoneNumber = queryParam?.phoneNumber {
+            query.filter(\.phoneNumber ~~ phoneNumber)
+        }
+        
+        if let beforeId = queryParam?.beforeId {
             query.filter(\.id < beforeId)
         }
         
-        let maximumCount = Constants.maximumRequestFetchResultsCount
-        var count = requestInput?.count ?? maximumCount
-        if count > maximumCount {
-            count = maximumCount
-        }
+        let count = Constants.maxFetchCount(bound: queryParam?.count)
         
         return query.sort(\.id, .descending).range(0..<count).all()
     }

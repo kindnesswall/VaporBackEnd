@@ -32,7 +32,6 @@ enum ErrorType: String {
     case invalidPhoneNumber
     case phoneNumberHasExisted
     case invalidActivationCode
-    case wrongUserId
     case pushPayloadIsNotValid
     case wrongPushNotificationType
     case chatHasBlockedByUser
@@ -45,6 +44,7 @@ enum ErrorType: String {
     case nilMessageId
     case nilCountryId
     case notFound
+    case userNotFound
     case giftNotFound
     case chatNotFound
     case nilChatId
@@ -84,7 +84,6 @@ extension ErrorType {
              .invalidPhoneNumber,
              .phoneNumberHasExisted,
              .invalidActivationCode,
-             .wrongUserId,
              .pushPayloadIsNotValid,
              .wrongPushNotificationType,
              .chatHasBlockedByUser,
@@ -98,6 +97,7 @@ extension ErrorType {
              .nilMessageId,
              .nilCountryId,
              .notFound,
+             .userNotFound,
              .giftNotFound,
              .chatNotFound,
              .nilChatId,
@@ -158,8 +158,6 @@ extension ErrorType {
             return "Phone number has existed"
         case .invalidActivationCode:
             return "The activation code is invalid"
-        case .wrongUserId:
-            return "User id is wrong"
         case .pushPayloadIsNotValid:
             return "Push payload is not valid"
         case .wrongPushNotificationType:
@@ -184,6 +182,8 @@ extension ErrorType {
             return "Country id is nil"
         case .notFound:
             return "The item has not been found"
+        case .userNotFound:
+            return "User not found"
         case .giftNotFound:
             return "Gift not found"
         case .chatNotFound:

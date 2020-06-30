@@ -10,7 +10,12 @@ import Foundation
 class Constants {
     
     static let appInfo = AppInfo()
-    static let maximumRequestFetchResultsCount = 50
-    static let maximumActiveSocketsPerUser = 3
+    static let maxFetchCount = 50
     
+}
+
+extension Constants {
+    static func maxFetchCount(bound: Int?) -> Int {
+        return min(bound ?? maxFetchCount, maxFetchCount)
+    }
 }

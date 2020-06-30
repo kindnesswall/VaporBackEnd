@@ -116,7 +116,7 @@ extension DirectChat {
         if let beforeId = beforeId {
             query.filter(\.id < beforeId)
         }
-        let maximumCount = Constants.maximumRequestFetchResultsCount
+        let maximumCount = Constants.maxFetchCount
         
         //TODO: For performance issue
         //      is sort(\.id, .descending) necessary?

@@ -247,11 +247,7 @@ extension Gift {
             query.filter(\.isReviewed == true)
         }
         
-        let maximumCount = Constants.maximumRequestFetchResultsCount
-        var count = requestInput?.count ?? maximumCount
-        if count > maximumCount {
-            count = maximumCount
-        }
+        let count = Constants.maxFetchCount(bound: requestInput?.count)
         
         return query.sort(\.id, .descending).range(0..<count).all()
     }

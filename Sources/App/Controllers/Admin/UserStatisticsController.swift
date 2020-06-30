@@ -1,5 +1,5 @@
 //
-//  UserAdminController.swift
+//  UserStatisticsController.swift
 //  App
 //
 //  Created by Amir Hossein on 4/5/19.
@@ -8,12 +8,12 @@
 import Vapor
 import FluentPostgreSQL
 
-final class UserAdminController {
+final class UserStatisticsController {
     
     func usersActiveList(_ req: Request) throws -> Future<[UserStatistic]> {
         
-        return try req.content.decode(RequestInput.self).flatMap({ requestInput in
-            return User.allActiveUsers(conn: req, requestInput: requestInput).flatMap({ users in
+        return try req.content.decode(Inputs.UserQuery.self).flatMap({ queryParam in
+            return User.allActiveUsers(on: req, queryParam: queryParam).flatMap({ users in
                 return self.getUserStatistics(req: req, users: users)
             })
         })
@@ -21,8 +21,8 @@ final class UserAdminController {
     }
     
     func usersBlockedList(_ req: Request) throws -> Future<[UserStatistic]> {
-        return try req.content.decode(RequestInput.self).flatMap({ requestInput in
-            return User.allBlockedUsers(conn: req, requestInput: requestInput).flatMap({ users in
+        return try req.content.decode(Inputs.UserQuery.self).flatMap({ queryParam in
+            return User.allBlockedUsers(on: req, queryParam: queryParam).flatMap({ users in
                 return self.getUserStatistics(req: req, users: users)
             })
         })
@@ -55,29 +55,9 @@ final class UserAdminController {
                 return self.getUserStatistics(req: req, users: users)
             })
     }
-    
-    
-    func userAllowAccess(_ req: Request) throws -> Future<User> {
-        return try req.content.decode(UserAllowAccessInput.self).flatMap({ input in
-            return User.query(on: req, withSoftDeleted: true).filter(\.id == input.userId).first().flatMap({ user in
-                guard let user = user else {
-                    throw Abort(.wrongUserId)
-                }
-                return user.restore(on: req)
-            })
-        })
-    }
-    
-    func userDenyAccess(_ req: Request) throws -> Future<HTTPStatus> {
-        return try req.parameters.next(User.self).flatMap({ user in
-            return user.delete(on: req).flatMap({ _ in
-                return try LogoutController.logoutAllDevices(req: req, user: user) 
-            })
-        })
-    }
 }
 
-extension UserAdminController {
+extension UserStatisticsController {
     
     func getUserStatistics(req:Request,users:[User])->Future<[UserStatistic]> {
         
