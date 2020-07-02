@@ -29,41 +29,6 @@ final class GiftController {
         }
     }
     
-    func registeredGifts(_ req: Request) throws -> Future<[Gift]> {
-        
-        
-        
-        return try req.parameters.next(User.self).flatMap({ selectedUser in
-            
-            guard let selectedUserId = selectedUser.id else {
-                throw Abort(.nilUserId)
-            }
-            
-            let authUser = try req.requireAuthenticated(User.self)
-            let isAdmin = authUser.isAdmin
-            var isOwner = false
-            if let authUserId = authUser.id,
-                authUserId == selectedUserId {
-                isOwner = true
-            }
-            
-            
-            return try req.content.decode(RequestInput.self).flatMap({ requestInput in
-                
-                let query = Gift.query(on: req, withSoftDeleted: (isAdmin || isOwner))
-                .filter(\.userId == selectedUserId)
-                
-                if (isOwner && !isAdmin) {
-                    query.filter(\.isDeleted == false)
-                }
-                
-                return Gift.getGiftsWithRequestFilter(query: query, requestInput: requestInput,onlyUndonatedGifts: true, onlyReviewedGifts: !(isAdmin || isOwner))
-            })
-            
-            
-        })
-        
-    }
     
     /// Saves a decoded `Gift` to the database.
     func create(_ req: Request) throws -> Future<Gift> {

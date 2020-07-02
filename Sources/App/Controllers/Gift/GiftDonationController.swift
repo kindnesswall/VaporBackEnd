@@ -10,27 +10,6 @@ import FluentPostgreSQL
 
 class GiftDonationController {
     
-    func donatedGifts(_ req: Request) throws -> Future<[Gift]> {
-        
-        return try req.parameters.next(User.self).flatMap({ selectedUser in
-            return try req.content.decode(RequestInput.self).flatMap({ requestInput in
-                let query = try selectedUser.gifts.query(on: req)
-                query.filter(\.donatedToUserId != nil)
-                return Gift.getGiftsWithRequestFilter(query: query, requestInput: requestInput,onlyUndonatedGifts: false, onlyReviewedGifts: true)
-            })
-        })
-    }
-    
-    func receivedGifts(_ req: Request) throws -> Future<[Gift]> {
-        
-        return try req.parameters.next(User.self).flatMap({ selectedUser in
-            return try req.content.decode(RequestInput.self).flatMap({ requestInput in
-                let query = try selectedUser.receivedGifts.query(on: req)
-                return Gift.getGiftsWithRequestFilter(query: query, requestInput: requestInput,onlyUndonatedGifts: false, onlyReviewedGifts: true)
-            })
-        })
-    }
-    
     func giftsToDonate(_ req: Request) throws -> Future<[Gift]> {
         
         let user = try req.requireAuthenticated(User.self)
