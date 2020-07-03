@@ -23,7 +23,7 @@ final class GiftController {
     
     func itemAt(_ req: Request) throws -> Future<Gift> {
         let giftId = try req.parameters.next(Int.self)
-        return Gift.find(giftId, on: req).unwrap(or: Abort(.giftNotFound)).map { gift in
+        return Gift.get(giftId, on: req).map { gift in
             guard gift.isReviewed else { throw Abort(.unreviewedGift) }
             return gift
         }
@@ -42,7 +42,7 @@ final class GiftController {
         let authId = try req.requireAuthenticated(User.self).getId()
         let giftId = try req.parameters.next(Int.self)
         
-        return Gift.find(id: giftId, withSoftDeleted: true, on: req).flatMap { gift in
+        return Gift.get(giftId, withSoftDeleted: true, on: req).flatMap { gift in
             
             return try req.content.decode(Gift.Input.self).flatMap { input -> Future<Gift> in
                 return try gift.update(input: input, authId: authId, on: req)

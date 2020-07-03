@@ -52,28 +52,54 @@ final class GiftRequestController: ChatInitializer {
     }
     
     public func requestStatus(_ req: Request) throws -> Future<GiftRequestStatus> {
-        let user = try req.requireAuthenticated(User.self)
-        let userId = try user.getId()
+        let authId = try req.requireAuthenticated(User.self).getId()
+        let giftId = try req.parameters.next(Int.self)
         
-        return try req.parameters.next(Gift.self).flatMap({ gift in
-            let giftId = try gift.getId()
-            return GiftRequest.hasExisted(requestUserId: userId, giftId: giftId, conn: req).flatMap({ isRequested in
-                
-                guard isRequested else {
-                    let requestStatus = GiftRequestStatus(isRequested: false, chat: nil)
-                    return req.eventLoop.newSucceededFuture(result: requestStatus)
-                }
-                
-                let giftOwnerId = try gift.getUserId()
-                return self.findChat(userId: userId, contactId: giftOwnerId, on: req).map({ chat in
-                    guard let chat = chat else {
-                        return GiftRequestStatus(isRequested: false, chat: nil)
+        return Gift.get(giftId, on: req).flatMap { gift in
+            
+            let ownerId = try gift.getUserId()
+            
+            if authId == ownerId {
+                if let receiverId = gift.donatedToUserId {
+                    
+                    return self.findChat(userId: authId, contactId: receiverId, on: req).map { chat in
+                        
+                        guard let chat = chat else {
+                            //Note: Throwing an error
+                            throw Abort(.chatNotFound)
+                        }
+                        
+                        return GiftRequestStatus(.donated(chat: chat))
                     }
                     
-                    return GiftRequestStatus(isRequested: true, chat: chat)
-                })
-            })
-        })
+                } else {
+                    let status = GiftRequestStatus(.notDonated)
+                    return req.eventLoop.newSucceededFuture(result: status)
+                }
+                
+            }
+            
+            return GiftRequest.hasExisted(requestUserId: authId, giftId: giftId, conn: req).flatMap { isRequested in
+                
+                if isRequested {
+                    
+                    return self.findChat(userId: authId, contactId: ownerId, on: req).map { chat in
+                        
+                        guard let chat = chat else {
+                            //Note: Instead of throwing an error, we ask user to request again.
+                            return GiftRequestStatus(.notRequested)
+                        }
+                        
+                        return GiftRequestStatus(.requested(chat: chat))
+                    }
+                    
+                } else {
+                    let status = GiftRequestStatus(.notRequested)
+                    return req.eventLoop.newSucceededFuture(result: status)
+                }
+                
+            }
+        }
     }
     
 }

@@ -175,7 +175,12 @@ extension Gift {
 }
 
 extension Gift {
-    static func find(id: Int, withSoftDeleted: Bool, on conn: DatabaseConnectable) -> Future<Gift> {
+    
+    static func get(_ id: Int, on conn: DatabaseConnectable) -> Future<Gift> {
+        return find(id, on: conn).unwrap(or: Abort(.giftNotFound))
+    }
+    
+    static func get(_ id: Int, withSoftDeleted: Bool, on conn: DatabaseConnectable) -> Future<Gift> {
         return query(on: conn, withSoftDeleted: withSoftDeleted).filter(\.id == id).first().unwrap(or: Abort(.giftNotFound))
     }
 }

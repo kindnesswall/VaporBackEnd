@@ -43,10 +43,7 @@ class GiftDonationController {
                     throw Abort(.unrequestedGift)
                 }
                 
-                return Gift.find(donate.giftId, on: req).flatMap({ gift in
-                    guard let gift = gift else {
-                        throw Abort(.giftNotFound)
-                    }
+                return Gift.get(donate.giftId, on: req).flatMap({ gift in
                     
                     guard userId == gift.userId else {
                         throw Abort(.unauthorizedGift)

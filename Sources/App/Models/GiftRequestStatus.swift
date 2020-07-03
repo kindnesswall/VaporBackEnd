@@ -9,10 +9,31 @@ import Vapor
 
 final class GiftRequestStatus: Content {
     var isRequested: Bool
+    var isDonated: Bool?
     var chat: ContactMessage?
     
-    init(isRequested: Bool, chat: ContactMessage?) {
-        self.isRequested = isRequested
-        self.chat = chat
+    enum StatusType {
+        case requested(chat: ContactMessage)
+        case notRequested
+        case donated(chat: ContactMessage)
+        case notDonated
+    }
+    
+    init(_ status: StatusType) {
+        switch status {
+        case .requested(let chat):
+            self.isRequested = true
+            self.chat = chat
+        case .notRequested:
+            self.isRequested = false
+        case .donated(let chat):
+            self.isRequested = false
+            self.isDonated = true
+            self.chat = chat
+        case .notDonated:
+            self.isRequested = false
+            self.isDonated = false
+        }
+        
     }
 }
