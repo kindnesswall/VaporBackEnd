@@ -38,6 +38,7 @@ public func routes(_ router: Router) throws {
     let tokenAuthMiddleware = User.tokenAuthMiddleware()
     let guardAuthMiddleware = User.guardAuthMiddleware()
     let guardAdminMiddleware = GuardAdminMiddleware()
+    let guardCharityMiddleware = GuardCharityMiddleware()
     let guardianMiddleware = GuardianMiddleware(rate: Rate(limit: 3, interval: .minute),closure:{ _ in
         throw Abort(.tryOneMinuteLater)
     })
@@ -46,6 +47,7 @@ public func routes(_ router: Router) throws {
     let publicRouter = router.grouped(logMiddleware)
     let tokenProtected = router.grouped(tokenAuthMiddleware, guardAuthMiddleware, logMiddleware)
     let adminProtected = router.grouped(tokenAuthMiddleware, guardAuthMiddleware, guardAdminMiddleware, logMiddleware)
+    let charityProtected = router.grouped(tokenAuthMiddleware, guardAuthMiddleware, guardCharityMiddleware, logMiddleware)
     let guardianProtected = router.grouped(guardianMiddleware, logMiddleware)
     let guardianTokenProtected = router.grouped(tokenAuthMiddleware, guardAuthMiddleware, guardianMiddleware, logMiddleware)
     
@@ -82,7 +84,7 @@ public func routes(_ router: Router) throws {
     tokenProtected.post(uris.donate, use: giftDonationController.donate)
     
     //Routes Gift Request
-    tokenProtected.get(uris.gifts_request,Gift.parameter, use: giftRequestController.requestGift)
+    charityProtected.get(uris.gifts_request,Gift.parameter, use: giftRequestController.requestGift)
     tokenProtected.get(uris.gifts_request_status, Int.parameter, use: giftRequestController.requestStatus)
     
     //Routes Chat
