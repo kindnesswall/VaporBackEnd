@@ -126,6 +126,12 @@ extension Gift {
 }
 
 extension Gift {
+    var isDonated: Bool {
+        return donatedToUserId != nil
+    }
+}
+
+extension Gift {
     
     static func create(input: Gift.Input, authId: Int, on req: Request) throws -> Future<Gift> {
         let gift = Gift(input: input, authId: authId)
@@ -136,6 +142,7 @@ extension Gift {
         
         guard self.userId == authId else { throw Abort(.unauthorizedGift) }
         guard !self.isDeleted else { throw Abort(.deletedGift) }
+        guard !isDonated else { throw Abort(.donatedGiftUnaccepted) }
         
         return self.restore(on: req).flatMap { gift in
             try gift.update(input: input)

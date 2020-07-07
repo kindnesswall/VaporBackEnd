@@ -52,11 +52,10 @@ final class GiftController {
     
     /// Deletes a parameterized `Gift`.
     func delete(_ req: Request) throws -> Future<HTTPStatus> {
-        let user = try req.requireAuthenticated(User.self)
+        let authId = try req.requireAuthenticated(User.self).getId()
         return try req.parameters.next(Gift.self).flatMap { (gift) -> Future<Void> in
-            guard let userId = user.id , userId == gift.userId else {
-                throw Abort(.unauthorizedGift)
-            }
+            guard gift.userId == authId else { throw Abort(.unauthorizedGift) }
+            guard !gift.isDonated else { throw Abort(.donatedGiftUnaccepted) }
             gift.isDeleted = true
             return gift.save(on: req).flatMap({ gift in
                 return gift.delete(on: req)
