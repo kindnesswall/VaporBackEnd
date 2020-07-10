@@ -15,7 +15,7 @@ protocol PhoneNumberValidator {
 extension PhoneNumberValidator {
     func validate(phoneNumber inputPhoneNumber: String) throws -> String {
         
-        //  TO DO: code and phone number can be divided in input, by "," or by separate parameters
+        //TODO: code and phone number can be divided in input, by "," or by separate parameters
         //  first example: {phoneNumber: "+code,number"}
         //  second example: {code: code, phoneNumber: number}
         

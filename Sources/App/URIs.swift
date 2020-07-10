@@ -125,6 +125,9 @@ class URIs {
     var users_list_blocked : String {
         return "\(apiRoute)/users/list/blocked"
     }
+    var users_list_chatBlocked : String {
+        return "\(apiRoute)/users/list/chatBlocked"
+    }
     var users_statistics_list_active : String {
         return "\(apiRoute)/users/statistics/list/active"
     }

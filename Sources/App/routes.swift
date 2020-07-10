@@ -108,6 +108,7 @@ public func routes(_ router: Router) throws {
     adminProtected.delete(uris.users_denyAccess,User.parameter, use: adminUserList.userDenyAccess)
     adminProtected.post(uris.users_list_active, use: adminUserList.usersActiveList)
     adminProtected.post(uris.users_list_blocked, use: adminUserList.usersBlockedList)
+    adminProtected.get(uris.users_list_chatBlocked, use: adminUserList.usersChatBlockedList)
     adminProtected.get(uris.users_statistics, User.parameter, use: userStatistics.userStatistics)
     adminProtected.post(uris.users_statistics_list_active, use: userStatistics.usersActiveList)
     adminProtected.post(uris.users_statistics_list_blocked, use: userStatistics.usersBlockedList)

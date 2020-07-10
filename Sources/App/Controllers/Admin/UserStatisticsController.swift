@@ -37,23 +37,11 @@ final class UserStatisticsController {
     
     func usersChatBlockedList(_ req: Request) throws -> Future<[UserStatistic]> {
         
-        return User.allChatBlockedUsers(conn: req).map { users_chatBlocks  in
-            
-            return users_chatBlocks.reduce(into: [Int:User]()) { result, user_chatBlock in
-                
-                let user = user_chatBlock.0
-                guard let userId = user.id else {return}
-                
-                if result[userId] == nil {
-                    result[userId] = user
-                }
-                
-                }
-                .reduce(into: [User](), { result, each in
-                    result.append(each.value) })
-            }.flatMap({ users in
-                return self.getUserStatistics(req: req, users: users)
-            })
+        return User.allChatBlockedUsers(on: req).map { list in
+            return list.map { $0.user }
+        }.flatMap({ users in
+            return self.getUserStatistics(req: req, users: users)
+        })
     }
 }
 

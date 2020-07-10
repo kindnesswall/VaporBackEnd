@@ -38,4 +38,7 @@ final class AdminUserListController {
         }
     }
     
+    func usersChatBlockedList(_ req: Request) throws -> Future<[User_BlockedReport]> {
+        return User.allChatBlockedUsers(on: req)
+    }
 }

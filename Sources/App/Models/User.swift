@@ -112,8 +112,11 @@ extension User {
         let query = User.query(on: conn, withSoftDeleted: true).filter(\.deletedAt != nil)
         return self.getUsersWithRequestFilter(query: query, queryParam: queryParam)
     }
-    static func allChatBlockedUsers(conn:DatabaseConnectable) -> Future<[(User,ChatBlock)]> {
-        return User.query(on: conn).join(\ChatBlock.blockedUserId, to: \User.id).alsoDecode(ChatBlock.self).all()
+}
+
+extension User {
+    static func allChatBlockedUsers(on conn: DatabaseConnectable) -> Future<[User_BlockedReport]> {
+        return User.query(on: conn).join(\ChatBlock.blockedUserId, to: \User.id).alsoDecode(ChatBlock.self).all().map { $0.getStandard() }
     }
 }
 
