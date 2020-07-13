@@ -73,8 +73,7 @@ final class GiftRequestController: ChatInitializer {
                     }
                     
                 } else {
-                    let status = GiftRequestStatus(.notDonated)
-                    return req.eventLoop.newSucceededFuture(result: status)
+                    return req.future(GiftRequestStatus(.notDonated))
                 }
                 
             }
@@ -94,8 +93,7 @@ final class GiftRequestController: ChatInitializer {
                     }
                     
                 } else {
-                    let status = GiftRequestStatus(.notRequested)
-                    return req.eventLoop.newSucceededFuture(result: status)
+                    return req.future(GiftRequestStatus(.notRequested))
                 }
                 
             }

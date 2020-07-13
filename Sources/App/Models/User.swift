@@ -34,9 +34,9 @@ final class User : PostgreSQLModel {
     
     func getIdFuture(req:Request) -> Future<Int> {
         guard let id = self.id else {
-            return req.eventLoop.newFailedFuture(error: Abort(.nilUserId))
+            return req.future(error: Abort(.nilUserId))
         }
-        return req.eventLoop.newSucceededFuture(result: id)
+        return req.future(id)
     }
     
     init(phoneNumber:String) {

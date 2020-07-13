@@ -19,7 +19,7 @@ extension FindOrCreatable {
         
         return _find(input: input, on: conn).flatMap { foundItem in
             if let foundItem = foundItem {
-                return conn.eventLoop.newSucceededFuture(result: foundItem)
+                return conn.future(foundItem)
             }
             return input.save(on: conn)
         }
