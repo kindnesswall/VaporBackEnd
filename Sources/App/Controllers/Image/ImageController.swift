@@ -19,7 +19,7 @@ final class ImageController {
         return try req.content.decode(ImageInput.self).map({ (imageInput) -> ImageOutput in
             
             let imageFormat = imageInput.imageFormat ?? "jpeg"
-            let imageName = "image_\(String.getCurrentDate()).\(imageFormat)"
+            let imageName = "image_\(String.getCurrentDate(withClock: true)).\(imageFormat)"
             
             let appDirectory = AppFileManager()
             let imageDirectory = appDirectory.appendUserDirectory(toURL: appDirectory.appImagesDirecory, userId: userId)

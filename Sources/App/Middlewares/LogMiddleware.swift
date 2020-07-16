@@ -53,7 +53,7 @@ final class LogMiddleware: Middleware {
     }
     
     private var filePath: URL {
-        let date = String.getCurrentDate()
+        let date = String.getCurrentDate(withClock: false)
         let fileName = "\(date).\(logConfig.fileExtension)"
         let url = directoryPath.appendingPathComponent(fileName)
         return url

@@ -8,11 +8,14 @@
 import Foundation
 
 extension String {
-    static func getCurrentDate()->String{
-        let currentDateComponents = Date().description.components(separatedBy: " ")
+    static func getCurrentDate(withClock: Bool)->String{
+        let currentDate = Date().description.components(separatedBy: " ")
         var description = ""
-        for i in 0..<currentDateComponents.count-1 {
-            description += currentDateComponents[i]
+        for i in 0..<currentDate.count {
+            description += currentDate[i]
+            if !withClock { break }
+            if i > 0 { break }
+            description += "-"
         }
         return description
     }
