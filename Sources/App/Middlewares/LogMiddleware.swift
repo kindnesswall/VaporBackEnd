@@ -47,13 +47,14 @@ final class LogMiddleware: Middleware {
     
     private var directoryPath: URL {
         let appInfo = Constants.appInfo
-        let path = "\(appInfo.rootPath)\(logConfig.path)"
+        let path = "\(appInfo.rootPath)\(logConfig.path)\(replicaId)"
         let url = URL(fileURLWithPath: path)
         return url
     }
     
     private var filePath: URL {
-        let fileName = "\(logConfig.name)_\(replicaId).\(logConfig.fileExtension)"
+        let date = String.getCurrentDate()
+        let fileName = "\(date).\(logConfig.fileExtension)"
         let url = directoryPath.appendingPathComponent(fileName)
         return url
     }
