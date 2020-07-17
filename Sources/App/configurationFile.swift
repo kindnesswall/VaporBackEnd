@@ -20,3 +20,8 @@ public func readConfiguration() {
     guard let data = try? Data(contentsOf: url) else {return}
     configuration = try? JSONDecoder().decode(Configuration.self, from: data)
 }
+
+public func checkDirectories() {
+    LogDirectory().check()
+}
+

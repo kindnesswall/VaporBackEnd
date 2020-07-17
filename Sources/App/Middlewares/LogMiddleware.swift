@@ -9,12 +9,12 @@ import Vapor
 
 final class LogMiddleware: Middleware {
     
+    let logDirectory = LogDirectory()
+    
     func respond(to request: Request, chainingTo next: Responder) throws -> EventLoopFuture<Response> {
         
         let log = getLog(request: request)
-        let lastLog = try? String(contentsOf: filePath, encoding: .utf8)
-        let newLog = "\(lastLog ?? "")\(log)"
-        save(log: newLog)
+        try? log.appendToURL(fileURL: logDirectory.filePath)
         
         return try next.respond(to: request)
     }
@@ -30,33 +30,6 @@ final class LogMiddleware: Middleware {
         
         let log = "\(method) \(url):    \(time)    ip: \(ip)   user: \(userId)\n"
         return log
-    }
-    
-    private func save(log: String) {
-        guard let logData = log.data(using: .utf8) else {
-            return
-        }
-        let fileManager = AppFileManager()
-        try? fileManager.createDirectoryIfDoesNotExist(path: directoryPath)
-        fileManager.saveFile(path: filePath, data: logData)
-    }
-    
-    private var logConfig: LogConfig {
-        return Constants.appInfo.logConfig
-    }
-    
-    private var directoryPath: URL {
-        let appInfo = Constants.appInfo
-        let path = "\(appInfo.rootPath)\(logConfig.path)\(replicaId)"
-        let url = URL(fileURLWithPath: path)
-        return url
-    }
-    
-    private var filePath: URL {
-        let date = String.getCurrentDate(withClock: false)
-        let fileName = "\(date).\(logConfig.fileExtension)"
-        let url = directoryPath.appendingPathComponent(fileName)
-        return url
     }
     
 }
