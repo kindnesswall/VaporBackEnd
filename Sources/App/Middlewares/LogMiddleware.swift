@@ -27,8 +27,9 @@ final class LogMiddleware: Middleware {
         let ip = request.http.remotePeer.hostname ?? ""
         let user = try? request.requireAuthenticated(User.self)
         let userId = user?.id?.description ?? "Guest"
+        let spacer = "    "
         
-        let log = "\(method) \(url):    \(time)    ip: \(ip)   user: \(userId)\n"
+        let log = "\(method) \(url)\(spacer)\(time)\(spacer)ip: \(ip)\(spacer)user: \(userId)\n"
         return log
     }
     
