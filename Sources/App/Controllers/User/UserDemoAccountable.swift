@@ -17,8 +17,7 @@ extension UserDemoAccountable {
     
     func isDemoAccount(phoneNumber: String) -> Bool {
         let demo = Constants.appInfo.demoAccount
-        if demo.phoneNumber == phoneNumber { return true }
-        return false
+        return demo.phoneNumber.validate(phoneNumber: phoneNumber)
     }
     
     func validateDemoAccount(phoneNumber: String, activationCode: String) throws -> Bool {
