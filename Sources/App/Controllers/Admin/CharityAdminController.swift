@@ -28,6 +28,7 @@ final class CharityAdminController {
                 return foundCharity.save(on: req).flatMap({ _ in
                     user.isCharity = true
                     user.charityName = foundCharity.name
+                    user.charityImage = foundCharity.imageUrl
                     return user.save(on: req).transform(to: .ok)
                 })
             }
@@ -41,6 +42,7 @@ final class CharityAdminController {
                 
                 user.isCharity = false
                 user.charityName = nil
+                user.charityImage = nil
                 
                 return user.save(on: req).flatMap { _ in
                     return try Charity.get(userId: try user.getId(), on: req).flatMap { foundCharity in

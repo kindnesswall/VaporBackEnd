@@ -78,6 +78,7 @@ final class CharityInfoController {
                     return User.get(userId, on: req).flatMap { user in
                         if user.isCharity {
                             user.charityName = input.name
+                            user.charityImage = input.imageUrl
                         }
                         return user.save(on: req).transform(to: charity)
                     }
@@ -94,6 +95,8 @@ final class CharityInfoController {
             
             user.isCharity = false
             user.charityName = nil
+            user.charityImage = nil
+            
             return user.save(on: req).flatMap { _ in
                 return try Charity.get(userId: userId, on: req).flatMap({ foundCharity in
                     return foundCharity.delete(on: req).transform(to: .ok)

@@ -20,6 +20,7 @@ final class User : PostgreSQLModel {
     var image:String?
     
     var charityName:String?
+    var charityImage:String?
     
     var createdAt: Date?
     var updatedAt: Date?
@@ -55,8 +56,19 @@ extension User {
         let id = try self.getId()
         let auth = try? req.requireAuthenticated(User.self)
         let phoneNumber = (auth?.isAdmin == true || auth?.isCharity == true || id == auth?.id) ? self.phoneNumber : nil
+        
         let charityName = self.isCharity ? self.charityName : nil
-        let userProfile = UserProfile(id: id, name: self.name, image: self.image, phoneNumber: phoneNumber, isCharity: self.isCharity, charityName: charityName)
+        let charityImage = self.isCharity ? self.charityImage : nil
+        
+        let userProfile = UserProfile(
+            id: id,
+            name: self.name,
+            image: self.image,
+            phoneNumber: phoneNumber,
+            isCharity: self.isCharity,
+            charityName: charityName,
+            charityImage: charityImage)
+        
         return userProfile
     }
 }
