@@ -60,6 +60,8 @@ extension User {
         let charityName = self.isCharity ? self.charityName : nil
         let charityImage = self.isCharity ? self.charityImage : nil
         
+        let isSupporter = self.isAdmin
+        
         let userProfile = UserProfile(
             id: id,
             name: self.name,
@@ -67,7 +69,8 @@ extension User {
             phoneNumber: phoneNumber,
             isCharity: self.isCharity,
             charityName: charityName,
-            charityImage: charityImage)
+            charityImage: charityImage,
+            isSupporter: isSupporter)
         
         return userProfile
     }

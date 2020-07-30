@@ -60,7 +60,7 @@ enum ErrorType: String {
     case userWasAlreadyBlocked
     case userWasAlreadyUnblocked
     case userIsNotCharity
-    case contactIsNotCharity
+    case chatIsNotAllowed
     case serverThrowsException
     case objectEncodingFailed
 }
@@ -73,7 +73,8 @@ extension ErrorType {
         case .unauthorizedRequest,
              .unauthorizedSocket,
              .unauthorizedGift,
-             .unauthorizedMessage:
+             .unauthorizedMessage,
+             .chatIsNotAllowed:
             return .methodNotAllowed
         case .unreviewedGift,
              .unrequestedGift,
@@ -116,8 +117,7 @@ extension ErrorType {
              .userWasAlreadyBlocked,
              .userWasAlreadyUnblocked:
             return .alreadyReported
-        case .userIsNotCharity,
-             .contactIsNotCharity:
+        case .userIsNotCharity:
             return .badRequest
         case .serverThrowsException,
              .objectEncodingFailed:
@@ -216,8 +216,8 @@ extension ErrorType {
             return "User was already unblocked"
         case .userIsNotCharity:
             return "User is not charity"
-        case .contactIsNotCharity:
-            return "Contact is not charity"
+        case .chatIsNotAllowed:
+            return "Chat is not allowed"
         case .serverThrowsException:
             return "Server throws exception"
         case .objectEncodingFailed:

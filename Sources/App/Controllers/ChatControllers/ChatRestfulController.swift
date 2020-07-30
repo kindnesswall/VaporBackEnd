@@ -20,12 +20,15 @@ class ChatRestfulController: ChatInitializer {
     }
     
     func startChat(_ req: Request) throws -> Future<ContactMessage> {
-        let user = try req.requireAuthenticated(User.self)
+        let auth = try req.requireAuthenticated(User.self)
         return try req.parameters.next(User.self).flatMap({ contact in
-            guard contact.isCharity else {
-                throw Abort(.contactIsNotCharity)
+            // Use cases:
+            // Admin: starts a chat to user/charity
+            // User: starts a chat to charity
+            guard auth.isAdmin || contact.isCharity else {
+                throw Abort(.chatIsNotAllowed)
             }
-            return try self.findOrCreateChat(user: user, contact: contact, on: req)
+            return try self.findOrCreateChat(user: auth, contact: contact, on: req)
         })
     }
     

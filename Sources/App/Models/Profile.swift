@@ -15,6 +15,7 @@ final class UserProfile : Content {
     var isCharity:Bool
     var charityName:String?
     var charityImage:String?
+    var isSupporter:Bool
     
     init(id:Int,
          name:String?,
@@ -22,7 +23,8 @@ final class UserProfile : Content {
          phoneNumber:String?,
          isCharity:Bool,
          charityName:String?,
-         charityImage:String?) {
+         charityImage:String?,
+         isSupporter:Bool) {
         
         self.id=id
         self.name=name
@@ -31,6 +33,7 @@ final class UserProfile : Content {
         self.isCharity = isCharity
         self.charityName = charityName
         self.charityImage = charityImage
+        self.isSupporter = isSupporter
     }
     
     final class Input: Content {
