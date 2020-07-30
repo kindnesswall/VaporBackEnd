@@ -56,11 +56,18 @@ public func routes(_ router: Router) throws {
     //Routes Login
     guardianProtected.post(uris.register, use: userController.registerHandler)
     publicRouter.post(uris.login, use: userController.loginHandler)
+    
     guardianTokenProtected.post(uris.register_phoneNumberChange_request, use: phoneChangeController.changePhoneNumberRequest)
     tokenProtected.post(uris.register_phoneNumberChange_validate, use: phoneChangeController.changePhoneNumberValidate)
+    
     tokenProtected.get(uris.logout, use: logoutController.logout)
     tokenProtected.get(uris.logout_allDevices, use: logoutController.logoutAllDevices)
+    
     publicRouter.post(uris.login_firebase, use: userFirebaseController.loginUser)
+    
+    if Constants.appInfo.stage == .development {
+        adminProtected.post(uris.login_admin_access, use: userController.adminAccessActivationCode)
+    }
     
     //Routes User Profile
     tokenFetched.get(uris.profile,User.parameter, use: userProfileController.show)

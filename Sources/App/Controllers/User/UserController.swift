@@ -53,7 +53,7 @@ final class UserController: UserControllerCore, PhoneNumberValidator {
     }
     
     // Only for development purpose
-    private func adminAccessActivationCode(_ req: Request) throws -> Future<AuthAdminAccessOutput> {
+    func adminAccessActivationCode(_ req: Request) throws -> Future<AuthAdminAccessOutput> {
         let auth = try req.requireAuthenticated(User.self)
         
         // Only accessable by admin!
