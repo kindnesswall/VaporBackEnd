@@ -45,6 +45,7 @@ public func routes(_ router: Router) throws {
     
     //Groups
     let publicRouter = router.grouped(logMiddleware)
+    let tokenFetched = router.grouped(tokenAuthMiddleware, logMiddleware)
     let tokenProtected = router.grouped(tokenAuthMiddleware, guardAuthMiddleware, logMiddleware)
     let adminProtected = router.grouped(tokenAuthMiddleware, guardAuthMiddleware, guardAdminMiddleware, logMiddleware)
     let charityProtected = router.grouped(tokenAuthMiddleware, guardAuthMiddleware, guardCharityMiddleware, logMiddleware)
@@ -62,7 +63,7 @@ public func routes(_ router: Router) throws {
     publicRouter.post(uris.login_firebase, use: userFirebaseController.loginUser)
     
     //Routes User Profile
-    tokenProtected.get(uris.profile,User.parameter, use: userProfileController.show)
+    tokenFetched.get(uris.profile,User.parameter, use: userProfileController.show)
     tokenProtected.post(uris.profile,use: userProfileController.update)
     
     
