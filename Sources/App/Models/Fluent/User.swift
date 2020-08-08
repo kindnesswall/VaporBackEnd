@@ -55,7 +55,7 @@ extension User {
     func userProfile(req:Request) throws -> UserProfile {
         let id = try self.getId()
         let auth = try? req.requireAuthenticated(User.self)
-        let phoneNumber = (auth?.isAdmin == true || auth?.isCharity == true || id == auth?.id) ? self.phoneNumber : nil
+        let phoneNumber = (auth?.isAdmin == true || id == auth?.id) ? self.phoneNumber : nil
         
         let charityName = self.isCharity ? self.charityName : nil
         let charityImage = self.isCharity ? self.charityImage : nil
