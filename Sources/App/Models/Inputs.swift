@@ -61,4 +61,11 @@ class Inputs {
         var phoneNumber:String?
     }
     
+    struct SMS: Codable {
+        var originator: String
+        var pattern_code: String
+        var recipient: String
+        var values: [String:String]
+    }
+    
 }

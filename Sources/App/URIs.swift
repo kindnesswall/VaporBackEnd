@@ -192,9 +192,7 @@ class URIs {
         return "\(apiRoute)/application/android/version"
     }
     
-    func getSMSUrl(receptor: String, template: String, token: String) -> String {
-        let apiKey = Constants.appInfo.smsConfig.apiKey
-        let url = "https://saharsms.com/api/\(apiKey)/json/SendVerify?receptor=\(receptor)&template=\(template)&token=\(token)"
-        return url
+    var smsURL: String {
+        return "http://rest.ippanel.com/v1/messages/patterns/send"
     }
 }
