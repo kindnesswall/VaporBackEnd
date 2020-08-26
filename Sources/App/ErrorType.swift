@@ -37,6 +37,7 @@ enum ErrorType: String {
     case wrongPushNotificationType
     case chatHasBlockedByUser
     case invalidType
+    case invalid
     case nilUserId
     case nilTokenId
     case nilGiftId
@@ -90,7 +91,8 @@ extension ErrorType {
              .pushPayloadIsNotValid,
              .wrongPushNotificationType,
              .chatHasBlockedByUser,
-             .invalidType:
+             .invalidType,
+             .invalid:
             return .notAcceptable
         case .nilUserId,
              .nilTokenId,
@@ -170,6 +172,8 @@ extension ErrorType {
             return "Chat has blocked by user"
         case .invalidType:
             return "The input type is invalid"
+        case .invalid:
+            return "The input is invalid"
         case .nilUserId:
             return "User id is nil"
         case .nilTokenId:

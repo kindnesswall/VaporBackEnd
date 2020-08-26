@@ -192,6 +192,13 @@ class URIs {
         return "\(apiRoute)/application/android/version"
     }
     
+    var sponsors : String {
+        return "\(apiRoute)/sponsors"
+    }
+    var sponsors_list : String {
+        return "\(apiRoute)/sponsors/list"
+    }
+    
     var smsURL: String {
         return "http://rest.ippanel.com/v1/messages/patterns/send"
     }
