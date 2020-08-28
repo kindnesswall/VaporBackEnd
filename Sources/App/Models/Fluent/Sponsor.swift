@@ -13,6 +13,7 @@ final class Sponsor: PostgreSQLModel {
     var name: String
     var image: String?
     var description: String?
+    var estimatedDonation: Double?
     
     var createdAt: Date?
     var updatedAt: Date?
@@ -22,6 +23,7 @@ final class Sponsor: PostgreSQLModel {
         self.name = input.name
         self.image = input.image
         self.description = input.description
+        self.estimatedDonation = input.estimatedDonation
         return update(on: req).transform(to: .ok)
     }
 
