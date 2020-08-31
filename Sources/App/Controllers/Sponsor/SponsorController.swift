@@ -19,15 +19,15 @@ final class SponsorController {
             guard input.isValid else {
                 return req.future(error: Abort(.invalid))
             }
-            return input.save(on: req).transform(to: .ok)
+            return input.create(on: req).transform(to: .ok)
         }
     }
     
     func update(_ req: Request) throws -> Future<HTTPStatus> {
         
-        let updateId = try req.parameters.next(Int.self)
+        let updatedId = try req.parameters.next(Int.self)
         
-        return Sponsor.get(updateId, on: req).flatMap { sponsor in
+        return Sponsor.get(updatedId, on: req).flatMap { sponsor in
             
             return try req.content.decode(Sponsor.self).flatMap { input in
                 guard input.isValid else {
