@@ -10,14 +10,24 @@ import Vapor
 final class RatingController {
     
     func get(_ req: Request) throws -> Future<Outputs.Rating> {
-        let authId = try req.getAuthId()
+        
         let reviewedId = try req.parameters.next(Int.self)
-        return Rating.find(authId: authId, reviewedId: reviewedId, on: req).flatMap { userRate in
-            return RatingResult.get(reviewedId: reviewedId, on: req).map { ratingResult in
-                return Outputs
-                    .Rating(userRate: userRate?.rate,
-                            averageRate: ratingResult?.averageRate,
-                            votersCount: ratingResult?.votersCount ?? 0)
+        let authId = try? req.getAuthId()
+        
+        return RatingResult.get(reviewedId: reviewedId, on: req).flatMap { ratingResult in
+            
+            var output = Outputs
+                .Rating(userRate: nil,
+                        averageRate: ratingResult?.averageRate,
+                        votersCount: ratingResult?.votersCount ?? 0)
+            
+            if let authId = authId {
+                return Rating.find(authId: authId, reviewedId: reviewedId, on: req).map { userRate in
+                    output.userRate = userRate?.rate
+                    return output
+                }
+            } else {
+                return req.future(output)
             }
         }
     }

@@ -169,6 +169,8 @@ public func routes(_ router: Router) throws {
     
     //Rating
     tokenProtected.post(uris.rating, use: rating.create)
+    tokenProtected.put(uris.rating, use: rating.update)
+    tokenFetched.get(uris.rating, Int.parameter, use: rating.get)
     
 }
 
