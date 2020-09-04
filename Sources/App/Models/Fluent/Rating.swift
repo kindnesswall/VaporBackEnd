@@ -98,7 +98,7 @@ extension Rating {
 
 extension Rating {
     
-    static func calculateAverageRate(reviewedId: Int, on conn: DatabaseConnectable) -> Future<Double?> {
+    static func calculateAverageRate(reviewedId: Int, on conn: DatabaseConnectable) -> Future<AverageRate?> {
         return query(on: conn)
             .filter(\.reviewedId == reviewedId)
             .all()
@@ -120,13 +120,23 @@ extension Rating : Content {}
 
 extension Rating : Parameter {}
 
+struct AverageRate: Content {
+    var rate: Double
+    var votersCount: Int
+}
+
 extension Array where Element == Rating {
 
-    var averageRate: Double? {
+    var averageRate: AverageRate? {
         var sum = 0
         for element in self {
             sum += element.rate
         }
-        return count > 0 ? (Double(sum) / Double(count)) : nil
+        if count > 0 {
+            let averageRate = Double(sum) / Double(count)
+            return AverageRate(rate: averageRate, votersCount: count)
+        } else {
+            return nil
+        }
     }
 }

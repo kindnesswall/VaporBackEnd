@@ -12,8 +12,13 @@ final class RatingController {
     func get(_ req: Request) throws -> Future<Outputs.Rating> {
         let authId = try req.getAuthId()
         let reviewedId = try req.parameters.next(Int.self)
-        return Rating.find(authId: authId, reviewedId: reviewedId, on: req).map { userRate in
-            return Outputs.Rating(userRate: userRate?.rate)
+        return Rating.find(authId: authId, reviewedId: reviewedId, on: req).flatMap { userRate in
+            return RatingResult.get(reviewedId: reviewedId, on: req).map { ratingResult in
+                return Outputs
+                    .Rating(userRate: userRate?.rate,
+                            averageRate: ratingResult?.averageRate,
+                            votersCount: ratingResult?.votersCount ?? 0)
+            }
         }
     }
     

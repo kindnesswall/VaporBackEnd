@@ -12,14 +12,16 @@ final class RatingResult: PostgreSQLModel {
     var id: Int?
     var reviewedId: Int
     var averageRate: Double
+    var votersCount: Int
     
     var createdAt: Date?
     var updatedAt: Date?
     var deletedAt: Date?
     
-    init(reviewedId: Int, averageRate: Double) {
+    init(reviewedId: Int, averageRate: AverageRate) {
         self.reviewedId = reviewedId
-        self.averageRate = averageRate
+        self.averageRate = averageRate.rate
+        self.votersCount = averageRate.votersCount
     }
 }
 
@@ -30,19 +32,22 @@ extension RatingResult {
 }
 
 extension RatingResult {
-    static func set(reviewedId: Int, averageRate: Double, on conn: DatabaseConnectable) -> Future<HTTPStatus>  {
+    static func set(reviewedId: Int, averageRate: AverageRate, on conn: DatabaseConnectable) -> Future<HTTPStatus>  {
+        
         let input = RatingResult(reviewedId: reviewedId, averageRate: averageRate)
         return _findOrCreate(input: input, on: conn).flatMap { item in
-            item.averageRate = averageRate
+            
+            item.averageRate = averageRate.rate
+            item.votersCount = averageRate.votersCount
+            
             return item.update(on: conn)
                 .transform(to: .ok)
         }
     }
     
-    static func get(reviewedId: Int, on conn: DatabaseConnectable) -> Future<RatingResult> {
+    static func get(reviewedId: Int, on conn: DatabaseConnectable) -> Future<RatingResult?> {
         return _findQuery(reviewedId: reviewedId, on: conn)
             .first()
-            .unwrap(or: Abort(.notFound))
     }
 }
 

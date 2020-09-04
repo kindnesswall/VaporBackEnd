@@ -11,6 +11,14 @@ class Outputs {
 
     struct Rating: Content {
         var userRate: Int?
+        var averageRate: Double?
+        var votersCount: Int
+        
+        init(userRate: Int?, averageRate: Double?, votersCount: Int) {
+            self.userRate = userRate
+            self.averageRate = averageRate
+            self.votersCount = votersCount
+        }
     }
 
 }
