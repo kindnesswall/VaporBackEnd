@@ -38,13 +38,24 @@ extension RatingResult {
                 .transform(to: .ok)
         }
     }
+    
+    static func get(reviewedId: Int, on conn: DatabaseConnectable) -> Future<RatingResult> {
+        return _findQuery(reviewedId: reviewedId, on: conn)
+            .first()
+            .unwrap(or: Abort(.notFound))
+    }
 }
 
 extension RatingResult: FindOrCreatable {
     static func _findQuery(input: RatingResult, on conn: DatabaseConnectable) -> QueryBuilder<PostgreSQLDatabase, RatingResult> {
         
+        return _findQuery(reviewedId: input.reviewedId, on: conn)
+    }
+    
+    static func _findQuery(reviewedId: Int, on conn: DatabaseConnectable) -> QueryBuilder<PostgreSQLDatabase, RatingResult> {
+        
         return query(on: conn)
-            .filter(\.reviewedId == input.reviewedId)
+            .filter(\.reviewedId == reviewedId)
     }
 }
 

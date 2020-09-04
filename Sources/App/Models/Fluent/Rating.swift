@@ -43,11 +43,11 @@ extension Rating {
 
 extension Rating {
     
-    static func get(authId: Int, input: Input, on req: Request) -> Future<Rating> {
-        let item = Rating(authId: authId, input: input)
-        
-        return _findFirst(input: item, on: req)
-            .unwrap(or: Abort(.notFound))
+    
+    
+    static func find(authId voterId: Int, reviewedId: Int, on req: Request) -> Future<Rating?> {
+        return _findQuery(voterId: voterId, reviewedId: reviewedId, on: req)
+            .first()
     }
     
     
@@ -80,9 +80,13 @@ extension Rating {
 
 extension Rating: FindOrCreatable {
     static func _findQuery(input: Rating, on conn: DatabaseConnectable) -> QueryBuilder<PostgreSQLDatabase, Rating> {
+        return _findQuery(voterId: input.voterId, reviewedId: input.reviewedId, on: conn)
+    }
+    
+    static func _findQuery(voterId: Int, reviewedId: Int, on conn: DatabaseConnectable) -> QueryBuilder<PostgreSQLDatabase, Rating> {
         return query(on: conn)
-            .filter(\.voterId == input.voterId)
-            .filter(\.reviewedId == input.reviewedId)
+            .filter(\.voterId == voterId)
+            .filter(\.reviewedId == reviewedId)
     }
 }
 
@@ -94,7 +98,7 @@ extension Rating {
 
 extension Rating {
     
-    static func averageRate(reviewedId: Int, on conn: DatabaseConnectable) -> Future<Double?> {
+    static func calculateAverageRate(reviewedId: Int, on conn: DatabaseConnectable) -> Future<Double?> {
         return query(on: conn)
             .filter(\.reviewedId == reviewedId)
             .all()
@@ -102,7 +106,7 @@ extension Rating {
     }
     
     static func updateAverageRate(reviewedId: Int, on conn: DatabaseConnectable) -> Future<HTTPStatus> {
-        return Rating.averageRate(reviewedId: reviewedId, on: conn)
+        return Rating.calculateAverageRate(reviewedId: reviewedId, on: conn)
             .unwrap(or: Abort(.notFound))
             .flatMap { averageRate in
                 return RatingResult.set(reviewedId: reviewedId, averageRate: averageRate, on: conn)
