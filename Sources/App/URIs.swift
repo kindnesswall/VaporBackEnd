@@ -199,6 +199,10 @@ class URIs {
         return "\(apiRoute)/sponsors/list"
     }
     
+    var rating : String {
+        return "\(apiRoute)/rating"
+    }
+    
     var smsURL: String {
         return "http://rest.ippanel.com/v1/messages/patterns/send"
     }

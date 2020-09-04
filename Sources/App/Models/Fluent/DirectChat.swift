@@ -93,7 +93,7 @@ extension DirectChat {
     }
     
     static func find(userId: Int, contactId: Int, on conn: DatabaseConnectable) -> Future<ContactMessage?> {
-        return _find(userId: userId, contactId: contactId, on: conn).map { item in
+        return _find(userId: userId, contactId: contactId, on: conn).first().map { item in
             return try item?.castFor(authId: userId)
         }
     }
@@ -149,18 +149,18 @@ extension DirectChat {
 
 extension DirectChat: FindOrCreatable {
     
-    static func _find(input: DirectChat, on conn: DatabaseConnectable) -> EventLoopFuture<DirectChat?> {
+    static func _findQuery(input: DirectChat, on conn: DatabaseConnectable) -> QueryBuilder<PostgreSQLDatabase, DirectChat> {
         return _find(userId: input.userId, contactId: input.contactId, on: conn)
     }
     
-    static private func _find(userId: Int, contactId: Int, on conn: DatabaseConnectable) -> Future<DirectChat?> {
+    static private func _find(userId: Int, contactId: Int, on conn: DatabaseConnectable) -> QueryBuilder<PostgreSQLDatabase, DirectChat> {
         return query(on: conn).group(.or) { query in
             query.group(.and, closure: { query in
                 query.filter(\.userId == userId).filter(\.contactId == contactId)
             }).group(.and, closure: { query in
                 query.filter(\.userId == contactId).filter(\.contactId == userId)
             })
-        }.first()
+        }
     }
 }
 

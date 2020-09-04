@@ -28,6 +28,7 @@ enum ErrorType: String {
     case giftIsAlreadyDonated
     case deletedGift
     case donatedGiftUnaccepted
+    case alreadyExists
     case charityInfoAlreadyExists
     case firebaseAuthenticationError
     case invalidPhoneNumber
@@ -64,6 +65,7 @@ enum ErrorType: String {
     case chatIsNotAllowed
     case serverThrowsException
     case objectEncodingFailed
+    case transactionFailed
 }
 
 extension ErrorType {
@@ -83,6 +85,7 @@ extension ErrorType {
              .giftIsAlreadyDonated,
              .deletedGift,
              .donatedGiftUnaccepted,
+             .alreadyExists,
              .charityInfoAlreadyExists,
              .firebaseAuthenticationError,
              .invalidPhoneNumber,
@@ -122,7 +125,8 @@ extension ErrorType {
         case .userIsNotCharity:
             return .badRequest
         case .serverThrowsException,
-             .objectEncodingFailed:
+             .objectEncodingFailed,
+             .transactionFailed:
             return .internalServerError
         
         }
@@ -154,6 +158,8 @@ extension ErrorType {
             return "Gift has been deleted"
         case .donatedGiftUnaccepted:
             return "Unacceptable operation for a donated gift"
+        case .alreadyExists:
+            return "Item already exists"
         case .charityInfoAlreadyExists:
             return "Charity information already exists"
         case .firebaseAuthenticationError:
@@ -226,7 +232,8 @@ extension ErrorType {
             return "Server throws exception"
         case .objectEncodingFailed:
             return "Object encoding failed"
-        
+        case .transactionFailed:
+            return "Transaction failed, please try again"
         }
     }
 }

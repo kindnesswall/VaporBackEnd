@@ -33,6 +33,7 @@ public func routes(_ router: Router) throws {
     let adminStatisticsController = AdminStatisticsController()
     let versionController = ApplicationVersionController()
     let sponsor = SponsorController()
+    let rating = RatingController()
     
     //Middlewares
     let logMiddleware = LogMiddleware()
@@ -165,6 +166,9 @@ public func routes(_ router: Router) throws {
     adminProtected.post(uris.sponsors, use: sponsor.create)
     adminProtected.put(uris.sponsors, Int.parameter, use: sponsor.update)
     adminProtected.delete(uris.sponsors, Int.parameter, use: sponsor.delete)
+    
+    //Rating
+    tokenProtected.post(uris.rating, use: rating.create)
     
 }
 
