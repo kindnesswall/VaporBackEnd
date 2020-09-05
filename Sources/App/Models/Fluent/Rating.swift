@@ -59,7 +59,7 @@ extension Rating {
         
         return Rating.mustNotFind(input: item, on: req).flatMap { _ in
             return item.create(on: req).flatMap { _ in
-                return Self.updateAverageRate(reviewedId: item.reviewedId,
+                return Rating.updateAverageRate(reviewedId: item.reviewedId,
                                               on: req)
             }
         }
@@ -71,7 +71,7 @@ extension Rating {
         }
         update(rate: input.rate)
         return update(on: req).flatMap { _ in
-            return Self.updateAverageRate(reviewedId: self.reviewedId,
+            return Rating.updateAverageRate(reviewedId: self.reviewedId,
                                           on: req)
         }
         
