@@ -44,7 +44,7 @@ final class RatingController {
         
         let authId = try req.getAuthId()
         return try req.content.decode(Rating.Input.self).flatMap { input in
-            return Rating.find(authId: authId, reviewedId: input.reviewedId, on: req)
+            return Rating.find(authId: authId, reviewedId: input.reviewedUserId, on: req)
                 .unwrap(or: Abort(.notFound))
                 .flatMap { rating in
                     return rating.update(input: input, on: req)

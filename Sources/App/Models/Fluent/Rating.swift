@@ -20,7 +20,7 @@ final class Rating: PostgreSQLModel {
     
     private init(authId voterId: Int, input: Input) {
         self.voterId = voterId
-        self.reviewedId = input.reviewedId
+        self.reviewedId = input.reviewedUserId
         self.rate = input.rate
     }
     
@@ -31,7 +31,7 @@ final class Rating: PostgreSQLModel {
 
 extension Rating {
     struct Input: Decodable {
-        var reviewedId: Int
+        var reviewedUserId: Int
         var rate: Int
         
         var isValid: Bool {
@@ -52,7 +52,7 @@ extension Rating {
     
     
     static func create(authId: Int, input: Input, on req: Request) -> Future<HTTPStatus> {
-        guard input.isValid else {
+        guard input.isValid, authId != input.reviewedUserId  else {
             return req.future(error: Abort(.invalid))
         }
         let item = Rating(authId: authId, input: input)
