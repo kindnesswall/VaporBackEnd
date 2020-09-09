@@ -1,0 +1,169 @@
+body{
+  background-image:  url(/landing/images/Web/landing_image.svg),url(/landing/images/Web/texture_bg.svg);
+  background-position: -50% center,center center;
+  background-repeat: no-repeat,no-repeat;
+  background-attachment: fixed;
+  background-size:80% 80%, cover;
+  background-color: #E5FFE6;
+  font-family:tahoma;
+  direction:rtl;
+}
+#logo{
+	display:block;
+	float:right;
+    width:100%;
+    text-align:right;
+	margin-bottom:50px;
+}
+#logo a{
+	background: url(/landing/images/Web/ic_logo.svg);
+    display: inline-block;
+    width: 100px;
+    height: 100px;
+    background-position: center center;
+    background-size: 100%;
+    background-repeat: no-repeat;
+	margin:50px 50px 0px 0px;
+}
+#logo img{
+	width:100px;
+	height:100px;
+	float:right;
+	padding: 50px 50px 0px 0px;
+}
+#content{
+	display:block;
+	float:right;
+	width:100%;
+	text-align:right;
+	color:white;
+	margin-bottom:50px;
+}
+
+#content h1{
+	font-size:25px;
+	margin: 0px 50px 10px 0px;
+	display:block;
+}
+
+#content p{
+	font-size:12px;
+	max-width:20%;
+	line-height:20px;
+	text-align:justify;
+	float:right;
+	margin: 0px 50px 0px 0px;
+}
+
+#footer{
+	display:block;
+	float:right;
+	width:100%;
+	text-align:right;
+}
+.btn-bazar{
+	width:150px;
+	height:40px;
+	display:block;
+	background:url(/landing/images/Web/ic_cafebazaar.svg)center center;
+	background-size:100%;
+    background-repeat:no-repeat;
+	clear:both;
+	margin: 0px 50px 0px 0px;
+}
+.btn-googlePlay{
+	width:150px;
+	height:40px;
+	display:block;
+	background-color:blue;
+	background:url(/landing/images/Web/ic_googleplay.svg)center center;
+    background-size:100%;
+	background-repeat:no-repeat;
+    clear:both;
+	margin: 10px 50px 0px 0px;
+}
+@media only screen and (max-width: 600px) {
+  body{
+  background-image:  url(/landing/images/Mobile/landing_image.svg),url(/landing/images/Mobile/texture_bg.svg);
+  background-position: center -50%,center center;
+  background-repeat: no-repeat,no-repeat;
+  background-attachment: fixed;
+  background-size:80% 80%, cover;
+}
+#logo{
+	display:block;
+	float:right;
+    width:100%;
+    text-align:right;
+	margin-bottom:50px;
+	position:absolute;
+	top:10px;
+
+}
+#logo a{
+	background: url(/landing/images/Mobile/ic_logo.svg);
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    background-position: center center;
+    background-size: 100%;
+    background-repeat: no-repeat;
+	margin-right:10px;
+	margin-top:0px;
+}
+#logo img{
+	width:50px;
+	height:50px;
+	float:right;
+	padding:0px 10px 0px 0px;
+
+}
+#content {
+    position: absolute;
+    top: 54%;
+}
+#content p{
+	max-width:91%;
+	margin:10px;
+}
+#content h1 {
+    font-size: 25px;
+    margin: 0px 10px 35px 0px;
+    display: block;
+    color: #17d29a;
+	text-align:right;
+}
+#footer{
+	display:block;
+	float:right;
+	width:100%;
+	text-align:right;
+
+}
+.btn-bazar{
+	width:150px;
+	height:40px;
+	display:inline-block;
+	background:url(/landing/images/Web/ic_cafebazaar.svg)center center;
+	background-size:100%;
+    background-repeat:no-repeat;
+	position:absolute;
+	bottom:10px;
+	right:15px;
+	margin:0px;
+}
+.btn-googlePlay{
+	width:150px;
+	height:40px;
+	display:inline-block;
+	background-color:blue;
+	background:url(/landing/images/Web/ic_googleplay.svg)center center;
+    background-size:100%;
+	background-repeat:no-repeat;
+	position:absolute;
+	bottom:10px;
+	left:10px;
+	margin:0px;
+}
+
+}

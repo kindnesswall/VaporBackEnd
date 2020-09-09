@@ -13,6 +13,12 @@ class URIs {
         self.apiRoute=Constants.appInfo.apiRoute
     }
     
+    var root: String {
+        return "/"
+    }
+    var home: String {
+        return "/home"
+    }
     var gifts : String {
         return "\(apiRoute)/gifts"
     }

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Landing Page</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="/landing/styles/style.css">
+</head>
+<body>
+<div id="logo"><a href="#"></a></div>
+<div id="content">
+<h1>دیوار مهربانی</h1>
+<p>
+هنگام شنیدن دیوار مهربانی اولین چیزی که به ذهنمان خطور می کند کمک به افراد نیازمند است اما اینگونه نیست دیوار مهربانی متعلق به همه مردم است
+</p>
+</div>
+<div id="footer">
+#// <a class="btn-bazar" href="#"></a>
+<a class="btn-googlePlay" href="#(googleStore)"></a>
+</div>
+</body>
+</html>

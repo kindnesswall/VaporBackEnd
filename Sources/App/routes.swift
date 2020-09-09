@@ -9,6 +9,7 @@ public func routes(_ router: Router) throws {
     let uris = URIs()
     
     //Controllers
+    let landing = LandingController()
     let giftController = GiftController()
     let userGifts = UserGiftsController()
     let imageController = ImageController()
@@ -54,6 +55,9 @@ public func routes(_ router: Router) throws {
     let guardianProtected = router.grouped(guardianMiddleware, logMiddleware)
     let guardianTokenProtected = router.grouped(tokenAuthMiddleware, guardAuthMiddleware, guardianMiddleware, logMiddleware)
     
+    //Home
+    publicRouter.get(uris.root, use: landing.redirectHome)
+    publicRouter.get(uris.home, use: landing.present)
     
     //Routes Login
     guardianProtected.post(uris.register, use: userController.registerHandler)
