@@ -1,3 +1,6 @@
+
+@import url(fontiran.css);
+
 body{
   background-image:  url(/landing/images/Web/landing_image.svg),url(/landing/images/Web/texture_bg.svg);
   background-position: -50% center,center center;
@@ -5,7 +8,8 @@ body{
   background-attachment: fixed;
   background-size:80% 80%, cover;
   background-color: #E5FFE6;
-  font-family:tahoma;
+  font-family: IRANSans !important;
+  font-weight: 300 !important;
   direction:rtl;
 }
 #logo{
