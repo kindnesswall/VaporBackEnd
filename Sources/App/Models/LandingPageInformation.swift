@@ -9,4 +9,5 @@ import Foundation
 
 struct LandingPageInformation: Codable {
     var googleStore: String?
+    var myketStore: String?
 }

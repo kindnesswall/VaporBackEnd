@@ -16,6 +16,7 @@
 </div>
 <div id="footer">
 #// <a class="btn-bazar" href="#"></a>
+<a class="btn-myket" href="#(myketStore)"></a>
 <a class="btn-googlePlay" href="#(googleStore)"></a>
 </div>
 </body>

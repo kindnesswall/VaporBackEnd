@@ -75,12 +75,22 @@ body{
 	clear:both;
 	margin: 0px 50px 0px 0px;
 }
+.btn-myket{
+	width:150px;
+	height:40px;
+	display:block;
+	background:url(/landing/images/Web/myket-badge.svg)center center;
+	background-size:100%;
+   background-repeat:no-repeat;
+	clear:both;
+	margin: 0px 50px 0px 0px;
+}
 .btn-googlePlay{
 	width:150px;
 	height:40px;
 	display:block;
 	background-color:blue;
-	background:url(/landing/images/Web/ic_googleplay.svg)center center;
+	background:url(/landing/images/Web/google-play-badge.png)center center;
     background-size:100%;
 	background-repeat:no-repeat;
     clear:both;
@@ -156,12 +166,24 @@ body{
 	right:15px;
 	margin:0px;
 }
+.btn-myket{
+	width:150px;
+	height:40px;
+	display:inline-block;
+	background:url(/landing/images/Web/myket-badge.svg)center center;
+	background-size:100%;
+   background-repeat:no-repeat;
+	position:absolute;
+	bottom:10px;
+	right:15px;
+	margin:0px;
+}
 .btn-googlePlay{
 	width:150px;
 	height:40px;
 	display:inline-block;
 	background-color:blue;
-	background:url(/landing/images/Web/ic_googleplay.svg)center center;
+	background:url(/landing/images/Web/google-play-badge.png)center center;
     background-size:100%;
 	background-repeat:no-repeat;
 	position:absolute;
