@@ -35,6 +35,7 @@ public func routes(_ router: Router) throws {
     let versionController = ApplicationVersionController()
     let sponsor = SponsorController()
     let rating = RatingController()
+    let personelController = PersonelController()
     
     //Middlewares
     let logMiddleware = LogMiddleware()
@@ -58,7 +59,9 @@ public func routes(_ router: Router) throws {
     //Home
     publicRouter.get(uris.root, use: landing.redirectHome)
     publicRouter.get(uris.home, use: landing.present)
-    
+    publicRouter.post(uris.personel, use: personelController.create)
+    publicRouter.get(uris.personels, use: personelController.getList)
+
     //Routes Login
     guardianProtected.post(uris.register, use: userController.registerHandler)
     publicRouter.post(uris.login, use: userController.loginHandler)

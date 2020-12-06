@@ -19,6 +19,14 @@ class URIs {
     var home: String {
         return "/home"
     }
+
+    var personel : String {
+        return "\(apiRoute)/personel"
+    }
+    var personels : String {
+        return "\(apiRoute)/personels"
+    }
+
     var gifts : String {
         return "\(apiRoute)/gifts"
     }

@@ -13,7 +13,7 @@ final class LandingController {
     func present(_ req: Request) throws -> Future<View> {
         
         let storeLinks = Constants.appInfo.storeLinks
-        
+
         let information = LandingPageInformation(
             googleStore: storeLinks.googleStore,
             myketStore: storeLinks.myketStore)
