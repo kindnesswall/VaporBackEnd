@@ -7,20 +7,19 @@
 
 import Vapor
 
-class AppFileManager {
+class AppFileManager: AppDirectoryDetector {
     
     enum Directory : String {
         case publicDirectory = "Public"
         case imagesDirectory = "images"
     }
     
-    var appDirectory : URL {
-        let directory = DirectoryConfig.detect().workDir
-        return URL(fileURLWithPath: directory)
+    var appDirectoryURL : URL {
+        return URL(fileURLWithPath: AppFileManager.appDirectory)
     }
     
     var appPublicDirectory : URL {
-        return appendDirectory(toURL: appDirectory, directory: .publicDirectory)
+        return appendDirectory(toURL: appDirectoryURL, directory: .publicDirectory)
     }
     
     var appImagesDirecory : URL {
@@ -54,4 +53,11 @@ class AppFileManager {
         let outputImageAddress = outputUserImagesDirectory.appendingPathComponent(fileName)
         return outputImageAddress.absoluteString
     }
+}
+
+protocol AppDirectoryDetector {
+    static var appDirectory: String { get }
+}
+extension AppDirectoryDetector {
+    static var appDirectory: String { return DirectoryConfig.detect().workDir }
 }

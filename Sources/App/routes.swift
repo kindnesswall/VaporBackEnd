@@ -71,7 +71,7 @@ public func routes(_ router: Router) throws {
     
     publicRouter.post(uris.login_firebase, use: userFirebaseController.loginUser)
     
-    if Constants.appInfo.stage == .development {
+    if configuration.main.stage == .development {
         adminProtected.post(uris.login_admin_access, use: userController.adminAccessActivationCode)
     }
     

@@ -66,6 +66,10 @@ enum ErrorType: String {
     case serverThrowsException
     case objectEncodingFailed
     case transactionFailed
+    case failedToSendSMS
+    case failedToSendAPNSPush
+    case failedToSendFirebasePush
+    case failedToLoginWithFirebase
 }
 
 extension ErrorType {
@@ -126,7 +130,11 @@ extension ErrorType {
             return .badRequest
         case .serverThrowsException,
              .objectEncodingFailed,
-             .transactionFailed:
+             .transactionFailed,
+             .failedToSendSMS,
+             .failedToSendAPNSPush,
+             .failedToSendFirebasePush,
+             .failedToLoginWithFirebase:
             return .internalServerError
         
         }
@@ -234,6 +242,14 @@ extension ErrorType {
             return "Object encoding failed"
         case .transactionFailed:
             return "Transaction failed, please try again"
+        case .failedToSendSMS:
+            return "Failed to send SMS"
+        case .failedToSendAPNSPush:
+            return "Failed to send APNS push"
+        case .failedToSendFirebasePush:
+            return "Failed to send Firebase push"
+        case .failedToLoginWithFirebase:
+            return "Failed to login with Firebase"
         }
     }
 }

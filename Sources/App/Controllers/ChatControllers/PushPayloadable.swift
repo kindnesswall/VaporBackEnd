@@ -14,7 +14,7 @@ protocol PushPayloadable: Content {
     var pushQueryItems: [URLQueryItem] { get }
     var pushContentName: String? { get }
     
-    func getClickAction(type: PushNotificationType)-> String?
+    func getClickAction(type: PushNotificationType) throws -> String?
     func getContent(on req: Request) throws -> Future<PushPayloadContent?>
     
 }
@@ -34,9 +34,9 @@ struct PushPayloadContent {
 
 extension PushPayloadable {
     
-    func getClickAction(type: PushNotificationType)-> String? {
+    func getClickAction(type: PushNotificationType) throws -> String? {
         var components = URLComponents()
-        components.scheme = getBundleId(type: type)
+        components.scheme = try getBundleId(type: type)
         components.host = pushMainPath
         
         if let supplementPath = pushSupplementPath {
@@ -60,13 +60,18 @@ extension PushPayloadable {
         }
     }
     
-    private func getBundleId(type: PushNotificationType) -> String {
-        let appInfo = Constants.appInfo
+    private func getBundleId(type: PushNotificationType) throws -> String {
         switch type {
         case .APNS:
-            return appInfo.apnsConfig.bundleId
+            guard let bundleId = configuration.apns?.bundleId else {
+                throw Abort(.failedToSendAPNSPush)
+            }
+            return bundleId
         case .Firebase:
-            return appInfo.firebaseConfig.bundleId
+            guard let bundleId = configuration.firebase?.bundleId else {
+                throw Abort(.failedToSendFirebasePush)
+            }
+            return bundleId
         }
     }
     

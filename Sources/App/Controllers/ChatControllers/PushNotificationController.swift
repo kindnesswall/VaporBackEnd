@@ -65,7 +65,7 @@ class PushNotificationController {
         
         guard let pushType = PushNotificationType(rawValue: token.type) else { return nil }
         
-        let click_action = payload.getClickAction(type: pushType)
+        let click_action = try payload.getClickAction(type: pushType)
         
         return try payload.getContent(on: req).flatMap { content in
             switch pushType {
@@ -84,13 +84,16 @@ class PushNotificationController {
             throw Abort(.pushPayloadIsNotValid)
         }
         
+        guard let configuration = configuration.apns else {
+            throw Abort(.failedToSendAPNSPush)
+        }
+        
         let shell = try req.make(Shell.self)
         
-        let appInfo = Constants.appInfo
-        let bundleId = appInfo.apnsConfig.bundleId
-        let apnsURL = appInfo.apnsConfig.apnsURL
-        let certPath = "\(appInfo.fileDirPath)\(appInfo.apnsConfig.certPath)"
-        let certPass = appInfo.apnsConfig.certPass
+        let bundleId = configuration.bundleId
+        let apnsURL = configuration.apnsURL
+        let certPass = configuration.certPass
+        let certPath = CertificatesPath.path(of: .apns)
         
         let arguments = ["-d", payload, "-H", "apns-topic:\(bundleId)", "-H", "apns-expiration: 1", "-H", "apns-priority: 10", "--http2", "--cert", "\(certPath):\(certPass)", "\(apnsURL)\(token)"]
         

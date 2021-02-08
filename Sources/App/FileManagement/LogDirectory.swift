@@ -16,23 +16,15 @@ struct LogDirectory {
     
     var filePath: URL {
         let date = String.getCurrentDate(withClock: false)
-        let fileName = "\(date).\(logConfig.fileExtension)"
+        let fileName = "\(date).\(LogsPath.fileExtension)"
         let url = directoryPath.appendingPathComponent(fileName)
         return url
     }
     
     private var directoryPath: URL {
-        let path = "\(appInfo.rootPath)\(logConfig.path)\(replicaId)"
+        let path = LogsPath.dirPath
         let url = URL(fileURLWithPath: path)
         return url
-    }
-    
-    private var logConfig: LogConfig {
-        return appInfo.logConfig
-    }
-    
-    private var appInfo: AppInfo {
-        return Constants.appInfo
     }
     
 }

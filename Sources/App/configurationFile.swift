@@ -7,18 +7,31 @@
 
 import Foundation
 
-var configuration: Configuration?
-var replicaId : Int {
-    return configuration?.replicaId ?? 1
+var configuration = Configuration()
+
+public func readConfigurations() {
+    
+    do {
+        configuration.main = try load(path: .main, type: MainConfiguration.self)
+    } catch {
+        fatalError("Config file is missing!")
+    }
+    
+    configuration.replica = try? load(path: .replica, type: ReplicaConfiguration.self)
+    
+    configuration.sms = try? load(path: .sms, type: SMSConfiguration.self)
+    configuration.apns = try? load(path: .apns, type: APNSConfiguration.self)
+    configuration.firebase = try? load(path: .firebase, type: FirebaseConfiguration.self)
+    configuration.googleIdentityToolkit = try? load(path: .googleIdentityToolkit, type: GoogleIdentityToolkitConfiguration.self)
+    configuration.demoAccount = try? load(path: .demoAccount, type: DemoAccountCredential.self)
+    configuration.applicationStoreLinks = try? load(path: .applicationStoreLinks, type: ApplicationStoreLinks.self)
 }
 
-public func readConfiguration() {
-    let rootPath = Constants.appInfo.rootPath
-    let configFile = Constants.appInfo.configFile
-    let path = "\(rootPath)\(configFile)"
+private func load<T: Codable>(path: ConfigurationsPath.FileType, type: T.Type) throws -> T {
+    let path = ConfigurationsPath.path(of: path)
     let url = URL(fileURLWithPath: path)
-    guard let data = try? Data(contentsOf: url) else {return}
-    configuration = try? JSONDecoder().decode(Configuration.self, from: data)
+    let data = try Data(contentsOf: url)
+    return try JSONDecoder().decode(type, from: data)
 }
 
 public func checkDirectories() {

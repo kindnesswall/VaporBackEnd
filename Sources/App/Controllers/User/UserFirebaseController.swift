@@ -32,7 +32,10 @@ class UserFirebaseController: UserControllerCore {
     private func sendFirebaseRequest(_ req: Request, idToken:String) throws -> Future<String?> {
         
         let apiInput = Inputs.FirebaseLogin(idToken: idToken)
-        let url = "\(Constants.appInfo.identityToolkitConfig.url)\(Constants.appInfo.identityToolkitConfig.apiKey)"
+        guard let configuration = configuration.googleIdentityToolkit else {
+            throw Abort(.failedToLoginWithFirebase)
+        }
+        let url = "\(configuration.url)\(configuration.apiKey)"
         
         return try APICurl.curl(req: req, url: url, httpMethod: .POST, input: apiInput).map({ data in
             
