@@ -76,8 +76,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     migrations.add(model: RatingResult.self, database: DatabaseIdentifier<RatingResult.Database>.psql)
     
     //models extension
-    //
-    
+    migrations.add(migration: AddGiftPhoneVisibility.self, database: .psql)
     
     //seeds
     migrations.add(migration: CategorySeed.self, database: .psql)
