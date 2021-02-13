@@ -9,9 +9,9 @@ import Foundation
 
 struct ConfigurationsPath: AppDirectoryDetector {
     
-    private static var mainDirPath: String { "\(appDirectory)/config/main/" }
-    private static var replicaDirPath: String { "\(appDirectory)/config/replica/" }
-    private static var sharedDirPath: String { "\(appDirectory)/config/shared/" }
+    private static var mainDirPath: String { return "\(appDirectory)/config/main/" }
+    private static var replicaDirPath: String { return "\(appDirectory)/config/replica/" }
+    private static var sharedDirPath: String { return "\(appDirectory)/config/shared/" }
     
     static func path(of file: FileType) -> String {
         

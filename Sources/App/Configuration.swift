@@ -36,7 +36,7 @@ class ReplicaConfiguration: Codable {
 }
 
 extension Configuration {
-    var replicaId: Int { replica?.replicaId ?? 1 }
+    var replicaId: Int { return replica?.replicaId ?? 1 }
 }
 
 class SMSConfiguration: Codable {
