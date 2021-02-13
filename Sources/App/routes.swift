@@ -35,6 +35,7 @@ public func routes(_ router: Router) throws {
     let versionController = ApplicationVersionController()
     let sponsor = SponsorController()
     let rating = RatingController()
+    let giftPhoneController = GiftPhoneController()
     
     //Middlewares
     let logMiddleware = LogMiddleware()
@@ -175,6 +176,12 @@ public func routes(_ router: Router) throws {
     tokenProtected.post(uris.rating, use: rating.create)
     tokenProtected.put(uris.rating, use: rating.update)
     tokenFetched.get(uris.rating, Int.parameter, use: rating.get)
-    
+
+    // get phone for a gift
+    tokenProtected.get(
+        uris.gift_phone,
+        Int.parameter,
+        use: giftPhoneController.getUserPhoneRequest
+    )
 }
 

@@ -88,7 +88,11 @@ class URIs {
     var chat_unblock : String {
         return "\(apiRoute)/chat/unblock"
     }
-    
+
+    var gift_phone : String {
+        return "\(apiRoute)/gift/phone"
+    }
+
     var gifts_register : String {
         return "\(apiRoute)/gifts/register"
     }
