@@ -22,10 +22,7 @@ final class Gift : PostgreSQLModel {
     var provinceName:String?
     var cityName:String?
     var regionName:String?
-
-    var isPhoneVisibleForCharities = false
-    var isPhoneVisibleForAll = false
-
+    
     var title:String
     var description:String
     var price:Double
@@ -57,14 +54,7 @@ final class Gift : PostgreSQLModel {
     
     private init(input: Gift.Input, authId: Int) {
         self.userId = authId
-
-        isPhoneVisibleForAll = input.isPhoneVisibleForAll
-        if isPhoneVisibleForAll {
-            isPhoneVisibleForCharities = true
-        } else {
-            isPhoneVisibleForCharities = input.isPhoneVisibleForCharities
-        }
-
+        
         self.title=input.title
         self.description=input.description
         self.price=input.price
@@ -78,14 +68,7 @@ final class Gift : PostgreSQLModel {
     }
     
     private func update(input: Gift.Input) throws {
-
-        isPhoneVisibleForAll = input.isPhoneVisibleForAll
-        if isPhoneVisibleForAll {
-            isPhoneVisibleForCharities = true
-        } else {
-            isPhoneVisibleForCharities = input.isPhoneVisibleForCharities
-        }
-
+        
         self.title=input.title
         self.description=input.description
         self.price=input.price
@@ -101,10 +84,9 @@ final class Gift : PostgreSQLModel {
 //        self.rejectReason = nil // Note: Commented because the reason may help for the next review
         self.isReviewed = false
     }
-
+    
+    
     final class Input : Codable {
-        var isPhoneVisibleForCharities: Bool
-        var isPhoneVisibleForAll: Bool
         var title:String
         var description:String
         var price:Double
