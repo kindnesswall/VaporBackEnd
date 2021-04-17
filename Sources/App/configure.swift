@@ -14,9 +14,10 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     try services.register(AuthenticationProvider())
     
     services.register(Shell.self)
-    let portOffset = replicaId - 1
-    let port = Constants.appInfo.hostPort + portOffset
-    let serverConfigure = NIOServerConfig.default(hostname: Constants.appInfo.hostName, port: port, maxBodySize:20_000_000)
+    
+    let portOffset = configuration.replicaId - 1
+    let port = configuration.main.hostPort + portOffset
+    let serverConfigure = NIOServerConfig.default(hostname: configuration.main.hostName, port: port, maxBodySize: 20_000_000)
     services.register(serverConfigure)
     
     /// Register routes to the router
@@ -34,13 +35,18 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     let corsMiddleware = CORSMiddleware(configuration: corsConfiguration)
     middlewares.use(corsMiddleware)
     
-//    middlewares.use(FileMiddleware.self) // Serves files from `Public/` directory
+    middlewares.use(FileMiddleware.self) // Serves files from `Public/` directory
     middlewares.use(ErrorMiddleware.self) // Catches errors and converts to HTTP response
     services.register(middlewares)
 
     // Configure a PostgreSQL database
 
-    let postgreSQLConfig = PostgreSQLDatabaseConfig(hostname: Constants.appInfo.dataBaseHost, port: Constants.appInfo.dataBasePort, username: Constants.appInfo.dataBaseUser, database: Constants.appInfo.dataBaseName,password: Constants.appInfo.dataBasePassword)
+    let postgreSQLConfig = PostgreSQLDatabaseConfig(
+        hostname: configuration.main.dataBaseHost,
+        port: configuration.main.dataBasePort,
+        username: configuration.main.dataBaseUser,
+        database: configuration.main.dataBaseName,
+        password: configuration.main.dataBasePassword)
     
     let postgreSQL = PostgreSQLDatabase(config: postgreSQLConfig)
     
@@ -87,8 +93,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     
     
     //Firebase
-    let appInfo = AppInfo()
-    let path = "\(appInfo.fileDirPath)\(appInfo.firebaseConfig.keyPath)"
+    let path = CertificatesPath.path(of: .firebase)
     let fcm = FCM(pathToServiceAccountKey: path)
     services.register(fcm, as: FCM.self)
 }

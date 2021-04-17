@@ -1,5 +1,5 @@
 //
-//  DemoAccountPhoneNumber.swift
+//  DemoAccountCredential.swift
 //  App
 //
 //  Created by Amir Hossein on 7/18/20.
@@ -7,15 +7,12 @@
 
 import Foundation
 
-struct DemoAccountPhoneNumber {
+struct DemoAccountCredential: Codable {
     
     private let codes: [String]
     private let phoneNumber: String
     
-    init(codes: [String], phoneNumber: String) {
-        self.codes = codes
-        self.phoneNumber = phoneNumber
-    }
+    let activationCode: String
     
     var phoneNumbers: [String] {
         return codes.map { "\($0)\(phoneNumber)" }

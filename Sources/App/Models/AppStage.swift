@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum AppStage {
+enum AppStage: String, Codable {
     case development
     case production
 }

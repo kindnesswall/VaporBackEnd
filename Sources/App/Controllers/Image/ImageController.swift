@@ -27,7 +27,7 @@ final class ImageController {
             let imageAddress = imageDirectory.appendingPathComponent(imageName)
             appDirectory.saveFile(path: imageAddress, data: imageInput.image)
             
-            let imageOutputAddress = appDirectory.getOutputImageAddress(domainAddress: Constants.appInfo.domainAddress, userId: userId, fileName: imageName)
+            let imageOutputAddress = appDirectory.getOutputImageAddress(domainAddress: configuration.main.domainAddress, userId: userId, fileName: imageName)
             
             return ImageOutput(address: imageOutputAddress)
         })

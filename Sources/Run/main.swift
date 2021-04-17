@@ -1,6 +1,6 @@
 import App
 
-readConfiguration()
+readConfigurations()
 checkDirectories()
 
 try app(.detect()).run()

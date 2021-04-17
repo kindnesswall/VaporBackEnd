@@ -16,15 +16,14 @@ protocol UserDemoAccountable {
 extension UserDemoAccountable {
     
     func isDemoAccount(phoneNumber: String) -> Bool {
-        let demo = Constants.appInfo.demoAccount
-        return demo.phoneNumber.validate(phoneNumber: phoneNumber)
+        guard let demoAccount = configuration.demoAccount else { return false }
+        return demoAccount.validate(phoneNumber: phoneNumber)
     }
     
     func validateDemoAccount(phoneNumber: String, activationCode: String) throws -> Bool {
-        
-        if isDemoAccount(phoneNumber: phoneNumber) {
-            let demo = Constants.appInfo.demoAccount
-            if demo.activationCode == activationCode {
+        if let demoAccount = configuration.demoAccount,
+            isDemoAccount(phoneNumber: phoneNumber) {
+            if demoAccount.activationCode == activationCode {
                 return true
             } else {
                 throw Abort(.invalidActivationCode)

@@ -12,11 +12,11 @@ final class LandingController {
     
     func present(_ req: Request) throws -> Future<View> {
         
-        let storeLinks = Constants.appInfo.storeLinks
+        let storeLinks = configuration.applicationStoreLinks
         
         let information = LandingPageInformation(
-            googleStore: storeLinks.googleStore,
-            myketStore: storeLinks.myketStore)
+            googleStore: storeLinks?.googleStore,
+            myketStore: storeLinks?.myketStore)
         
         return try req.view().render("landing",information)
     }

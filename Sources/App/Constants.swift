@@ -9,7 +9,6 @@ import Foundation
 
 class Constants {
     
-    static let appInfo = AppInfo()
     static let maxFetchCount = 50
     
 }

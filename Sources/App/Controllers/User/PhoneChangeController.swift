@@ -27,7 +27,7 @@ final class PhoneChangeController: PhoneNumberValidator {
                 
                 return output.flatMap { _ in
                     
-                    let template: SMSTemplates = .register
+                    let template: SMSTemplatesType = .register
                     return try SMSController.send(phoneNumber: auth.phoneNumber, code: activationCode.from, template: template, on: req).flatMap { _ in
                         return try SMSController.send(phoneNumber: toPhoneNumber, code: activationCode.to, template: template, on: req)
                     }

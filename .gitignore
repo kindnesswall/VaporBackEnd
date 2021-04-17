@@ -4,10 +4,9 @@ xcuserdata
 *.xcodeproj
 DerivedData/
 .DS_Store
-AppInfo.swift
 Public/images
-Files
-Log
 contents.xcworkspacedata
-config.json
 Public/landing/fonts
+certificates
+config
+log
