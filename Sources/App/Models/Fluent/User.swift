@@ -22,6 +22,10 @@ final class User : PostgreSQLModel {
     var charityName:String?
     var charityImage:String?
     
+    var isPhoneVisibleForCharities: Bool? = true
+    var isPhoneVisibleForAll: Bool? = false
+
+    
     var createdAt: Date?
     var updatedAt: Date?
     var deletedAt: Date?
