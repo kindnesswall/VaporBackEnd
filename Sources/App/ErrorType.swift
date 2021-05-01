@@ -70,6 +70,7 @@ enum ErrorType: String {
     case failedToSendAPNSPush
     case failedToSendFirebasePush
     case failedToLoginWithFirebase
+    case phoneNumberIsNotAccessible
 }
 
 extension ErrorType {
@@ -99,7 +100,8 @@ extension ErrorType {
              .wrongPushNotificationType,
              .chatHasBlockedByUser,
              .invalidType,
-             .invalid:
+             .invalid,
+             .phoneNumberIsNotAccessible:
             return .notAcceptable
         case .nilUserId,
              .nilTokenId,
@@ -250,6 +252,8 @@ extension ErrorType {
             return "Failed to send Firebase push"
         case .failedToLoginWithFirebase:
             return "Failed to login with Firebase"
+        case .phoneNumberIsNotAccessible:
+            return "The phone number is not accessible"
         }
     }
 }

@@ -20,5 +20,9 @@ class Outputs {
             self.votersCount = votersCount
         }
     }
+    
+    struct UserPhoneNumber: Content {
+        var phoneNumber: String
+    }
 
 }
