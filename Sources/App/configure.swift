@@ -80,6 +80,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     migrations.add(model: Sponsor.self, database: DatabaseIdentifier<Sponsor.Database>.psql)
     migrations.add(model: Rating.self, database: DatabaseIdentifier<Rating.Database>.psql)
     migrations.add(model: RatingResult.self, database: DatabaseIdentifier<RatingResult.Database>.psql)
+    migrations.add(model: PhoneNumberSeenLog.self, database: DatabaseIdentifier<PhoneNumberSeenLog.Database>.psql)
     
     //models extension
     migrations.add(migration: AddPhoneVisibilityToUser.self, database: .psql)

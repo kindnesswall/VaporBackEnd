@@ -16,11 +16,22 @@ final class UserPhoneController {
     }
     
     func getPhoneNumber(_ req: Request) throws -> Future<Outputs.UserPhoneNumber> {
-        try getUserIfPhoneNumberIsAccessible(req).map { user in
+        
+        let authId = try req.requireAuthenticated(User.self).getId()
+        
+        return try getUserIfPhoneNumberIsAccessible(req).flatMap { user in
             guard let user = user else {
                 throw Abort(.phoneNumberIsNotAccessible)
             }
-            return Outputs.UserPhoneNumber(phoneNumber: user.phoneNumber)
+            
+            let log = try PhoneNumberSeenLog(
+                fromUserId: authId,
+                seenUserId: user.getId(),
+                seenPhoneNumber: user.phoneNumber)
+            
+            let output = Outputs.UserPhoneNumber(phoneNumber: user.phoneNumber)
+            
+            return log.create(on: req).transform(to: output)
         }
     }
     
