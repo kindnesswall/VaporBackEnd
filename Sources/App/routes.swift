@@ -35,6 +35,8 @@ public func routes(_ router: Router) throws {
     let versionController = ApplicationVersionController()
     let sponsor = SponsorController()
     let rating = RatingController()
+    let userPhone = UserPhoneController()
+    let phoneVisibilitySetting = UserPhoneVisibilitySettingController()
     
     //Middlewares
     let logMiddleware = LogMiddleware()
@@ -176,5 +178,12 @@ public func routes(_ router: Router) throws {
     tokenProtected.put(uris.rating, use: rating.update)
     tokenFetched.get(uris.rating, Int.parameter, use: rating.get)
     
+    //Phone Visibility Access
+    tokenProtected.get(uris.phone_visibility_check, use: userPhone.checkPhoneNumberAccessibility)
+    tokenProtected.get(uris.phone_visibility_access, use: userPhone.getPhoneNumber)
+    
+    //Phone Visibility Setting
+    tokenProtected.get(uris.phone_visibility_setting, use: phoneVisibilitySetting.get)
+    tokenProtected.post(uris.phone_visibility_setting, use: phoneVisibilitySetting.set)
 }
 

@@ -209,6 +209,22 @@ class URIs {
         return "\(apiRoute)/rating"
     }
     
+    var phone_visibility: String {
+        return "\(apiRoute)/phone/visibility"
+    }
+    
+    var phone_visibility_check: String {
+        return "\(phone_visibility)/check"
+    }
+    
+    var phone_visibility_access: String {
+        return "\(phone_visibility)/access"
+    }
+    
+    var phone_visibility_setting: String {
+        return "\(phone_visibility)/setting"
+    }
+    
     var smsURL: String {
         return "http://rest.ippanel.com/v1/messages/patterns/send"
     }
