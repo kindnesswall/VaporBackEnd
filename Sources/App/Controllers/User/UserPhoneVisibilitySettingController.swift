@@ -19,7 +19,7 @@ final class UserPhoneVisibilitySettingController {
         let auth = try req.requireAuthenticated(User.self)
         let input = try req.content.decode(PhoneVisibilitySettingIO.self)
         return input.flatMap { input in
-            auth.setPhoneVisibility(setting: input.setting, on: req)
+            return auth.setPhoneVisibility(setting: input.setting, on: req)
         }
     }
 }
