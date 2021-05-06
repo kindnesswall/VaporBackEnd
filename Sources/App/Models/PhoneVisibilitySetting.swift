@@ -19,7 +19,7 @@ struct PhoneVisibilitySettingIO: Content {
 
 extension User {
     var phoneVisibilitySetting: PhoneVisibilitySetting {
-        (isPhoneVisibleForAll ?? false) ? .all : ((isPhoneVisibleForCharities ?? false) ? .charity : .none)
+        return (isPhoneVisibleForAll ?? false) ? .all : ((isPhoneVisibleForCharities ?? false) ? .charity : .none)
     }
     
     func setPhoneVisibility(setting: PhoneVisibilitySetting, on conn: DatabaseConnectable) -> Future<HTTPStatus> {
