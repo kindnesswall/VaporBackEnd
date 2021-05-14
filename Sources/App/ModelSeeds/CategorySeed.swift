@@ -6,7 +6,8 @@
 //
 
 
-import FluentPostgreSQL
+import Fluent
+import FluentPostgresDriver
 
 final class CategorySeed: Migration {
     

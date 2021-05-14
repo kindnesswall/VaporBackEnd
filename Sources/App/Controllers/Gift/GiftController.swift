@@ -6,7 +6,8 @@
 //
 
 import Vapor
-import FluentPostgreSQL
+import Fluent
+import FluentPostgresDriver
 
 /// Controls basic CRUD operations on `Gift`s.
 final class GiftController {

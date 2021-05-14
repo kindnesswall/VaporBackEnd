@@ -6,7 +6,8 @@
 //
 
 import Vapor
-import FluentPostgreSQL
+import Fluent
+import FluentPostgresDriver
 
 final class UserPhoneNumberLog: PostgreSQLModel {
     var id:Int?

@@ -6,7 +6,8 @@
 //
 
 import Vapor
-import FluentPostgreSQL
+import Fluent
+import FluentPostgresDriver
 
 class UserControllerCore: UserDemoAccountable {
     

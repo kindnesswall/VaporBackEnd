@@ -6,7 +6,8 @@
 //
 
 import Vapor
-import FluentPostgreSQL
+import Fluent
+import FluentPostgresDriver
 
 protocol FindOrCreatable: PostgreSQLModel {
     static func _findQuery(input: Self, on conn: DatabaseConnectable) -> QueryBuilder<PostgreSQLDatabase, Self>

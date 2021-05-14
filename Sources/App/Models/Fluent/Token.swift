@@ -6,8 +6,8 @@
 //
 
 import Vapor
-import FluentPostgreSQL
-import Authentication
+import Fluent
+import FluentPostgresDriver
 
 final class Token: PostgreSQLModel {
     var id: Int?

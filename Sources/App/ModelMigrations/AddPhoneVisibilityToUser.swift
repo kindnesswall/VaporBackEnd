@@ -1,4 +1,5 @@
-import FluentPostgreSQL
+import Fluent
+import FluentPostgresDriver
 
 final class AddPhoneVisibilityToUser: Migration {
     typealias Database = PostgreSQLDatabase

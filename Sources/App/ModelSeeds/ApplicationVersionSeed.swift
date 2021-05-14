@@ -5,7 +5,8 @@
 //  Created by Amir Hossein on 5/23/20.
 //
 
-import FluentPostgreSQL
+import Fluent
+import FluentPostgresDriver
 
 final class ApplicationVersionSeed: Migration {
     

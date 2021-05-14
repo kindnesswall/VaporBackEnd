@@ -8,7 +8,8 @@
 import Foundation
 
 import Vapor
-import FluentPostgreSQL
+import Fluent
+import FluentPostgresDriver
 import Crypto
 
 final class UserController: UserControllerCore, PhoneNumberValidator {

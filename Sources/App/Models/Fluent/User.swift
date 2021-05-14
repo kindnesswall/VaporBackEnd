@@ -7,8 +7,8 @@
 
 import Vapor
 import FluentSQL
-import FluentPostgreSQL
-import Authentication
+import Fluent
+import FluentPostgresDriver
 
 final class User : PostgreSQLModel {
     var id:Int?

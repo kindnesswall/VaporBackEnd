@@ -6,7 +6,6 @@
 //
 
 import Vapor
-import Authentication
 
 final class GuardAdminMiddleware : Middleware {
     

@@ -6,7 +6,7 @@
 //
 
 import Vapor
-import Authentication
+
 
 final class GuardCharityMiddleware: Middleware {
     func respond(to request: Request, chainingTo next: Responder) throws -> EventLoopFuture<Response> {

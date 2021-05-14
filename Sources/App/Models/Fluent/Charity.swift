@@ -7,7 +7,8 @@
 //
 
 import Vapor
-import FluentPostgreSQL
+import Fluent
+import FluentPostgresDriver
 
 final class Charity: PostgreSQLModel {
     var id: Int?
