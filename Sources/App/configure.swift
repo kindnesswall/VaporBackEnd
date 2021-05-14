@@ -1,8 +1,8 @@
 
-import FluentPostgreSQL
 import Vapor
+import Fluent
+import FluentPostgresDriver
 import Leaf
-import Authentication
 import FCM
 
 /// Called before your application initializes.
