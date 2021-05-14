@@ -6,55 +6,42 @@ import Leaf
 import FCM
 
 /// Called before your application initializes.
-public func configure(_ config: inout Config, _ env: inout Environment, _ services: inout Services) throws {
+public func configure(_ app: Application) throws {
     /// Register providers first
-    try services.register(LeafProvider())
-    config.prefer(LeafRenderer.self, for: ViewRenderer.self)
-    try services.register(FluentPostgreSQLProvider())
-    try services.register(AuthenticationProvider())
-    
-    services.register(Shell.self)
+    app.views.use(.leaf)
     
     let portOffset = configuration.replicaId - 1
     let port = configuration.main.hostPort + portOffset
-    let serverConfigure = NIOServerConfig.default(hostname: configuration.main.hostName, port: port, maxBodySize: 20_000_000)
-    services.register(serverConfigure)
     
-    /// Register routes to the router
-    let router = EngineRouter.default()
-    try routes(router)
-    services.register(router, as: Router.self)
+    app.http.server.configuration.hostname = configuration.main.hostName
+    app.http.server.configuration.port = port
+    
+    try routes(app)
 
     /// Register middleware
-    var middlewares = MiddlewareConfig() // Create _empty_ middleware config
     let corsConfiguration = CORSMiddleware.Configuration(
         allowedOrigin: .all,
         allowedMethods: [.GET, .POST, .PUT, .OPTIONS, .DELETE, .PATCH],
         allowedHeaders: [.accept, .authorization, .contentType, .origin, .xRequestedWith, .userAgent, .accessControlAllowOrigin]
     )
     let corsMiddleware = CORSMiddleware(configuration: corsConfiguration)
-    middlewares.use(corsMiddleware)
+    app.middleware.use(corsMiddleware)
     
-    middlewares.use(FileMiddleware.self) // Serves files from `Public/` directory
-    middlewares.use(ErrorMiddleware.self) // Catches errors and converts to HTTP response
-    services.register(middlewares)
+    let file = FileMiddleware(publicDirectory: app.directory.publicDirectory)
+    app.middleware.use(file)
+    
+    let error = ErrorMiddleware.default(environment: app.environment)
+    app.middleware.use(error)
 
     // Configure a PostgreSQL database
-
-    let postgreSQLConfig = PostgreSQLDatabaseConfig(
+    app.databases.use(.postgres(
         hostname: configuration.main.dataBaseHost,
         port: configuration.main.dataBasePort,
         username: configuration.main.dataBaseUser,
-        database: configuration.main.dataBaseName,
-        password: configuration.main.dataBasePassword)
+        password: configuration.main.dataBasePassword ?? "",
+        database: configuration.main.dataBaseName
+        ), as: .psql)
     
-    let postgreSQL = PostgreSQLDatabase(config: postgreSQLConfig)
-    
-    /// Register the configured SQLite database to the database config.
-    var databases = DatabasesConfig()
-    databases.add(database: postgreSQL, as: .psql)
-    services.register(databases)
-
     /// Configure migrations
 //    var migrations = MigrationConfig()
     
@@ -95,6 +82,5 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     
     //Firebase
     let path = CertificatesPath.path(of: .firebase)
-    let fcm = FCM(pathToServiceAccountKey: path)
-    services.register(fcm, as: FCM.self)
+    app.fcm.configuration = .init(pathToServiceAccountKey: path)
 }

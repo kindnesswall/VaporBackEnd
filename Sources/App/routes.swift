@@ -3,7 +3,7 @@ import Vapor
 import Crypto
 //TODO: Guardian
 /// Register your application's routes here.
-public func routes(_ router: Router) throws {
+public func routes(_ app: Application) throws {
     
     let uris = URIs()
     
