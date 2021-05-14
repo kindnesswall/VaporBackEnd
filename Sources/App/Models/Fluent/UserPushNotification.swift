@@ -63,7 +63,7 @@ enum PushNotificationType: String, Codable {
     case Firebase
 }
 
-extension UserPushNotification : Migration {}
+//extension UserPushNotification : Migration {}
 
 extension UserPushNotification : Content {}
 

@@ -48,7 +48,7 @@ extension Sponsor {
     }
 }
 
-extension Sponsor : Migration {}
+//extension Sponsor : Migration {}
 
 extension Sponsor : Content {}
 

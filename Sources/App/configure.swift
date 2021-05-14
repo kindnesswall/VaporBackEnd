@@ -56,41 +56,41 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     services.register(databases)
 
     /// Configure migrations
-    var migrations = MigrationConfig()
+//    var migrations = MigrationConfig()
     
     //models
-    migrations.add(model: Gift.self, database: DatabaseIdentifier<Gift.Database>.psql)
-    migrations.add(model: Category.self, database: DatabaseIdentifier<Category.Database>.psql)
-    migrations.add(model: User.self, database: DatabaseIdentifier<User.Database>.psql)
-    migrations.add(model: UserPhoneNumberLog.self, database: DatabaseIdentifier<UserPhoneNumberLog.Database>.psql)
-    migrations.add(model: PhoneNumberActivationCode.self, database: DatabaseIdentifier<PhoneNumberActivationCode.Database>.psql)
-    migrations.add(model: Token.self, database: DatabaseIdentifier<Token.Database>.psql)
-    migrations.add(model: TextMessage.self, database: DatabaseIdentifier<TextMessage.Database>.psql)
-    migrations.add(model: Country.self, database: DatabaseIdentifier<Country.Database>.psql)
-    migrations.add(model: Province.self, database: DatabaseIdentifier<Province.Database>.psql)
-    migrations.add(model: County.self, database: DatabaseIdentifier<County.Database>.psql)
-    migrations.add(model: City.self, database: DatabaseIdentifier<City.Database>.psql)
-    migrations.add(model: Region.self, database: DatabaseIdentifier<Region.Database>.psql)
-    migrations.add(model: DirectChat.self, database: DatabaseIdentifier<DirectChat.Database>.psql)
-    migrations.add(model: ChatBlock.self, database: DatabaseIdentifier<ChatBlock.Database>.psql)
-    migrations.add(model: GiftRequest.self, database: DatabaseIdentifier<GiftRequest.Database>.psql)
-    migrations.add(model: UserPushNotification.self, database: DatabaseIdentifier<UserPushNotification.Database>.psql)
-    migrations.add(model: Charity.self, database: DatabaseIdentifier<Charity.Database>.psql)
-    migrations.add(model: ApplicationVersion.self, database: DatabaseIdentifier<ApplicationVersion.Database>.psql)
-    migrations.add(model: Sponsor.self, database: DatabaseIdentifier<Sponsor.Database>.psql)
-    migrations.add(model: Rating.self, database: DatabaseIdentifier<Rating.Database>.psql)
-    migrations.add(model: RatingResult.self, database: DatabaseIdentifier<RatingResult.Database>.psql)
-    migrations.add(model: PhoneNumberSeenLog.self, database: DatabaseIdentifier<PhoneNumberSeenLog.Database>.psql)
+//    migrations.add(model: Gift.self, database: DatabaseIdentifier<Gift.Database>.psql)
+//    migrations.add(model: Category.self, database: DatabaseIdentifier<Category.Database>.psql)
+//    migrations.add(model: User.self, database: DatabaseIdentifier<User.Database>.psql)
+//    migrations.add(model: UserPhoneNumberLog.self, database: DatabaseIdentifier<UserPhoneNumberLog.Database>.psql)
+//    migrations.add(model: PhoneNumberActivationCode.self, database: DatabaseIdentifier<PhoneNumberActivationCode.Database>.psql)
+//    migrations.add(model: Token.self, database: DatabaseIdentifier<Token.Database>.psql)
+//    migrations.add(model: TextMessage.self, database: DatabaseIdentifier<TextMessage.Database>.psql)
+//    migrations.add(model: Country.self, database: DatabaseIdentifier<Country.Database>.psql)
+//    migrations.add(model: Province.self, database: DatabaseIdentifier<Province.Database>.psql)
+//    migrations.add(model: County.self, database: DatabaseIdentifier<County.Database>.psql)
+//    migrations.add(model: City.self, database: DatabaseIdentifier<City.Database>.psql)
+//    migrations.add(model: Region.self, database: DatabaseIdentifier<Region.Database>.psql)
+//    migrations.add(model: DirectChat.self, database: DatabaseIdentifier<DirectChat.Database>.psql)
+//    migrations.add(model: ChatBlock.self, database: DatabaseIdentifier<ChatBlock.Database>.psql)
+//    migrations.add(model: GiftRequest.self, database: DatabaseIdentifier<GiftRequest.Database>.psql)
+//    migrations.add(model: UserPushNotification.self, database: DatabaseIdentifier<UserPushNotification.Database>.psql)
+//    migrations.add(model: Charity.self, database: DatabaseIdentifier<Charity.Database>.psql)
+//    migrations.add(model: ApplicationVersion.self, database: DatabaseIdentifier<ApplicationVersion.Database>.psql)
+//    migrations.add(model: Sponsor.self, database: DatabaseIdentifier<Sponsor.Database>.psql)
+//    migrations.add(model: Rating.self, database: DatabaseIdentifier<Rating.Database>.psql)
+//    migrations.add(model: RatingResult.self, database: DatabaseIdentifier<RatingResult.Database>.psql)
+//    migrations.add(model: PhoneNumberSeenLog.self, database: DatabaseIdentifier<PhoneNumberSeenLog.Database>.psql)
     
     //models extension
-    migrations.add(migration: AddPhoneVisibilityToUser.self, database: .psql)
+//    migrations.add(migration: AddPhoneVisibilityToUser.self, database: .psql)
     
     
     //seeds
-    migrations.add(migration: CategorySeed.self, database: .psql)
-    migrations.add(migration: ApplicationVersionSeed.self, database: .psql)
+//    migrations.add(migration: CategorySeed.self, database: .psql)
+//    migrations.add(migration: ApplicationVersionSeed.self, database: .psql)
     
-    services.register(migrations)
+//    services.register(migrations)
     
     
     //Firebase

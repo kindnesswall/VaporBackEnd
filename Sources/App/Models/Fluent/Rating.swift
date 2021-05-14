@@ -115,7 +115,7 @@ extension Rating {
     }
 }
 
-extension Rating : Migration {}
+//extension Rating : Migration {}
 
 extension Rating : Content {}
 

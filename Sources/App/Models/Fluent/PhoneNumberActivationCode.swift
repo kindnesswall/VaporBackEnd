@@ -50,7 +50,7 @@ extension PhoneNumberActivationCode {
     static let deletedAtKey: TimestampKey? = \.deletedAt
 }
 
-extension PhoneNumberActivationCode : Migration {}
+//extension PhoneNumberActivationCode : Migration {}
 
 extension PhoneNumberActivationCode : Content {}
 

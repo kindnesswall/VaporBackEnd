@@ -30,7 +30,7 @@ extension PhoneNumberSeenLog {
     static let createdAtKey: TimestampKey? = \.createdAt
 }
 
-extension PhoneNumberSeenLog : Migration {}
+//extension PhoneNumberSeenLog : Migration {}
 
 extension PhoneNumberSeenLog : Content {}
 

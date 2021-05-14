@@ -136,7 +136,7 @@ extension Charity {
     }
 }
 
-extension Charity : Migration {}
+//extension Charity : Migration {}
 
 extension Charity : Content {}
 

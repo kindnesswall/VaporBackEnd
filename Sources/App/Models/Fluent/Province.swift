@@ -23,7 +23,7 @@ extension Province {
     }
 }
 
-extension Province : Migration {}
+//extension Province : Migration {}
 
 extension Province : Content {}
 

@@ -27,7 +27,7 @@ extension Country {
     }
 }
 
-extension Country : Migration {}
+//extension Country : Migration {}
 
 extension Country : Content {}
 

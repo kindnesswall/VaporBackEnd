@@ -20,7 +20,7 @@ final class Region : PostgreSQLModel {
 }
 
 
-extension Region : Migration {}
+//extension Region : Migration {}
 
 extension Region : Content {}
 

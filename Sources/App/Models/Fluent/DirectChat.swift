@@ -243,7 +243,7 @@ extension DirectChat {
 }
 
 
-extension DirectChat : Migration {}
+//extension DirectChat : Migration {}
 extension DirectChat : Content {}
 extension DirectChat : Parameter {}
 

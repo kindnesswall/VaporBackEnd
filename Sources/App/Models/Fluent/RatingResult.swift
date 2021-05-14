@@ -65,7 +65,7 @@ extension RatingResult: FindOrCreatable {
     }
 }
 
-extension RatingResult : Migration {}
+//extension RatingResult : Migration {}
 
 extension RatingResult : Content {}
 

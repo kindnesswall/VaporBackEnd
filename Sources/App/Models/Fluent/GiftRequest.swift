@@ -42,7 +42,7 @@ extension GiftRequest {
     }
 }
 
-extension GiftRequest : Migration {}
+//extension GiftRequest : Migration {}
 
 extension GiftRequest : Content {}
 

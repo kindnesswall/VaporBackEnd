@@ -32,7 +32,7 @@ final class ChatBlock : PostgreSQLModel {
     
 }
 
-extension ChatBlock : Migration {}
+//extension ChatBlock : Migration {}
 extension ChatBlock : Content {}
 extension ChatBlock : Parameter {}
 

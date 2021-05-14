@@ -60,7 +60,7 @@ extension Token: Authentication.Token {
 }
 
 
-extension Token : Migration {}
+//extension Token : Migration {}
 extension Token : Content {}
 extension Token : Parameter {}
 

@@ -45,7 +45,7 @@ extension Category {
     }
 }
 
-extension Category : Migration {}
+//extension Category : Migration {}
 
 extension Category : Content {}
 

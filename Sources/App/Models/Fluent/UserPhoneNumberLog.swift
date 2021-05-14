@@ -143,7 +143,7 @@ extension UserPhoneNumberLog {
     static let deletedAtKey: TimestampKey? = \.deletedAt
 }
 
-extension UserPhoneNumberLog : Migration {}
+//extension UserPhoneNumberLog : Migration {}
 
 extension UserPhoneNumberLog : Content {}
 

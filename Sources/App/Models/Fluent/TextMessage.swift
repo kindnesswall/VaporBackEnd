@@ -67,6 +67,6 @@ extension TextMessage {
     
 }
 
-extension TextMessage : Migration {}
+//extension TextMessage : Migration {}
 extension TextMessage : Content {}
 extension TextMessage : Parameter {}

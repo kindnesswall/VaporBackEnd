@@ -269,7 +269,7 @@ extension Gift {
 }
 
 /// Allows `Gift` to be used as a dynamic migration.
-extension Gift : Migration {}
+//extension Gift : Migration {}
 
 /// Allows `Gift` to be encoded to and decoded from HTTP messages.
 extension Gift : Content {}

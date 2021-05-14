@@ -17,7 +17,7 @@ final class County : PostgreSQLModel{
 }
 
 
-extension County : Migration {}
+//extension County : Migration {}
 
 extension County : Content {}
 

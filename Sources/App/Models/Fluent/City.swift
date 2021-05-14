@@ -26,7 +26,7 @@ extension City {
 }
 
 
-extension City : Migration {}
+//extension City : Migration {}
 
 extension City : Content {}
 

@@ -177,7 +177,7 @@ extension User: TokenAuthenticatable {
     typealias TokenType = Token
 }
 
-extension User : Migration {}
+//extension User : Migration {}
 
 extension User : Content {}
 

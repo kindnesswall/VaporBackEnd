@@ -59,7 +59,7 @@ extension ApplicationVersion {
     }
 }
 
-extension ApplicationVersion : Migration {}
+//extension ApplicationVersion : Migration {}
 
 extension ApplicationVersion : Content {}
 
