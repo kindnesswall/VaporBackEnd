@@ -1,8 +1,7 @@
 
 import Vapor
 import Crypto
-import Guardian
-
+//TODO: Guardian
 /// Register your application's routes here.
 public func routes(_ router: Router) throws {
     
