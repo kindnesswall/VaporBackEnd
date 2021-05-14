@@ -11,7 +11,7 @@ final class ImageController {
     
     func uploadImage(_ req: Request) throws -> EventLoopFuture<ImageOutput> {
         
-        let user = try req.requireAuthenticated(User.self)
+        let user = try req.auth.require(User.self)
         guard let userId = user.id else {
             throw Abort(.nilUserId)
         }

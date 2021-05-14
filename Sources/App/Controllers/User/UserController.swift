@@ -55,7 +55,7 @@ final class UserController: UserControllerCore, PhoneNumberValidator {
     
     // Only for development purpose
     func adminAccessActivationCode(_ req: Request) throws -> EventLoopFuture<AuthAdminAccessOutput> {
-        let auth = try req.requireAuthenticated(User.self)
+        let auth = try req.auth.require(User.self)
         
         // Only accessable by admin!
         guard auth.isAdmin else {

@@ -14,13 +14,13 @@ class ChatRestfulController: ChatInitializer {
     
     private func getRequestInfo(req: Request) throws -> RequestInfo {
         
-        let user = try req.requireAuthenticated(User.self)
+        let user = try req.auth.require(User.self)
         let userId = try user.getId()
         return RequestInfo(req: req, userId: userId)
     }
     
     func startChat(_ req: Request) throws -> EventLoopFuture<ContactMessage> {
-        let auth = try req.requireAuthenticated(User.self)
+        let auth = try req.auth.require(User.self)
         return try req.parameters.next(User.self).flatMap({ contact in
             // Use cases:
             // Admin: starts a chat to user/charity

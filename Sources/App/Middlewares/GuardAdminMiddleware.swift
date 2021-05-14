@@ -11,7 +11,7 @@ final class GuardAdminMiddleware : Middleware {
     
     func respond(to request: Request, chainingTo next: Responder) throws -> EventLoopFuture<Response> {
         
-        let user = try request.requireAuthenticated(User.self)
+        let user = try request.auth.require(User.self)
         
         guard user.isAdmin else {
             throw Abort(.unauthorizedRequest)

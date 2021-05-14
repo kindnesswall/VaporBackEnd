@@ -10,13 +10,13 @@ import Vapor
 class LogoutController {
     
     func logout(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
-        let authToken = try req.requireAuthenticated(Token.self)
+        let authToken = try req.auth.require(Token.self)
         return try LogoutController.logout(req: req, userToken: authToken)
     }
     
     func logoutAllDevices(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
 
-        let auth = try req.requireAuthenticated(User.self)
+        let auth = try req.auth.require(User.self)
         return try LogoutController.logoutAllDevices(req: req, user: auth)
     }
     

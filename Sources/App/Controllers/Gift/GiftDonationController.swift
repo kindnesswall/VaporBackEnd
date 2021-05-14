@@ -13,7 +13,7 @@ class GiftDonationController {
     
     func giftsToDonate(_ req: Request) throws -> EventLoopFuture<[Gift]> {
         
-        let user = try req.requireAuthenticated(User.self)
+        let user = try req.auth.require(User.self)
         guard let userId = user.id else {
             throw Abort(.nilUserId)
         }
@@ -30,7 +30,7 @@ class GiftDonationController {
     }
     
     func donate(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
-        let user = try req.requireAuthenticated(User.self)
+        let user = try req.auth.require(User.self)
         let userId = try user.getId()
         
         return try req.content.decode(Donate.self).flatMap({ donate in

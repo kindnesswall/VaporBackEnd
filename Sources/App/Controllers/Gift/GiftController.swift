@@ -33,14 +33,14 @@ final class GiftController {
     
     /// Saves a decoded `Gift` to the database.
     func create(_ req: Request) throws -> EventLoopFuture<Gift> {
-        let authId = try req.requireAuthenticated(User.self).getId()
+        let authId = try req.auth.require(User.self).getId()
         return try req.content.decode(Gift.Input.self).flatMap { input in
             return try Gift.create(input: input, authId: authId, on: req)
         }
     }
     
     func update(_ req: Request) throws -> EventLoopFuture<Gift> {
-        let authId = try req.requireAuthenticated(User.self).getId()
+        let authId = try req.auth.require(User.self).getId()
         let giftId = try req.parameters.next(Int.self)
         
         return Gift.get(giftId, withSoftDeleted: true, on: req).flatMap { gift in
@@ -53,7 +53,7 @@ final class GiftController {
     
     /// Deletes a parameterized `Gift`.
     func delete(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
-        let authId = try req.requireAuthenticated(User.self).getId()
+        let authId = try req.auth.require(User.self).getId()
         return try req.parameters.next(Gift.self).flatMap { (gift) -> EventLoopFuture<Void> in
             guard gift.userId == authId else { throw Abort(.unauthorizedGift) }
             guard !gift.isDonated else { throw Abort(.donatedGiftUnaccepted) }

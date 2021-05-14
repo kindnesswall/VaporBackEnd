@@ -25,7 +25,7 @@ final class LogMiddleware: Middleware {
         let url = request.http.url
         let time = Date().description
         let ip = request.http.remotePeer.hostname ?? ""
-        let user = try? request.requireAuthenticated(User.self)
+        let user = try? request.auth.require(User.self)
         let userId = user?.id?.description ?? "Guest"
         let spacer = "    "
         

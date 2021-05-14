@@ -50,7 +50,7 @@ class ChatBlockController {
     }
     
     private func getUserId(_ req: Request) throws -> Int {
-        let user = try req.requireAuthenticated(User.self)
+        let user = try req.auth.require(User.self)
         let userId = try user.getId()
         return userId
     }

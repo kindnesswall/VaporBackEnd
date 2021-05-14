@@ -17,7 +17,7 @@ final class UserProfileController {
     }
  
     func update(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
-        let user = try req.requireAuthenticated(User.self)
+        let user = try req.auth.require(User.self)
         
         return try req.content.decode(UserProfile.Input.self).flatMap({ (userProfile) -> EventLoopFuture<User>  in
             user.name = userProfile.name

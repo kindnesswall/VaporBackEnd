@@ -11,7 +11,7 @@ final class CharityInfoController {
     
     private func validate(_ req: Request) throws -> Int {
         
-        let auth = try req.requireAuthenticated(User.self)
+        let auth = try req.auth.require(User.self)
         let userId = try req.parameters.next(Int.self)
         
         guard auth.isAdmin || auth.id == userId else {

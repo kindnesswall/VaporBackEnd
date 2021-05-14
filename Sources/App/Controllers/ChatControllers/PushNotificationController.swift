@@ -11,9 +11,9 @@ import FCM
 class PushNotificationController {
     
     func registerPush(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
-        let user = try req.requireAuthenticated(User.self)
+        let user = try req.auth.require(User.self)
         let userId = try user.getId()
-        let userToken = try req.requireAuthenticated(Token.self)
+        let userToken = try req.auth.require(Token.self)
         let userTokenId = try userToken.getId()
         
         return try req.content.decode(Inputs.UserPushNotification.self).flatMap { input in

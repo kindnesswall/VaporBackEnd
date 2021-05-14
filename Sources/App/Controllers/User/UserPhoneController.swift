@@ -18,7 +18,7 @@ final class UserPhoneController {
     
     func getPhoneNumber(_ req: Request) throws -> EventLoopFuture<Outputs.UserPhoneNumber> {
         
-        let authId = try req.requireAuthenticated(User.self).getId()
+        let authId = try req.auth.require(User.self).getId()
         
         return try getUserIfPhoneNumberIsAccessible(req).flatMap { user in
             guard let user = user else {
@@ -37,7 +37,7 @@ final class UserPhoneController {
     }
     
     private func getUserIfPhoneNumberIsAccessible(_ req: Request) throws -> EventLoopFuture<User?> {
-        let auth = try req.requireAuthenticated(User.self)
+        let auth = try req.auth.require(User.self)
         let isAdmin = auth.isAdmin
         let isCharity = auth.isCharity
         let userId = try req.parameters.next(Int.self)

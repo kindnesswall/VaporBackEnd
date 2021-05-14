@@ -14,7 +14,7 @@ final class UserGiftsController {
     func registeredGifts(_ req: Request) throws -> EventLoopFuture<[Gift]> {
         
         
-        let auth = try req.requireAuthenticated(User.self)
+        let auth = try req.auth.require(User.self)
         let isAdmin = auth.isAdmin
         let userId = try req.parameters.next(Int.self)
         let isOwner = (auth.id == userId)
@@ -38,7 +38,7 @@ final class UserGiftsController {
     
     func donatedGifts(_ req: Request) throws -> EventLoopFuture<[Gift]> {
         
-        let auth = try req.requireAuthenticated(User.self)
+        let auth = try req.auth.require(User.self)
         let isAdmin = auth.isAdmin
         let userId = try req.parameters.next(Int.self)
         
@@ -54,7 +54,7 @@ final class UserGiftsController {
     
     func receivedGifts(_ req: Request) throws -> EventLoopFuture<[Gift]> {
         
-        let auth = try req.requireAuthenticated(User.self)
+        let auth = try req.auth.require(User.self)
         let isAdmin = auth.isAdmin
         let userId = try req.parameters.next(Int.self)
         
