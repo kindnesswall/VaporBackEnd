@@ -10,7 +10,7 @@ import Vapor
 
 final class GiftRequestController: ChatInitializer {
     
-    public func requestGift(_ req: Request) throws -> Future<ContactMessage> {
+    public func requestGift(_ req: Request) throws -> EventLoopFuture<ContactMessage> {
         let user = try req.requireAuthenticated(User.self)
         guard let userId = user.id else {
             throw Abort(.nilUserId)
@@ -51,7 +51,7 @@ final class GiftRequestController: ChatInitializer {
         }
     }
     
-    public func requestStatus(_ req: Request) throws -> Future<GiftRequestStatus> {
+    public func requestStatus(_ req: Request) throws -> EventLoopFuture<GiftRequestStatus> {
         let authId = try req.requireAuthenticated(User.self).getId()
         let giftId = try req.parameters.next(Int.self)
         

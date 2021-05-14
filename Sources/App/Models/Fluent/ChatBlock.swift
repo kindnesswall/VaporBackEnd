@@ -22,7 +22,7 @@ final class ChatBlock : PostgreSQLModel {
         self.byUserId = byUserId
     }
     
-    static func find(chatBlock:ChatBlock,conn:DatabaseConnectable) -> Future<ChatBlock?> {
+    static func find(chatBlock:ChatBlock,conn:DatabaseConnectable) -> EventLoopFuture<ChatBlock?> {
         return ChatBlock.query(on: conn)
             .filter(\.chatId == chatBlock.chatId)
             .filter(\.blockedUserId == chatBlock.blockedUserId)

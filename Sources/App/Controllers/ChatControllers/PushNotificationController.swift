@@ -10,7 +10,7 @@ import FCM
 
 class PushNotificationController {
     
-    func registerPush(_ req: Request) throws -> Future<HTTPStatus> {
+    func registerPush(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
         let user = try req.requireAuthenticated(User.self)
         let userId = try user.getId()
         let userToken = try req.requireAuthenticated(Token.self)
@@ -22,7 +22,7 @@ class PushNotificationController {
                 throw Abort(.wrongPushNotificationType)
             }
             
-            return UserPushNotification.hasFound(input: input, conn: req).flatMap({ found -> Future<UserPushNotification> in
+            return UserPushNotification.hasFound(input: input, conn: req).flatMap({ found -> EventLoopFuture<UserPushNotification> in
                 
                 if let found = found {
                     found.userId = userId
@@ -38,7 +38,7 @@ class PushNotificationController {
     }
     
     
-    func sendPush(_ req: Request) throws -> Future<HTTPStatus> {
+    func sendPush(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
         return try req.content.decode(SendPushInput.self).map { input in
             let payload = SamplePushPayload()
             try PushNotificationController.sendPush(req, userId: input.userId, title: input.title, body: input.body, payload: payload)
@@ -61,7 +61,7 @@ class PushNotificationController {
         }
     }
     
-    static func sendPush<T: PushPayloadable>(_ req: Request, token: UserPushNotification, title:String?, body:String, payload: T) throws -> Future<HTTPStatus>? {
+    static func sendPush<T: PushPayloadable>(_ req: Request, token: UserPushNotification, title:String?, body:String, payload: T) throws -> EventLoopFuture<HTTPStatus>? {
         
         guard let pushType = PushNotificationType(rawValue: token.type) else { return nil }
         
@@ -78,7 +78,7 @@ class PushNotificationController {
         
     }
     
-    private static func sendAPNSPush(_ req: Request, token: String, title: String?, body: String, content: PushPayloadContent?) throws -> Future<HTTPStatus> {
+    private static func sendAPNSPush(_ req: Request, token: String, title: String?, body: String, content: PushPayloadContent?) throws -> EventLoopFuture<HTTPStatus> {
         
         guard let payload = APNSPayload(title: title, body: body, data: content?.data).textFormat else {
             throw Abort(.pushPayloadIsNotValid)
@@ -103,7 +103,7 @@ class PushNotificationController {
         }).transform(to: .ok)
     }
     
-    private static func sendFirebasePush(_ req: Request, token: String, title: String?, body: String, content: PushPayloadContent?, click_action: String?) throws -> Future<HTTPStatus> {
+    private static func sendFirebasePush(_ req: Request, token: String, title: String?, body: String, content: PushPayloadContent?, click_action: String?) throws -> EventLoopFuture<HTTPStatus> {
         let fcm = try req.make(FCM.self)
         
         //TODO: More study about restricted_package_name field in FCMMessage (Android only)

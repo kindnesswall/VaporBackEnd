@@ -11,7 +11,7 @@ import FluentPostgresDriver
 
 final class UserStatisticsController {
     
-    func usersActiveList(_ req: Request) throws -> Future<[UserStatistic]> {
+    func usersActiveList(_ req: Request) throws -> EventLoopFuture<[UserStatistic]> {
         
         return try req.content.decode(Inputs.UserQuery.self).flatMap({ queryParam in
             return User.allActiveUsers(on: req, queryParam: queryParam).flatMap({ users in
@@ -21,7 +21,7 @@ final class UserStatisticsController {
         
     }
     
-    func usersBlockedList(_ req: Request) throws -> Future<[UserStatistic]> {
+    func usersBlockedList(_ req: Request) throws -> EventLoopFuture<[UserStatistic]> {
         return try req.content.decode(Inputs.UserQuery.self).flatMap({ queryParam in
             return User.allBlockedUsers(on: req, queryParam: queryParam).flatMap({ users in
                 return self.getUserStatistics(req: req, users: users)
@@ -30,13 +30,13 @@ final class UserStatisticsController {
         
     }
     
-    func userStatistics(_ req: Request) throws -> Future<UserStatistic> {
+    func userStatistics(_ req: Request) throws -> EventLoopFuture<UserStatistic> {
         return try req.parameters.next(User.self).flatMap({ user in
             return self.getUserStatistic(req: req, user: user)
         })
     }
     
-    func usersChatBlockedList(_ req: Request) throws -> Future<[UserStatistic]> {
+    func usersChatBlockedList(_ req: Request) throws -> EventLoopFuture<[UserStatistic]> {
         
         return User.allChatBlockedUsers(on: req).map { list in
             return list.map { $0.user }
@@ -48,9 +48,9 @@ final class UserStatisticsController {
 
 extension UserStatisticsController {
     
-    func getUserStatistics(req:Request,users:[User])->Future<[UserStatistic]> {
+    func getUserStatistics(req:Request,users:[User])->EventLoopFuture<[UserStatistic]> {
         
-        var list = [Future<UserStatistic>]()
+        var list = [EventLoopFuture<UserStatistic>]()
 
         for user in users {
             let userFuture = self.getUserStatistic(req: req, user: user)
@@ -61,7 +61,7 @@ extension UserStatisticsController {
         return future.futureResult()
     }
     
-    func getUserStatistic(req:Request,user:User)->Future<UserStatistic> {
+    func getUserStatistic(req:Request,user:User)->EventLoopFuture<UserStatistic> {
         return user.getIdFuture(req: req).flatMap({ userId in
             
             let registeredGifts = Gift.query(on: req, withSoftDeleted: true)
@@ -85,12 +85,12 @@ extension UserStatisticsController {
     }
     
     func getUserStatistic(user:User,
-                          registeredGifts:Future<Int>,
-                          rejectedGifts:Future<Int>,
-                          donatedGifts:Future<Int>,
-                          receivedGifts:Future<Int>,
-                          blockedChats:Future<Int>
-        )->Future<UserStatistic> {
+                          registeredGifts:EventLoopFuture<Int>,
+                          rejectedGifts:EventLoopFuture<Int>,
+                          donatedGifts:EventLoopFuture<Int>,
+                          receivedGifts:EventLoopFuture<Int>,
+                          blockedChats:EventLoopFuture<Int>
+        )->EventLoopFuture<UserStatistic> {
         let userStatistic = UserStatistic(user: user)
         return registeredGifts.flatMap { userStatistic.registeredGifts = $0
             return rejectedGifts.flatMap({ userStatistic.rejectedGifts = $0

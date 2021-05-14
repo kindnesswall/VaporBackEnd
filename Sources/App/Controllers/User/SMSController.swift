@@ -9,7 +9,7 @@ import Vapor
 
 final class SMSController {
     
-    static func send(phoneNumber: String, code: String, template: SMSTemplatesType, on req: Request) throws -> Future<HTTPStatus> {
+    static func send(phoneNumber: String, code: String, template: SMSTemplatesType, on req: Request) throws -> EventLoopFuture<HTTPStatus> {
         
         guard let configuration = configuration.sms,
             let template = configuration.templates[.register],

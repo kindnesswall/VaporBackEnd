@@ -10,7 +10,7 @@ import Vapor
 
 class UserFirebaseController: UserControllerCore {
     
-    func loginUser(_ req: Request) throws -> Future<AuthOutput> {
+    func loginUser(_ req: Request) throws -> EventLoopFuture<AuthOutput> {
         
         return try req.content.decode(Inputs.FirebaseLogin.self).flatMap { input in
 
@@ -29,7 +29,7 @@ class UserFirebaseController: UserControllerCore {
         
     }
     
-    private func sendFirebaseRequest(_ req: Request, idToken:String) throws -> Future<String?> {
+    private func sendFirebaseRequest(_ req: Request, idToken:String) throws -> EventLoopFuture<String?> {
         
         let apiInput = Inputs.FirebaseLogin(idToken: idToken)
         guard let configuration = configuration.googleIdentityToolkit else {

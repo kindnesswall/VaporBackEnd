@@ -24,19 +24,19 @@ final class CategorySeed: Migration {
         Category(title:"Home Appliance", title_fa: "وسایل منزل")
     ]
     
-    static func prepare(on connection: PostgreSQLConnection) -> Future<Void> {
+    static func prepare(on connection: PostgreSQLConnection) -> EventLoopFuture<Void> {
         
         let futures = seeds.map { seed in
             return seed.create(on: connection).map(to: Void.self) { _ in return }
         }
-        return Future<Void>.andAll(futures, eventLoop: connection.eventLoop)
+        return EventLoopFuture<Void>.andAll(futures, eventLoop: connection.eventLoop)
     }
     
-    static func revert(on connection: PostgreSQLConnection) -> Future<Void> {
+    static func revert(on connection: PostgreSQLConnection) -> EventLoopFuture<Void> {
         
         let futures = seeds.map { seed in
             return Category.query(on: connection).filter(\Category.title == seed.title).delete()
         }
-        return Future<Void>.andAll(futures, eventLoop: connection.eventLoop)
+        return EventLoopFuture<Void>.andAll(futures, eventLoop: connection.eventLoop)
     }
 }

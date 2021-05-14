@@ -20,7 +20,7 @@ final class CharityInfoController {
         return userId
     }
     
-    func show(_ req: Request) throws -> Future<Charity_Status> {
+    func show(_ req: Request) throws -> EventLoopFuture<Charity_Status> {
         
         let userId = try validate(req)
         
@@ -51,7 +51,7 @@ final class CharityInfoController {
         
     }
     
-    func create(_ req: Request) throws -> Future<Charity> {
+    func create(_ req: Request) throws -> EventLoopFuture<Charity> {
         
         let userId = try validate(req)
         
@@ -65,7 +65,7 @@ final class CharityInfoController {
         }
     }
     
-    func update(_ req: Request) throws -> Future<Charity> {
+    func update(_ req: Request) throws -> EventLoopFuture<Charity> {
         
         let userId = try validate(req)
         
@@ -87,7 +87,7 @@ final class CharityInfoController {
         }
     }
     
-    func delete(_ req: Request) throws -> Future<HTTPStatus> {
+    func delete(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
         
         let userId = try validate(req)
         

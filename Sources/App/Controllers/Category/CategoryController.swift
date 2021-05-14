@@ -10,7 +10,7 @@ import Vapor
 
 final class CategoryController {
 
-    func index(_ req: Request) throws -> Future<[Category.Output]> {
+    func index(_ req: Request) throws -> EventLoopFuture<[Category.Output]> {
         
         return try req.content.decode(Inputs.Country.self).flatMap { input in
             
@@ -25,7 +25,7 @@ final class CategoryController {
         }
     }
     
-    private func localizedCategories(req: Request, country: Country) -> Future<[Category.Output]>  {
+    private func localizedCategories(req: Request, country: Country) -> EventLoopFuture<[Category.Output]>  {
         return Category.query(on: req).all().map { categories in
             categories.map { category in
                 return category.localized(country: country)

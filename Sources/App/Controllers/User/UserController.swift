@@ -14,9 +14,9 @@ import Crypto
 
 final class UserController: UserControllerCore, PhoneNumberValidator {
     
-    func registerHandler(_ req: Request) throws -> Future<HTTPStatus> {
+    func registerHandler(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
         
-        return try req.content.decode(Inputs.Login.self).flatMap{ (inputUser)->Future<HTTPStatus> in
+        return try req.content.decode(Inputs.Login.self).flatMap{ (inputUser)->EventLoopFuture<HTTPStatus> in
             
             let phoneNumber = try self.validate(phoneNumber: inputUser.phoneNumber)
             
@@ -34,7 +34,7 @@ final class UserController: UserControllerCore, PhoneNumberValidator {
     
     
     
-    func loginHandler(_ req: Request) throws -> Future<AuthOutput> {
+    func loginHandler(_ req: Request) throws -> EventLoopFuture<AuthOutput> {
         
         return try req.content.decode(Inputs.Login.self).flatMap{ inputUser in
             
@@ -54,7 +54,7 @@ final class UserController: UserControllerCore, PhoneNumberValidator {
     }
     
     // Only for development purpose
-    func adminAccessActivationCode(_ req: Request) throws -> Future<AuthAdminAccessOutput> {
+    func adminAccessActivationCode(_ req: Request) throws -> EventLoopFuture<AuthAdminAccessOutput> {
         let auth = try req.requireAuthenticated(User.self)
         
         // Only accessable by admin!

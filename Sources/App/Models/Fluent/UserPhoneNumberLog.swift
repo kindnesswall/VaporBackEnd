@@ -40,7 +40,7 @@ final class UserPhoneNumberLog: PostgreSQLModel {
         case completed
     }
     
-    func complete(on conn: DatabaseConnectable) -> Future<HTTPStatus> {
+    func complete(on conn: DatabaseConnectable) -> EventLoopFuture<HTTPStatus> {
         activationCode_from = nil
         activationCode_to = nil
         setStatus(status: .completed)
@@ -56,7 +56,7 @@ final class UserPhoneNumberLog: PostgreSQLModel {
         return true
     }
     
-    func set(activationCode: ActivationCode, on conn: DatabaseConnectable) -> Future<HTTPStatus> {
+    func set(activationCode: ActivationCode, on conn: DatabaseConnectable) -> EventLoopFuture<HTTPStatus> {
         activationCode_from = activationCode.from
         activationCode_to = activationCode.to
         return save(on: conn).transform(to: .ok)
@@ -87,7 +87,7 @@ final class UserPhoneNumberLog: PostgreSQLModel {
 
 extension UserPhoneNumberLog {
     
-    static func setActivationCode(req: Request, auth: User, toPhoneNumber: String, activationCode: ActivationCode) throws -> Future<HTTPStatus> {
+    static func setActivationCode(req: Request, auth: User, toPhoneNumber: String, activationCode: ActivationCode) throws -> EventLoopFuture<HTTPStatus> {
         
         let futureItem = try findOrCreate(req: req, auth: auth, toPhoneNumber: toPhoneNumber)
         
@@ -96,7 +96,7 @@ extension UserPhoneNumberLog {
         }
     }
     
-    static func findOrCreate(req: Request, auth: User, toPhoneNumber: String) throws -> Future<UserPhoneNumberLog> {
+    static func findOrCreate(req: Request, auth: User, toPhoneNumber: String) throws -> EventLoopFuture<UserPhoneNumberLog> {
         
         let requested = UserPhoneNumberLog(userId: try auth.getId(), fromPhoneNumber: auth.phoneNumber, toPhoneNumber: toPhoneNumber, status: .requested)
         
@@ -107,7 +107,7 @@ extension UserPhoneNumberLog {
         
     }
     
-    static func check(req: Request, auth: User, toPhoneNumber: String, activationCode: ActivationCode) throws ->  Future<UserPhoneNumberLog> {
+    static func check(req: Request, auth: User, toPhoneNumber: String, activationCode: ActivationCode) throws ->  EventLoopFuture<UserPhoneNumberLog> {
         
         let requested = UserPhoneNumberLog(userId: try auth.getId(), fromPhoneNumber: auth.phoneNumber, toPhoneNumber: toPhoneNumber, status: .requested)
         
@@ -127,7 +127,7 @@ extension UserPhoneNumberLog {
     }
     
     
-    static func getLatest(phoneNumberLog: UserPhoneNumberLog, conn:DatabaseConnectable) -> Future<UserPhoneNumberLog?> {
+    static func getLatest(phoneNumberLog: UserPhoneNumberLog, conn:DatabaseConnectable) -> EventLoopFuture<UserPhoneNumberLog?> {
         return query(on: conn)
             .filter(\.userId == phoneNumberLog.userId)
             .filter(\.fromPhoneNumber == phoneNumberLog.fromPhoneNumber)

@@ -19,7 +19,7 @@ class ChatRestfulController: ChatInitializer {
         return RequestInfo(req: req, userId: userId)
     }
     
-    func startChat(_ req: Request) throws -> Future<ContactMessage> {
+    func startChat(_ req: Request) throws -> EventLoopFuture<ContactMessage> {
         let auth = try req.requireAuthenticated(User.self)
         return try req.parameters.next(User.self).flatMap({ contact in
             // Use cases:
@@ -32,19 +32,19 @@ class ChatRestfulController: ChatInitializer {
         })
     }
     
-    func fetchContacts(_ req: Request) throws -> Future<[ContactMessage]> {
+    func fetchContacts(_ req: Request) throws -> EventLoopFuture<[ContactMessage]> {
         
         let reqInfo = try getRequestInfo(req: req)
         return try chatController.fetchContacts(reqInfo: reqInfo)
     }
     
-    func fetchBlockedContacts(_ req: Request) throws -> Future<[ContactMessage]> {
+    func fetchBlockedContacts(_ req: Request) throws -> EventLoopFuture<[ContactMessage]> {
         
         let reqInfo = try getRequestInfo(req: req)
         return try chatController.fetchBlockedContacts(reqInfo: reqInfo)
     }
     
-    func fetchMessages(_ req: Request) throws -> Future<ContactMessage> {
+    func fetchMessages(_ req: Request) throws -> EventLoopFuture<ContactMessage> {
         
         let reqInfo = try getRequestInfo(req: req)
         return try req.content.decode(FetchMessagesInput.self).flatMap({ fetchMessagesInput in
@@ -54,14 +54,14 @@ class ChatRestfulController: ChatInitializer {
         
     }
     
-    func sendMessage(_ req: Request) throws -> Future<TextMessage> {
+    func sendMessage(_ req: Request) throws -> EventLoopFuture<TextMessage> {
         
         return try req.content.decode(Inputs.TextMessage.self).flatMap({ input in
             return try self.sendMessage(req: req, input: input)
         })
     }
     
-    private func sendMessage(req: Request, input: Inputs.TextMessage) throws -> Future<TextMessage> {
+    private func sendMessage(req: Request, input: Inputs.TextMessage) throws -> EventLoopFuture<TextMessage> {
         
         let reqInfo = try getRequestInfo(req: req)
         let textMessage = try TextMessage(input: input)
@@ -94,7 +94,7 @@ class ChatRestfulController: ChatInitializer {
         
     }
     
-    func ackMessage(_ req: Request) throws -> Future<HTTPStatus> {
+    func ackMessage(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
         
         let reqInfo = try getRequestInfo(req: req)
         return try req.content.decode(AckMessage.self).flatMap({ ackMessage in

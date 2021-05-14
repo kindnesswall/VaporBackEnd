@@ -8,7 +8,7 @@
 import Vapor
 
 final class PhoneChangeController: PhoneNumberValidator {
-    func changePhoneNumberRequest(_ req: Request) throws -> Future<HTTPStatus> {
+    func changePhoneNumberRequest(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
         
         let auth = try req.requireAuthenticated(User.self)
         
@@ -40,7 +40,7 @@ final class PhoneChangeController: PhoneNumberValidator {
         
     }
     
-    func changePhoneNumberValidate(_ req: Request) throws -> Future<HTTPStatus> {
+    func changePhoneNumberValidate(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
         
         let auth = try req.requireAuthenticated(User.self)
         

@@ -9,14 +9,14 @@ import Vapor
 
 final class UserPhoneController {
     
-    func checkPhoneNumberAccessibility(_ req: Request) throws -> Future<Outputs.UserPhoneNumberCheck> {
+    func checkPhoneNumberAccessibility(_ req: Request) throws -> EventLoopFuture<Outputs.UserPhoneNumberCheck> {
         return try getUserIfPhoneNumberIsAccessible(req).map { user in
             return user != nil
         }
         .map {Outputs.UserPhoneNumberCheck(isVisible: $0)}
     }
     
-    func getPhoneNumber(_ req: Request) throws -> Future<Outputs.UserPhoneNumber> {
+    func getPhoneNumber(_ req: Request) throws -> EventLoopFuture<Outputs.UserPhoneNumber> {
         
         let authId = try req.requireAuthenticated(User.self).getId()
         
@@ -36,7 +36,7 @@ final class UserPhoneController {
         }
     }
     
-    private func getUserIfPhoneNumberIsAccessible(_ req: Request) throws -> Future<User?> {
+    private func getUserIfPhoneNumberIsAccessible(_ req: Request) throws -> EventLoopFuture<User?> {
         let auth = try req.requireAuthenticated(User.self)
         let isAdmin = auth.isAdmin
         let isCharity = auth.isCharity

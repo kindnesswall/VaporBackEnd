@@ -9,17 +9,17 @@ import Vapor
 
 final class CharityAdminController {
     
-    func getUnreviewedList(_ req: Request) throws -> Future<[Charity]> {
+    func getUnreviewedList(_ req: Request) throws -> EventLoopFuture<[Charity]> {
         
         return Charity.getCharityReviewList(conn: req)
     }
     
-    func getRejectedList(_ req: Request) throws -> Future<[Charity]> {
+    func getRejectedList(_ req: Request) throws -> EventLoopFuture<[Charity]> {
         
         return Charity.getCharityRejectedList(conn: req)
     }
     
-    func acceptCharity(_ req: Request) throws -> Future<HTTPStatus> {
+    func acceptCharity(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
         return try req.parameters.next(User.self).flatMap { user in
             
             return try Charity.get(userId: try user.getId(), on: req).flatMap { foundCharity in
@@ -35,7 +35,7 @@ final class CharityAdminController {
         }
     }
     
-    func rejectCharity(_ req: Request) throws -> Future<HTTPStatus> {
+    func rejectCharity(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
         return try req.parameters.next(User.self).flatMap { user in
             
             return try req.content.decode(Inputs.RejectReason.self).flatMap({ input in 

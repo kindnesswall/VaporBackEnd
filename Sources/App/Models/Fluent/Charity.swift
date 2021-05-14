@@ -95,7 +95,7 @@ extension Charity {
 
 extension Charity {
     
-    static func getAllCharities(conn:DatabaseConnectable) -> Future<[(User,Charity)]> {
+    static func getAllCharities(conn:DatabaseConnectable) -> EventLoopFuture<[(User,Charity)]> {
         return User.query(on: conn)
             .filter(\.isCharity == true)
             .join(\Charity.userId, to: \User.id)
@@ -104,7 +104,7 @@ extension Charity {
             .all()
     }
     
-    static func getCharityReviewList(conn:DatabaseConnectable) -> Future<[Charity]> {
+    static func getCharityReviewList(conn:DatabaseConnectable) -> EventLoopFuture<[Charity]> {
         return Charity.query(on: conn)
             .filter(\.isRejected == false)
             .join(\User.id, to: \Charity.userId)
@@ -113,7 +113,7 @@ extension Charity {
             .all()
     }
     
-    static func getCharityRejectedList(conn:DatabaseConnectable) -> Future<[Charity]> {
+    static func getCharityRejectedList(conn:DatabaseConnectable) -> EventLoopFuture<[Charity]> {
         return Charity.query(on: conn)
             .filter(\.isRejected == true)
             .join(\User.id, to: \Charity.userId)
@@ -123,15 +123,15 @@ extension Charity {
 }
 
 extension Charity {
-    static func find(userId: Int, on conn: DatabaseConnectable) -> Future<Charity?> {
+    static func find(userId: Int, on conn: DatabaseConnectable) -> EventLoopFuture<Charity?> {
         return Charity.query(on: conn).filter(\.userId == userId).first()
     }
     
-    static func hasFound(userId: Int, on conn: DatabaseConnectable) -> Future<Bool> {
+    static func hasFound(userId: Int, on conn: DatabaseConnectable) -> EventLoopFuture<Bool> {
         return find(userId: userId, on: conn).map { $0 != nil }
     }
     
-    static func get(userId: Int , on conn: DatabaseConnectable) throws -> Future<Charity> {
+    static func get(userId: Int , on conn: DatabaseConnectable) throws -> EventLoopFuture<Charity> {
         return find(userId: userId, on: conn).unwrap(or: Abort(.charityInfoNotFound))
     }
 }

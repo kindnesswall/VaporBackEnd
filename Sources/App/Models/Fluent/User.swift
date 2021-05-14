@@ -37,7 +37,7 @@ final class User : PostgreSQLModel {
         return id
     }
     
-    func getIdFuture(req:Request) -> Future<Int> {
+    func getIdFuture(req:Request) -> EventLoopFuture<Int> {
         guard let id = self.id else {
             return req.future(error: Abort(.nilUserId))
         }
@@ -81,24 +81,24 @@ extension User {
 }
 
 extension User {
-    func change(toPhoneNumber: String, on conn: DatabaseConnectable) -> Future<User> {
+    func change(toPhoneNumber: String, on conn: DatabaseConnectable) -> EventLoopFuture<User> {
         self.phoneNumber = toPhoneNumber
         return save(on: conn)
     }
 }
 
 extension User {
-    static func get(_ id: Int, on conn: DatabaseConnectable) -> Future<User> {
+    static func get(_ id: Int, on conn: DatabaseConnectable) -> EventLoopFuture<User> {
         return find(id, on: conn).unwrap(or: Abort(.userNotFound))
     }
-    static func get(_ id: Int, withSoftDeleted: Bool, on conn: DatabaseConnectable) -> Future<User> {
+    static func get(_ id: Int, withSoftDeleted: Bool, on conn: DatabaseConnectable) -> EventLoopFuture<User> {
         return query(on: conn, withSoftDeleted: withSoftDeleted).filter(\.id == id).first().unwrap(or: Abort(.userNotFound))
     }
 }
 
 extension User {
     
-    static func find(req: Request, phoneNumber: String) -> Future<User?> {
+    static func find(req: Request, phoneNumber: String) -> EventLoopFuture<User?> {
         
         return User.query(on: req, withSoftDeleted: true).filter(\User.phoneNumber == phoneNumber).first().map({ foundUser in
             
@@ -110,11 +110,11 @@ extension User {
         })
     }
     
-    static func isNotDeleted(req: Request, phoneNumber: String) -> Future<HTTPStatus> {
+    static func isNotDeleted(req: Request, phoneNumber: String) -> EventLoopFuture<HTTPStatus> {
         return User.find(req: req, phoneNumber: phoneNumber).transform(to: .ok)
     }
     
-    static func phoneNumberHasExisted(phoneNumber:String,conn:DatabaseConnectable)->Future<Bool>{
+    static func phoneNumberHasExisted(phoneNumber:String,conn:DatabaseConnectable)->EventLoopFuture<Bool>{
         return User.query(on: conn, withSoftDeleted: true).filter(\User.phoneNumber == phoneNumber).count().map { count in
             if count != 0 { return true }
             else { return false }
@@ -123,25 +123,25 @@ extension User {
 } 
 
 extension User {
-    static func allActiveUsers(on conn: DatabaseConnectable, queryParam: Inputs.UserQuery?) -> Future<[User]> {
+    static func allActiveUsers(on conn: DatabaseConnectable, queryParam: Inputs.UserQuery?) -> EventLoopFuture<[User]> {
         let query =  User.query(on: conn)
         return self.getUsersWithRequestFilter(query: query, queryParam: queryParam)
     }
-    static func allBlockedUsers(on conn: DatabaseConnectable, queryParam: Inputs.UserQuery?) -> Future<[User]> {
+    static func allBlockedUsers(on conn: DatabaseConnectable, queryParam: Inputs.UserQuery?) -> EventLoopFuture<[User]> {
         let query = User.query(on: conn, withSoftDeleted: true).filter(\.deletedAt != nil)
         return self.getUsersWithRequestFilter(query: query, queryParam: queryParam)
     }
 }
 
 extension User {
-    static func allChatBlockedUsers(on conn: DatabaseConnectable) -> Future<[User_BlockedReport]> {
+    static func allChatBlockedUsers(on conn: DatabaseConnectable) -> EventLoopFuture<[User_BlockedReport]> {
         return User.query(on: conn).join(\ChatBlock.blockedUserId, to: \User.id).alsoDecode(ChatBlock.self).all().map { $0.getStandard() }
     }
 }
 
 extension User {
     
-    static func getUsersWithRequestFilter(query: QueryBuilder<PostgreSQLDatabase, User>, queryParam: Inputs.UserQuery?) -> Future<[User]> {
+    static func getUsersWithRequestFilter(query: QueryBuilder<PostgreSQLDatabase, User>, queryParam: Inputs.UserQuery?) -> EventLoopFuture<[User]> {
         
         if let phoneNumber = queryParam?.phoneNumber {
             query.filter(\.phoneNumber ~~ phoneNumber)

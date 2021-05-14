@@ -16,7 +16,7 @@ enum HttpCallMethod :String{
 
 class APICurl {
     
-    static func curl<InputCodable:Codable>(req: Request, url: String, httpMethod: HttpCallMethod, input: InputCodable?) throws -> Future<Data> {
+    static func curl<InputCodable:Codable>(req: Request, url: String, httpMethod: HttpCallMethod, input: InputCodable?) throws -> EventLoopFuture<Data> {
         
         guard let data = try? JSONEncoder().encode(input),
             let payload = String(data: data, encoding: .utf8) else
@@ -27,12 +27,12 @@ class APICurl {
         return try APICurl.curl(req: req, url: url, httpMethod: httpMethod, payload: payload)
     }
     
-    static func curl(req: Request, url: String, httpMethod: HttpCallMethod) throws -> Future<Data> {
+    static func curl(req: Request, url: String, httpMethod: HttpCallMethod) throws -> EventLoopFuture<Data> {
         
         return try APICurl.curl(req: req, url: url, httpMethod: httpMethod, payload: nil)
     }
     
-    private static func curl(req: Request, url: String, httpMethod:HttpCallMethod, payload: String?) throws -> Future<Data> {
+    private static func curl(req: Request, url: String, httpMethod:HttpCallMethod, payload: String?) throws -> EventLoopFuture<Data> {
         
         let shell = try req.make(Shell.self)
         let arguments = getArguments(payload: payload, url: url)

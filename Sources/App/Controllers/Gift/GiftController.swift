@@ -13,7 +13,7 @@ import FluentPostgresDriver
 final class GiftController {
     
     /// Returns a list of all `Gift`s.
-    func index(_ req: Request) throws -> Future<[Gift]> {
+    func index(_ req: Request) throws -> EventLoopFuture<[Gift]> {
         
         return try req.content.decode(RequestInput.self).flatMap { requestInput in
             let query = Gift.query(on: req)
@@ -22,7 +22,7 @@ final class GiftController {
         
     }
     
-    func itemAt(_ req: Request) throws -> Future<Gift> {
+    func itemAt(_ req: Request) throws -> EventLoopFuture<Gift> {
         let giftId = try req.parameters.next(Int.self)
         return Gift.get(giftId, on: req).map { gift in
             guard gift.isReviewed else { throw Abort(.unreviewedGift) }
@@ -32,29 +32,29 @@ final class GiftController {
     
     
     /// Saves a decoded `Gift` to the database.
-    func create(_ req: Request) throws -> Future<Gift> {
+    func create(_ req: Request) throws -> EventLoopFuture<Gift> {
         let authId = try req.requireAuthenticated(User.self).getId()
         return try req.content.decode(Gift.Input.self).flatMap { input in
             return try Gift.create(input: input, authId: authId, on: req)
         }
     }
     
-    func update(_ req: Request) throws -> Future<Gift> {
+    func update(_ req: Request) throws -> EventLoopFuture<Gift> {
         let authId = try req.requireAuthenticated(User.self).getId()
         let giftId = try req.parameters.next(Int.self)
         
         return Gift.get(giftId, withSoftDeleted: true, on: req).flatMap { gift in
             
-            return try req.content.decode(Gift.Input.self).flatMap { input -> Future<Gift> in
+            return try req.content.decode(Gift.Input.self).flatMap { input -> EventLoopFuture<Gift> in
                 return try gift.update(input: input, authId: authId, on: req)
             }
         }
     }
     
     /// Deletes a parameterized `Gift`.
-    func delete(_ req: Request) throws -> Future<HTTPStatus> {
+    func delete(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
         let authId = try req.requireAuthenticated(User.self).getId()
-        return try req.parameters.next(Gift.self).flatMap { (gift) -> Future<Void> in
+        return try req.parameters.next(Gift.self).flatMap { (gift) -> EventLoopFuture<Void> in
             guard gift.userId == authId else { throw Abort(.unauthorizedGift) }
             guard !gift.isDonated else { throw Abort(.donatedGiftUnaccepted) }
             gift.isDeleted = true

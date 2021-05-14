@@ -46,13 +46,13 @@ extension Rating {
     
     
     
-    static func find(authId voterId: Int, reviewedId: Int, on req: Request) -> Future<Rating?> {
+    static func find(authId voterId: Int, reviewedId: Int, on req: Request) -> EventLoopFuture<Rating?> {
         return _findQuery(voterId: voterId, reviewedId: reviewedId, on: req)
             .first()
     }
     
     
-    static func create(authId: Int, input: Input, on req: Request) -> Future<HTTPStatus> {
+    static func create(authId: Int, input: Input, on req: Request) -> EventLoopFuture<HTTPStatus> {
         guard input.isValid, authId != input.reviewedUserId  else {
             return req.future(error: Abort(.invalid))
         }
@@ -66,7 +66,7 @@ extension Rating {
         }
     }
     
-    func update(input: Input, on req: Request) -> Future<HTTPStatus> {
+    func update(input: Input, on req: Request) -> EventLoopFuture<HTTPStatus> {
         guard input.isValid else {
             return req.future(error: Abort(.invalid))
         }
@@ -99,14 +99,14 @@ extension Rating {
 
 extension Rating {
     
-    static func calculateAverageRate(reviewedId: Int, on conn: DatabaseConnectable) -> Future<AverageRate?> {
+    static func calculateAverageRate(reviewedId: Int, on conn: DatabaseConnectable) -> EventLoopFuture<AverageRate?> {
         return query(on: conn)
             .filter(\.reviewedId == reviewedId)
             .all()
             .map { $0.averageRate }
     }
     
-    static func updateAverageRate(reviewedId: Int, on conn: DatabaseConnectable) -> Future<HTTPStatus> {
+    static func updateAverageRate(reviewedId: Int, on conn: DatabaseConnectable) -> EventLoopFuture<HTTPStatus> {
         return Rating.calculateAverageRate(reviewedId: reviewedId, on: conn)
             .unwrap(or: Abort(.notFound))
             .flatMap { averageRate in

@@ -22,7 +22,7 @@ extension User {
         return (isPhoneVisibleForAll ?? false) ? .all : ((isPhoneVisibleForCharities ?? false) ? .charity : .none)
     }
     
-    func setPhoneVisibility(setting: PhoneVisibilitySetting, on conn: DatabaseConnectable) -> Future<HTTPStatus> {
+    func setPhoneVisibility(setting: PhoneVisibilitySetting, on conn: DatabaseConnectable) -> EventLoopFuture<HTTPStatus> {
         switch setting {
         case .all:
             isPhoneVisibleForAll = true

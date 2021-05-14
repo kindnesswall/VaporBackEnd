@@ -21,7 +21,7 @@ final class ApplicationVersionSeed: Migration {
         let futures = seeds.map { seed in
             return seed.create(on: conn).map(to: Void.self) { _ in return }
         }
-        return Future<Void>.andAll(futures, eventLoop: conn.eventLoop)
+        return EventLoopFuture<Void>.andAll(futures, eventLoop: conn.eventLoop)
     }
     
     static func revert(on conn: PostgreSQLConnection) -> EventLoopFuture<Void> {

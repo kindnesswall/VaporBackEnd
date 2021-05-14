@@ -11,7 +11,7 @@ import FluentPostgresDriver
 
 class ChatBlockController {
     
-    func blockUser(_ req: Request) throws -> Future<HTTPStatus> {
+    func blockUser(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
         
         let userId = try getUserId(req)
         let chatId = try req.parameters.next(Int.self)
@@ -30,7 +30,7 @@ class ChatBlockController {
         }
     }
     
-    func unblockUser(_ req: Request) throws -> Future<HTTPStatus> {
+    func unblockUser(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
         
         let userId = try getUserId(req)
         let chatId = try req.parameters.next(Int.self)

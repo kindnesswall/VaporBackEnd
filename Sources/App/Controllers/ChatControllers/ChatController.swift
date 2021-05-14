@@ -12,7 +12,7 @@ class ChatController {
     
     //MARK: - Save Messages
     
-    func saveTextMessage(reqInfo: RequestInfo, textMessage: TextMessage, chatId: Int, receiverId: Int) throws -> Future<TextMessage> {
+    func saveTextMessage(reqInfo: RequestInfo, textMessage: TextMessage, chatId: Int, receiverId: Int) throws -> EventLoopFuture<TextMessage> {
         
         textMessage.senderId = reqInfo.userId
         textMessage.receiverId = receiverId
@@ -26,7 +26,7 @@ class ChatController {
         }
     }
     
-    func ackMessageIsReceived(reqInfo: RequestInfo, ackMessage: AckMessage) -> Future<HTTPStatus> {
+    func ackMessageIsReceived(reqInfo: RequestInfo, ackMessage: AckMessage) -> EventLoopFuture<HTTPStatus> {
         
         return TextMessage.find(ackMessage.messageId, on: reqInfo.req).flatMap { message in
             guard let message = message else {
@@ -51,19 +51,19 @@ class ChatController {
     
     //MARK: - Fetch Contacts
     
-    func fetchContacts(reqInfo: RequestInfo) throws -> Future<[ContactMessage]> {
+    func fetchContacts(reqInfo: RequestInfo) throws -> EventLoopFuture<[ContactMessage]> {
         
         return DirectChat.userChats(blocked: false, userId: reqInfo.userId, on: reqInfo.req)
     }
     
-    func fetchBlockedContacts(reqInfo: RequestInfo) throws -> Future<[ContactMessage]>{
+    func fetchBlockedContacts(reqInfo: RequestInfo) throws -> EventLoopFuture<[ContactMessage]>{
         
         return DirectChat.userChats(blocked: true, userId: reqInfo.userId, on: reqInfo.req)
     }
     
     //MARK: - Fetch Messages
     
-    func fetchMessages(reqInfo: RequestInfo, input: FetchMessagesInput) throws -> Future<ContactMessage> {
+    func fetchMessages(reqInfo: RequestInfo, input: FetchMessagesInput) throws -> EventLoopFuture<ContactMessage> {
         
         return DirectChat.fetchTextMessages(beforeId: input.beforeId, authId: reqInfo.userId, chatId: input.chatId, on: reqInfo.req)
         
@@ -73,7 +73,7 @@ class ChatController {
     //MARK: - Chat Notifications
     
     
-    private func updateChatNotification(receiverId: Int, chatId: Int, on req: Request) -> Future<HTTPStatus> {
+    private func updateChatNotification(receiverId: Int, chatId: Int, on req: Request) -> EventLoopFuture<HTTPStatus> {
         
         return TextMessage.calculateNumberOfNotifications(userId: receiverId, chatId: chatId, conn: req).flatMap { notificationCount in
             

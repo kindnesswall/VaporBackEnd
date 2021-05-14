@@ -20,7 +20,7 @@ final class Sponsor: PostgreSQLModel {
     var updatedAt: Date?
     var deletedAt: Date?
     
-    func update(input: Sponsor, on req: Request) -> Future<HTTPStatus> {
+    func update(input: Sponsor, on req: Request) -> EventLoopFuture<HTTPStatus> {
         self.name = input.name
         self.image = input.image
         self.description = input.description
@@ -31,7 +31,7 @@ final class Sponsor: PostgreSQLModel {
 }
 
 extension Sponsor {
-    static func get(_ id: Int, on conn: DatabaseConnectable) -> Future<Sponsor> {
+    static func get(_ id: Int, on conn: DatabaseConnectable) -> EventLoopFuture<Sponsor> {
         return find(id, on: conn).unwrap(or: Abort(.notFound))
     }
 }

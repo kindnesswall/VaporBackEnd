@@ -23,7 +23,7 @@ final class GiftRequest: PostgreSQLModel {
 }
 
 extension GiftRequest {
-    static func hasExisted(requestUserId:Int,giftId:Int,conn:DatabaseConnectable) -> Future<Bool> {
+    static func hasExisted(requestUserId:Int,giftId:Int,conn:DatabaseConnectable) -> EventLoopFuture<Bool> {
         return GiftRequest.query(on: conn).filter(\.requestUserId == requestUserId).filter(\.giftId == giftId).count().map { count in
             if count>0 {
                 return true
@@ -32,7 +32,7 @@ extension GiftRequest {
         }
     }
     
-    static func create(requestUserId:Int,giftId:Int,giftOwnerId:Int,conn:DatabaseConnectable) -> Future<GiftRequest>{
+    static func create(requestUserId:Int,giftId:Int,giftOwnerId:Int,conn:DatabaseConnectable) -> EventLoopFuture<GiftRequest>{
         let giftRequest = GiftRequest(requestUserId: requestUserId, giftId: giftId, giftOwnerId: giftOwnerId)
         return giftRequest.save(on: conn)
     }

@@ -9,7 +9,7 @@ import Vapor
 
 final class ImageController {
     
-    func uploadImage(_ req: Request) throws -> Future<ImageOutput> {
+    func uploadImage(_ req: Request) throws -> EventLoopFuture<ImageOutput> {
         
         let user = try req.requireAuthenticated(User.self)
         guard let userId = user.id else {

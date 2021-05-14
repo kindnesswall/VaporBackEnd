@@ -11,7 +11,7 @@ import FluentPostgresDriver
 
 class UserControllerCore: UserDemoAccountable {
     
-    func findOrCreateUser(req: Request, phoneNumber: String) -> Future<User> {
+    func findOrCreateUser(req: Request, phoneNumber: String) -> EventLoopFuture<User> {
         
         return User.find(req: req, phoneNumber: phoneNumber).flatMap { foundUser in
             
@@ -20,7 +20,7 @@ class UserControllerCore: UserDemoAccountable {
         }
     }
     
-    func setActvatioCode(req: Request, phoneNumber: String, activationCode: String) -> Future<HTTPStatus> {
+    func setActvatioCode(req: Request, phoneNumber: String, activationCode: String) -> EventLoopFuture<HTTPStatus> {
         return User.isNotDeleted(req: req, phoneNumber: phoneNumber).flatMap { _ in
             
             return PhoneNumberActivationCode.find(req: req, phoneNumber: phoneNumber).flatMap { foundItem in
@@ -44,7 +44,7 @@ class UserControllerCore: UserDemoAccountable {
     }
     
     
-    func checkActivationCode(req: Request, phoneNumber: String, activationCode: String) throws -> Future<HTTPStatus> {
+    func checkActivationCode(req: Request, phoneNumber: String, activationCode: String) throws -> EventLoopFuture<HTTPStatus> {
         
         if try validateDemoAccount(phoneNumber: phoneNumber, activationCode: activationCode) {
             return req.future(.ok)
@@ -53,7 +53,7 @@ class UserControllerCore: UserDemoAccountable {
         return PhoneNumberActivationCode.check(req: req, phoneNumber: phoneNumber, activationCode: activationCode)
     }
     
-    func getToken(req: Request, user: User) throws -> Future<AuthOutput> {
+    func getToken(req: Request, user: User) throws -> EventLoopFuture<AuthOutput> {
         let token = try Token.generate(for: user)
         
         return token.save(on: req).map({ token in

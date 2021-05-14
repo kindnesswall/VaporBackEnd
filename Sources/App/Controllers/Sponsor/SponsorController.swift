@@ -9,11 +9,11 @@ import Vapor
 
 final class SponsorController {
     
-    func index(_ req: Request) throws -> Future<[Sponsor]> {
+    func index(_ req: Request) throws -> EventLoopFuture<[Sponsor]> {
         return Sponsor.query(on: req).all()
     }
     
-    func create(_ req: Request) throws -> Future<HTTPStatus> {
+    func create(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
         
         return try req.content.decode(Sponsor.self).flatMap { input in
             guard input.isValid else {
@@ -23,7 +23,7 @@ final class SponsorController {
         }
     }
     
-    func update(_ req: Request) throws -> Future<HTTPStatus> {
+    func update(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
         
         let updatedId = try req.parameters.next(Int.self)
         
@@ -38,7 +38,7 @@ final class SponsorController {
         }
     }
     
-    func delete(_ req: Request) throws -> Future<HTTPStatus> {
+    func delete(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
         
         let deletedId = try req.parameters.next(Int.self)
         

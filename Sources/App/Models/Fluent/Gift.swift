@@ -134,12 +134,12 @@ extension Gift {
 
 extension Gift {
     
-    static func create(input: Gift.Input, authId: Int, on req: Request) throws -> Future<Gift> {
+    static func create(input: Gift.Input, authId: Int, on req: Request) throws -> EventLoopFuture<Gift> {
         let gift = Gift(input: input, authId: authId)
         return try gift.setNamesAndSave(on: req)
     }
     
-    func update(input: Gift.Input, authId: Int, on req: Request) throws -> Future<Gift> {
+    func update(input: Gift.Input, authId: Int, on req: Request) throws -> EventLoopFuture<Gift> {
         
         guard self.userId == authId else { throw Abort(.unauthorizedGift) }
         guard !self.isDeleted else { throw Abort(.deletedGift) }
@@ -153,7 +153,7 @@ extension Gift {
 }
 
 extension Gift {
-    private func setNamesAndSave(on req: Request) throws ->  Future<Gift> {
+    private func setNamesAndSave(on req: Request) throws ->  EventLoopFuture<Gift> {
         return try getCountry(on: req).flatMap { country in
             self.countryName = country.name
             
@@ -184,24 +184,24 @@ extension Gift {
 
 extension Gift {
     
-    static func get(_ id: Int, on conn: DatabaseConnectable) -> Future<Gift> {
+    static func get(_ id: Int, on conn: DatabaseConnectable) -> EventLoopFuture<Gift> {
         return find(id, on: conn).unwrap(or: Abort(.giftNotFound))
     }
     
-    static func get(_ id: Int, withSoftDeleted: Bool, on conn: DatabaseConnectable) -> Future<Gift> {
+    static func get(_ id: Int, withSoftDeleted: Bool, on conn: DatabaseConnectable) -> EventLoopFuture<Gift> {
         return query(on: conn, withSoftDeleted: withSoftDeleted).filter(\.id == id).first().unwrap(or: Abort(.giftNotFound))
     }
 }
 
 extension Gift {
-    func getCountry(on req: Request) throws -> Future<Country>  {
+    func getCountry(on req: Request) throws -> EventLoopFuture<Country>  {
         guard let countryId = self.countryId else {
             throw Abort(.nilCountryId)
         }
         return Country.find(countryId, on: req).unwrap(or: Abort(.countryNotFound))
     }
     
-    func getCategoryTitle(on req: Request, country: Country) -> Future<String?> {
+    func getCategoryTitle(on req: Request, country: Country) -> EventLoopFuture<String?> {
         return category.get(on: req).map { category in
             return category.localizedTitle(country: country)
         }
@@ -210,7 +210,7 @@ extension Gift {
 
 extension Gift {
     
-    static func getGiftsWithRequestFilter(query:QueryBuilder<PostgreSQLDatabase, Gift>,requestInput:RequestInput?,onlyUndonatedGifts:Bool,onlyReviewedGifts:Bool)->Future<[Gift]>{
+    static func getGiftsWithRequestFilter(query:QueryBuilder<PostgreSQLDatabase, Gift>,requestInput:RequestInput?,onlyUndonatedGifts:Bool,onlyReviewedGifts:Bool)->EventLoopFuture<[Gift]>{
         
         if let searchWord = requestInput?.searchWord {
             query.group(.or) { query in

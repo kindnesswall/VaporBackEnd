@@ -11,9 +11,9 @@ import FluentPostgresDriver
 
 final class GiftAdminController {
     
-    func rejectGift(_ req: Request) throws -> Future<HTTPStatus> {
+    func rejectGift(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
         
-        return try req.parameters.next(Gift.self).flatMap { (gift) -> Future<Void> in
+        return try req.parameters.next(Gift.self).flatMap { (gift) -> EventLoopFuture<Void> in
             
             return try req.content.decode(Inputs.RejectReason.self).flatMap({ input in 
                 
@@ -29,9 +29,9 @@ final class GiftAdminController {
             }.transform(to: .ok)
     }
     
-    func acceptGift(_ req: Request) throws -> Future<HTTPStatus> {
+    func acceptGift(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
         
-        return try req.parameters.next(Gift.self).flatMap { (gift) -> Future<Gift> in
+        return try req.parameters.next(Gift.self).flatMap { (gift) -> EventLoopFuture<Gift> in
             
             gift.isReviewed = true
             gift.isRejected = false
@@ -41,7 +41,7 @@ final class GiftAdminController {
             }.transform(to: .ok)
     }
     
-    func unreviewedGifts(_ req: Request) throws -> Future<[Gift]> {
+    func unreviewedGifts(_ req: Request) throws -> EventLoopFuture<[Gift]> {
         
         return try req.content.decode(RequestInput.self).flatMap { requestInput in
             let query = Gift.query(on: req).filter(\.isReviewed == false)

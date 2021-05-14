@@ -10,9 +10,9 @@ import Vapor
 class CustomFutureList<T> {
     private var results = [T?]()
     private let promise:Promise<[T]>
-    private let futures: [Future<T>]
+    private let futures: [EventLoopFuture<T>]
     
-    init(req:Request, futures: [Future<T>]) {
+    init(req:Request, futures: [EventLoopFuture<T>]) {
         self.promise = req.eventLoop.newPromise([T].self)
         self.futures = futures
         self.setFutures()
@@ -22,7 +22,7 @@ class CustomFutureList<T> {
 //        print("deinit")
     }
     
-    func futureResult()->Future<[T]>{
+    func futureResult()->EventLoopFuture<[T]>{
         return promise.futureResult
     }
     

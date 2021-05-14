@@ -9,7 +9,7 @@ import Vapor
 
 final class CharityController {
     
-    func getCharityList(_ req: Request) throws -> Future<[Charity]> {
+    func getCharityList(_ req: Request) throws -> EventLoopFuture<[Charity]> {
         
         return Charity.getAllCharities(conn: req).map({ result in
             var list = [Charity]()
@@ -21,7 +21,7 @@ final class CharityController {
         
     }
     
-    func getCharityOfUser(_ req: Request) throws -> Future<Charity> {
+    func getCharityOfUser(_ req: Request) throws -> EventLoopFuture<Charity> {
         
         let userId = try req.parameters.next(Int.self)
         return User.get(userId, on: req).flatMap { user in

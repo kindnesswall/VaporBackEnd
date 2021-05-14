@@ -11,7 +11,7 @@ import FluentPostgresDriver
 
 final class AdminStatisticsController {
     
-    func getStatistics(_ req: Request) throws -> Future<Statistics> {
+    func getStatistics(_ req: Request) throws -> EventLoopFuture<Statistics> {
         
         let registeredGifts = Gift.query(on: req).count()
         let donatedGifts = Gift.query(on: req).filter(\.donatedToUserId != nil).count()
@@ -38,14 +38,14 @@ final class AdminStatisticsController {
     }
     
     
-    func getStatistics(registeredGifts:Future<Int>,
-                       donatedGifts:Future<Int>,
-                       unreviewedGifts:Future<Int>,
-                       rejectedGifts:Future<Int>,
-                       deletedGifts:Future<Int>,
-                       activeUsers:Future<Int>,
-                       blockedUsers:Future<Int>,
-                       chatBlockedUsers:Future<Int>)->Future<Statistics>{
+    func getStatistics(registeredGifts:EventLoopFuture<Int>,
+                       donatedGifts:EventLoopFuture<Int>,
+                       unreviewedGifts:EventLoopFuture<Int>,
+                       rejectedGifts:EventLoopFuture<Int>,
+                       deletedGifts:EventLoopFuture<Int>,
+                       activeUsers:EventLoopFuture<Int>,
+                       blockedUsers:EventLoopFuture<Int>,
+                       chatBlockedUsers:EventLoopFuture<Int>)->EventLoopFuture<Statistics>{
         
         return registeredGifts.flatMap { registeredGifts in
         return donatedGifts.flatMap { donatedGifts in

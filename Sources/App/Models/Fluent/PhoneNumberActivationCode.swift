@@ -26,13 +26,13 @@ final class PhoneNumberActivationCode: PostgreSQLModel {
 
 extension PhoneNumberActivationCode {
     
-    static func find(req: Request, phoneNumber: String) -> Future<PhoneNumberActivationCode?> {
+    static func find(req: Request, phoneNumber: String) -> EventLoopFuture<PhoneNumberActivationCode?> {
         
         return PhoneNumberActivationCode.query(on: req).filter(\.phoneNumber == phoneNumber).first()
         
     }
     
-    static func check(req: Request, phoneNumber: String, activationCode: String) -> Future<HTTPStatus> {
+    static func check(req: Request, phoneNumber: String, activationCode: String) -> EventLoopFuture<HTTPStatus> {
         
         return PhoneNumberActivationCode.query(on: req).filter(\.phoneNumber == phoneNumber).filter(\.activationCode == activationCode).first().flatMap { item in
             guard let item = item else {

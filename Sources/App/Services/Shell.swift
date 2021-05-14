@@ -19,13 +19,13 @@ final class Shell: Service {
     
     // MARK: - Public
     
-    func execute(commandName: String, arguments: [String] = []) throws -> Future<Data> {
+    func execute(commandName: String, arguments: [String] = []) throws -> EventLoopFuture<Data> {
         return try bash(commandName: commandName, arguments:arguments)
     }
     
     // MARK: - Private
     
-    private func bash(commandName: String, arguments: [String]) throws -> Future<Data> {
+    private func bash(commandName: String, arguments: [String]) throws -> EventLoopFuture<Data> {
         
         return executeShell(command: "/bin/bash" , arguments:[ "-l", "-c", "which \(commandName)" ])
             .map(to: String.self) { data in
@@ -38,9 +38,9 @@ final class Shell: Service {
         }
     }
     
-    private func executeShell(command: String, arguments: [String] = []) -> Future<Data> {
+    private func executeShell(command: String, arguments: [String] = []) -> EventLoopFuture<Data> {
         
-        return Future.map(on: worker) {
+        return EventLoopFuture.map(on: worker) {
             
             let process = Process()
             process.launchPath = command

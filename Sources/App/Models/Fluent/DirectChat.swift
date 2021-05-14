@@ -84,7 +84,7 @@ extension DirectChat {
 
 extension DirectChat {
     
-    static func findOrFail(authId: Int, chatId: Int, on conn: DatabaseConnectable) -> Future<ContactMessage> {
+    static func findOrFail(authId: Int, chatId: Int, on conn: DatabaseConnectable) -> EventLoopFuture<ContactMessage> {
         return find(chatId, on: conn).map { item in
             guard let item = item else {
                 throw Abort(.chatNotFound)
@@ -93,13 +93,13 @@ extension DirectChat {
         }
     }
     
-    static func find(userId: Int, contactId: Int, on conn: DatabaseConnectable) -> Future<ContactMessage?> {
+    static func find(userId: Int, contactId: Int, on conn: DatabaseConnectable) -> EventLoopFuture<ContactMessage?> {
         return _find(userId: userId, contactId: contactId, on: conn).first().map { item in
             return try item?.castFor(authId: userId)
         }
     }
     
-    static func findOrCreate(userId: Int, contactId: Int, on conn: DatabaseConnectable) -> Future<ContactMessage> {
+    static func findOrCreate(userId: Int, contactId: Int, on conn: DatabaseConnectable) -> EventLoopFuture<ContactMessage> {
         let input = DirectChat(userId: userId, contactId: contactId)
         return _findOrCreate(input: input, on: conn).map { item in
             return try item.castFor(authId: userId)
@@ -110,7 +110,7 @@ extension DirectChat {
 
 extension DirectChat {
     
-    private static func fetch(textMessages: Children<DirectChat, TextMessage>, beforeId: Int?, on conn: DatabaseConnectable) throws -> Future<[TextMessage]> {
+    private static func fetch(textMessages: Children<DirectChat, TextMessage>, beforeId: Int?, on conn: DatabaseConnectable) throws -> EventLoopFuture<[TextMessage]> {
         
         let query = try textMessages.query(on: conn)
         
@@ -127,7 +127,7 @@ extension DirectChat {
     }
     
     
-    static func fetchTextMessages(beforeId: Int?, authId: Int, chatId: Int, on conn: DatabaseConnectable) -> Future<ContactMessage> {
+    static func fetchTextMessages(beforeId: Int?, authId: Int, chatId: Int, on conn: DatabaseConnectable) -> EventLoopFuture<ContactMessage> {
         return find(chatId, on: conn).flatMap { chat in
             
             guard let chat = chat else {
@@ -166,7 +166,7 @@ extension DirectChat: FindOrCreatable {
 }
 
 extension DirectChat {
-    static func userChats(blocked: Bool, userId: Int, on req: Request) -> Future<[ContactMessage]> {
+    static func userChats(blocked: Bool, userId: Int, on req: Request) -> EventLoopFuture<[ContactMessage]> {
         let onUsers = query(on: req)
             .filter(\.userId == userId)
             .filter(\.contactIsBlocked == blocked)
@@ -196,7 +196,7 @@ extension DirectChat {
 }
 
 extension DirectChat {
-    static func set(notification: Int, receiverId: Int, chatId: Int, on conn: DatabaseConnectable) -> Future<HTTPStatus> {
+    static func set(notification: Int, receiverId: Int, chatId: Int, on conn: DatabaseConnectable) -> EventLoopFuture<HTTPStatus> {
         return find(chatId, on: conn).flatMap { item in
             guard let item = item else {
                 throw Abort(.chatNotFound)
@@ -215,7 +215,7 @@ extension DirectChat {
 }
 
 extension DirectChat {
-    static func set(block: Bool, authId: Int, chatId: Int, on conn: DatabaseConnectable) -> Future<ChatBlock> {
+    static func set(block: Bool, authId: Int, chatId: Int, on conn: DatabaseConnectable) -> EventLoopFuture<ChatBlock> {
         
         return find(chatId, on: conn).flatMap { item in
             

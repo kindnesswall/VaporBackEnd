@@ -33,7 +33,7 @@ extension RatingResult {
 }
 
 extension RatingResult {
-    static func set(reviewedId: Int, averageRate: AverageRate, on conn: DatabaseConnectable) -> Future<HTTPStatus>  {
+    static func set(reviewedId: Int, averageRate: AverageRate, on conn: DatabaseConnectable) -> EventLoopFuture<HTTPStatus>  {
         
         let input = RatingResult(reviewedId: reviewedId, averageRate: averageRate)
         return _findOrCreate(input: input, on: conn).flatMap { item in
@@ -46,7 +46,7 @@ extension RatingResult {
         }
     }
     
-    static func get(reviewedId: Int, on conn: DatabaseConnectable) -> Future<RatingResult?> {
+    static func get(reviewedId: Int, on conn: DatabaseConnectable) -> EventLoopFuture<RatingResult?> {
         return _findQuery(reviewedId: reviewedId, on: conn)
             .first()
     }

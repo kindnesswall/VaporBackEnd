@@ -53,7 +53,7 @@ extension TextMessage: PushPayloadable {
 
 extension TextMessage {
     
-    static func calculateNumberOfNotifications(userId:Int,chatId:Int,conn:DatabaseConnectable) -> Future<Int> {
+    static func calculateNumberOfNotifications(userId:Int,chatId:Int,conn:DatabaseConnectable) -> EventLoopFuture<Int> {
         
         let query = TextMessage.query(on: conn)
         

@@ -9,7 +9,7 @@ import Vapor
 
 final class AdminUserListController {
     
-    func userAllowAccess(_ req: Request) throws -> Future<User> {
+    func userAllowAccess(_ req: Request) throws -> EventLoopFuture<User> {
         return try req.content.decode(UserAllowAccessInput.self).flatMap { input in
             
             return User.get(input.userId, withSoftDeleted: true, on: req).flatMap { user in
@@ -17,7 +17,7 @@ final class AdminUserListController {
             }
         }
     }
-    func userDenyAccess(_ req: Request) throws -> Future<HTTPStatus> {
+    func userDenyAccess(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
         return try req.parameters.next(User.self).flatMap({ user in
             return user.delete(on: req).flatMap({ _ in
                 return try LogoutController.logoutAllDevices(req: req, user: user)
@@ -25,20 +25,20 @@ final class AdminUserListController {
         })
     }
     
-    func usersActiveList(_ req: Request) throws -> Future<[User]> {
+    func usersActiveList(_ req: Request) throws -> EventLoopFuture<[User]> {
         
         return try req.content.decode(Inputs.UserQuery.self).flatMap { queryParam in
             return User.allActiveUsers(on: req, queryParam: queryParam)
         }
     }
     
-    func usersBlockedList(_ req: Request) throws -> Future<[User]> {
+    func usersBlockedList(_ req: Request) throws -> EventLoopFuture<[User]> {
         return try req.content.decode(Inputs.UserQuery.self).flatMap { queryParam in
             return User.allBlockedUsers(on: req, queryParam: queryParam)
         }
     }
     
-    func usersChatBlockedList(_ req: Request) throws -> Future<[User_BlockedReport]> {
+    func usersChatBlockedList(_ req: Request) throws -> EventLoopFuture<[User_BlockedReport]> {
         return User.allChatBlockedUsers(on: req)
     }
 }

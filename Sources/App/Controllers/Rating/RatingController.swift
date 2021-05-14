@@ -9,7 +9,7 @@ import Vapor
 
 final class RatingController {
     
-    func get(_ req: Request) throws -> Future<Outputs.Rating> {
+    func get(_ req: Request) throws -> EventLoopFuture<Outputs.Rating> {
         
         let reviewedId = try req.parameters.next(Int.self)
         let authId = try? req.getAuthId()
@@ -32,7 +32,7 @@ final class RatingController {
         }
     }
     
-    func create(_ req: Request) throws -> Future<HTTPStatus> {
+    func create(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
         
         let authId = try req.getAuthId()
         return try req.content.decode(Rating.Input.self).flatMap { input in
@@ -40,7 +40,7 @@ final class RatingController {
         }
     }
     
-    func update(_ req: Request) throws -> Future<HTTPStatus> {
+    func update(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
         
         let authId = try req.getAuthId()
         return try req.content.decode(Rating.Input.self).flatMap { input in
