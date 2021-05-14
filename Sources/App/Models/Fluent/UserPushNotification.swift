@@ -6,14 +6,28 @@
 //
 
 import Vapor
-import FluentPostgreSQL
+import Fluent
 
-final class UserPushNotification: PostgreSQLModel {
+final class UserPushNotification: Model {
+    
+    static let schema = "UserPushNotification"
+    
+    @ID(key: .id)
     var id: Int?
+    
+    @Field(key: "userId")
     var userId: Int
+    
+    @Field(key: "userTokenId")
     var userTokenId: Int
+    
+    @Field(key: "type")
     var type: String
+    
+    @Field(key: "devicePushToken")
     var devicePushToken: String
+    
+    init() {}
     
     init(userId: Int, userTokenId: Int, input: Inputs.UserPushNotification) {
         self.userId = userId
@@ -22,29 +36,29 @@ final class UserPushNotification: PostgreSQLModel {
         self.devicePushToken = input.devicePushToken
     }
     
-    static func hasFound(input: Inputs.UserPushNotification, conn: DatabaseConnectable)->Future<UserPushNotification?> {
+    static func hasFound(input: Inputs.UserPushNotification, conn: Database)->EventLoopFuture<UserPushNotification?> {
         return query(on: conn)
-            .filter(\.type == input.type)
-            .filter(\.devicePushToken == input.devicePushToken)
+            .filter(\.$type == input.type)
+            .filter(\.$devicePushToken == input.devicePushToken)
             .first()
     }
     
-    static func findAllTokens(userId:Int, conn: DatabaseConnectable) -> Future<[UserPushNotification]>{
+    static func findAllTokens(userId:Int, conn: Database) -> EventLoopFuture<[UserPushNotification]>{
         return query(on: conn)
-            .filter(\.userId == userId)
+            .filter(\.$userId == userId)
             .all()
     }
     
-    static func deleteAll(userId: Int, conn: DatabaseConnectable) -> Future<HTTPStatus> {
+    static func deleteAll(userId: Int, conn: Database) -> EventLoopFuture<HTTPStatus> {
         return query(on: conn)
-            .filter(\.userId == userId)
+            .filter(\.$userId == userId)
             .delete()
             .transform(to: .ok)
     }
     
-    static func delete(userTokenId: Int, conn: DatabaseConnectable) -> Future<HTTPStatus> {
+    static func delete(userTokenId: Int, conn: Database) -> EventLoopFuture<HTTPStatus> {
         return query(on: conn)
-            .filter(\.userTokenId == userTokenId)
+            .filter(\.$userTokenId == userTokenId)
             .delete()
             .transform(to: .ok)
     }
@@ -62,8 +76,7 @@ enum PushNotificationType: String, Codable {
     case Firebase
 }
 
-extension UserPushNotification : Migration {}
+//extension UserPushNotification : Migration {}
 
 extension UserPushNotification : Content {}
 
-extension UserPushNotification : Parameter {}

@@ -10,7 +10,7 @@ import Leaf
 
 final class LandingController {
     
-    func present(_ req: Request) throws -> Future<View> {
+    func present(_ req: Request) throws -> EventLoopFuture<View> {
         
         let storeLinks = configuration.applicationStoreLinks
         
@@ -18,10 +18,10 @@ final class LandingController {
             googleStore: storeLinks?.googleStore,
             myketStore: storeLinks?.myketStore)
         
-        return try req.view().render("landing",information)
+        return req.view.render("landing", information)
     }
     
     func redirectHome(_ req: Request) throws -> Response {
-        return req.redirect(to: URIs().home)
+        return req.redirect(to: "/\(URIs().home.string)")
     }
 }

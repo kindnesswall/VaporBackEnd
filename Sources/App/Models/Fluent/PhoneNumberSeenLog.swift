@@ -6,17 +6,28 @@
 //
 
 import Vapor
-import FluentPostgreSQL
+import Fluent
 
-final class PhoneNumberSeenLog: PostgreSQLModel {
+final class PhoneNumberSeenLog: Model {
     
+    static let schema = "PhoneNumberSeenLog"
+    
+    @ID(key: .id)
     var id: Int?
+    
+    @Field(key: "fromUserId")
     var fromUserId: Int
+    
+    @Field(key: "seenUserId")
     var seenUserId: Int
+    
+    @Field(key: "seenPhoneNumber")
     var seenPhoneNumber: String
     
+    @Timestamp(key: "createdAt", on: .create)
     var createdAt: Date?
     
+    init() {}
     
     init(fromUserId: Int, seenUserId: Int, seenPhoneNumber: String) {
         self.fromUserId = fromUserId
@@ -25,13 +36,9 @@ final class PhoneNumberSeenLog: PostgreSQLModel {
     }
 }
 
-extension PhoneNumberSeenLog {
-    static let createdAtKey: TimestampKey? = \.createdAt
-}
-
-extension PhoneNumberSeenLog : Migration {}
+//extension PhoneNumberSeenLog : Migration {}
 
 extension PhoneNumberSeenLog : Content {}
 
-extension PhoneNumberSeenLog : Parameter {}
+
 

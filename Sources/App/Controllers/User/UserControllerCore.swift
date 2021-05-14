@@ -6,28 +6,42 @@
 //
 
 import Vapor
-import FluentPostgreSQL
+import Fluent
+import FluentPostgresDriver
 
 class UserControllerCore: UserDemoAccountable {
     
-    func findOrCreateUser(req: Request, phoneNumber: String) -> Future<User> {
+    func findOrCreateUser(req: Request, phoneNumber: String) -> EventLoopFuture<User> {
         
-        return User.find(req: req, phoneNumber: phoneNumber).flatMap { foundUser in
-            
-            let user = foundUser ?? User(phoneNumber: phoneNumber)
-            return user.save(on: req)
+        return User.find(
+            req: req,
+            phoneNumber: phoneNumber)
+            .flatMap { foundUser in
+                let user = foundUser ?? User(phoneNumber: phoneNumber)
+                return user.save(on: req.db)
+                    .transform(to: user)
         }
     }
     
-    func setActvatioCode(req: Request, phoneNumber: String, activationCode: String) -> Future<HTTPStatus> {
-        return User.isNotDeleted(req: req, phoneNumber: phoneNumber).flatMap { _ in
-            
-            return PhoneNumberActivationCode.find(req: req, phoneNumber: phoneNumber).flatMap { foundItem in
+    func setActvatioCode(req: Request, phoneNumber: String, activationCode: String) -> EventLoopFuture<HTTPStatus> {
+        return User.isNotDeleted(
+            req: req,
+            phoneNumber: phoneNumber)
+            .flatMap { _ in
                 
-                let item = self.setActvatioCode(req: req, foundItem: foundItem, phoneNumber: phoneNumber, activationCode: activationCode)
-                
-                return item.save(on: req).transform(to: .ok)
-            }
+                return PhoneNumberActivationCode.find(
+                    req: req,
+                    phoneNumber: phoneNumber).flatMap { foundItem in
+                        
+                        let item = self.setActvatioCode(
+                            req: req,
+                            foundItem: foundItem,
+                            phoneNumber: phoneNumber,
+                            activationCode: activationCode)
+                        
+                        return item.save(on: req.db)
+                            .transform(to: .ok)
+                }
         }
     }
     
@@ -38,26 +52,41 @@ class UserControllerCore: UserDemoAccountable {
             return foundItem
         }
         
-        let item = PhoneNumberActivationCode(phoneNumber: phoneNumber, activationCode: activationCode)
+        let item = PhoneNumberActivationCode(
+            phoneNumber: phoneNumber,
+            activationCode: activationCode)
         return item
     }
     
     
-    func checkActivationCode(req: Request, phoneNumber: String, activationCode: String) throws -> Future<HTTPStatus> {
+    func checkActivationCode(req: Request, phoneNumber: String, activationCode: String) throws -> EventLoopFuture<HTTPStatus> {
         
-        if try validateDemoAccount(phoneNumber: phoneNumber, activationCode: activationCode) {
-            return req.future(.ok)
+        if try validateDemoAccount(
+            phoneNumber: phoneNumber,
+            activationCode: activationCode) {
+            return req.db.makeSucceededFuture(.ok)
         }
         
-        return PhoneNumberActivationCode.check(req: req, phoneNumber: phoneNumber, activationCode: activationCode)
+        return PhoneNumberActivationCode.check(
+            req: req,
+            phoneNumber: phoneNumber,
+            activationCode: activationCode)
     }
     
-    func getToken(req: Request, user: User) throws -> Future<AuthOutput> {
-        let token = try Token.generate(for: user)
+    func getToken(req: Request, user: User) -> EventLoopFuture<AuthOutput> {
         
-        return token.save(on: req).map({ token in
-            return AuthOutput(token: token, isAdmin: user.isAdmin, isCharity: user.isCharity)
-        })
-    }
-    
+        guard let userId = user.id else {
+            return req.db.makeFailedFuture(.nilUserId)
+        }
+        
+        let token = try Token.generate(for: userId)
+        
+        return token.save(on: req.db)
+            .map {
+                return AuthOutput(
+                    token: token,
+                    isAdmin: user.isAdmin,
+                    isCharity: user.isCharity)
+        }
+    }    
 }

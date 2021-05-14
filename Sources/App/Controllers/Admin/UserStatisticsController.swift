@@ -6,38 +6,36 @@
 //
 
 import Vapor
-import FluentPostgreSQL
+import Fluent
+import FluentPostgresDriver
 
 final class UserStatisticsController {
     
-    func usersActiveList(_ req: Request) throws -> Future<[UserStatistic]> {
+    func usersActiveList(_ req: Request) throws -> EventLoopFuture<[UserStatistic]> {
         
-        return try req.content.decode(Inputs.UserQuery.self).flatMap({ queryParam in
-            return User.allActiveUsers(on: req, queryParam: queryParam).flatMap({ users in
-                return self.getUserStatistics(req: req, users: users)
-            })
-        })
-        
+        let queryParam = try req.content.decode(Inputs.UserQuery.self)
+        return User.allActiveUsers(on: req.db, queryParam: queryParam).flatMap { users in
+            return self.getUserStatistics(req: req, users: users)
+        }
     }
     
-    func usersBlockedList(_ req: Request) throws -> Future<[UserStatistic]> {
-        return try req.content.decode(Inputs.UserQuery.self).flatMap({ queryParam in
-            return User.allBlockedUsers(on: req, queryParam: queryParam).flatMap({ users in
-                return self.getUserStatistics(req: req, users: users)
-            })
-        })
+    func usersBlockedList(_ req: Request) throws -> EventLoopFuture<[UserStatistic]> {
         
+        let queryParam = try req.content.decode(Inputs.UserQuery.self)
+        return User.allBlockedUsers(on: req.db, queryParam: queryParam).flatMap { users in
+            return self.getUserStatistics(req: req, users: users)
+        }
     }
     
-    func userStatistics(_ req: Request) throws -> Future<UserStatistic> {
-        return try req.parameters.next(User.self).flatMap({ user in
+    func userStatistics(_ req: Request) throws -> EventLoopFuture<UserStatistic> {
+        return User.getParameter(on: req).flatMap({ user in
             return self.getUserStatistic(req: req, user: user)
         })
     }
     
-    func usersChatBlockedList(_ req: Request) throws -> Future<[UserStatistic]> {
+    func usersChatBlockedList(_ req: Request) throws -> EventLoopFuture<[UserStatistic]> {
         
-        return User.allChatBlockedUsers(on: req).map { list in
+        return User.allChatBlockedUsers(on: req.db).map { list in
             return list.map { $0.user }
         }.flatMap({ users in
             return self.getUserStatistics(req: req, users: users)
@@ -47,9 +45,9 @@ final class UserStatisticsController {
 
 extension UserStatisticsController {
     
-    func getUserStatistics(req:Request,users:[User])->Future<[UserStatistic]> {
+    func getUserStatistics(req:Request,users:[User])->EventLoopFuture<[UserStatistic]> {
         
-        var list = [Future<UserStatistic>]()
+        var list = [EventLoopFuture<UserStatistic>]()
 
         for user in users {
             let userFuture = self.getUserStatistic(req: req, user: user)
@@ -60,36 +58,48 @@ extension UserStatisticsController {
         return future.futureResult()
     }
     
-    func getUserStatistic(req:Request,user:User)->Future<UserStatistic> {
-        return user.getIdFuture(req: req).flatMap({ userId in
-            
-            let registeredGifts = Gift.query(on: req, withSoftDeleted: true)
-                .filter(\.userId == userId).count()
-            let rejectedGifts = Gift.query(on: req, withSoftDeleted: true)
-                .filter(\.userId == userId)
-                .filter(\.isRejected == true).count()
-            
-            let donatedGifts = try user.gifts.query(on: req).filter(\.donatedToUserId != nil).count()
-            let receivedGifts = try user.receivedGifts.query(on: req).count()
-            
-            let blockedChats = ChatBlock.query(on: req).filter(\ChatBlock.blockedUserId == userId).count()
-            
-            return self.getUserStatistic(user: user,
-                                         registeredGifts: registeredGifts,
-                                         rejectedGifts: rejectedGifts,
-                                         donatedGifts: donatedGifts,
-                                         receivedGifts: receivedGifts,
-                                         blockedChats: blockedChats)
-        })
+    func getUserStatistic(req:Request,user:User)->EventLoopFuture<UserStatistic> {
+        
+        guard let userId = user.id else {
+            return req.db.makeFailedFuture(.nilUserId)
+        }
+        
+        let registeredGifts = Gift.query(on: req.db)
+            .withDeleted()
+            .filter(\.$user.$id == userId)
+            .count()
+        let rejectedGifts = Gift.query(on: req.db)
+            .withDeleted()
+            .filter(\.$user.$id == userId)
+            .filter(\.$isRejected == true)
+            .count()
+        
+        let donatedGifts = user.$gifts.query(on: req.db)
+            .filter(\.$donatedToUser.$id != nil)
+            .count()
+        let receivedGifts = user.$receivedGifts.query(on: req.db)
+            .count()
+        
+        let blockedChats = ChatBlock.query(on: req.db)
+            .filter(\.$blockedUserId == userId)
+            .count()
+        
+        return self.getUserStatistic(user: user,
+                                     registeredGifts: registeredGifts,
+                                     rejectedGifts: rejectedGifts,
+                                     donatedGifts: donatedGifts,
+                                     receivedGifts: receivedGifts,
+                                     blockedChats: blockedChats)
+        
     }
     
     func getUserStatistic(user:User,
-                          registeredGifts:Future<Int>,
-                          rejectedGifts:Future<Int>,
-                          donatedGifts:Future<Int>,
-                          receivedGifts:Future<Int>,
-                          blockedChats:Future<Int>
-        )->Future<UserStatistic> {
+                          registeredGifts:EventLoopFuture<Int>,
+                          rejectedGifts:EventLoopFuture<Int>,
+                          donatedGifts:EventLoopFuture<Int>,
+                          receivedGifts:EventLoopFuture<Int>,
+                          blockedChats:EventLoopFuture<Int>
+        )->EventLoopFuture<UserStatistic> {
         let userStatistic = UserStatistic(user: user)
         return registeredGifts.flatMap { userStatistic.registeredGifts = $0
             return rejectedGifts.flatMap({ userStatistic.rejectedGifts = $0

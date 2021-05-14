@@ -9,23 +9,20 @@ import Vapor
 
 final class UserPhoneVisibilitySettingController {
     
-    func getOwnerSetting(_ req: Request) throws -> Future<PhoneVisibilitySettingIO> {
-        let auth = try req.requireAuthenticated(User.self)
-        return req.future(PhoneVisibilitySettingIO(user: auth))
+    func getOwnerSetting(_ req: Request) throws -> PhoneVisibilitySettingIO {
+        let auth = try req.auth.require(User.self)
+        return PhoneVisibilitySettingIO(user: auth)
     }
     
-    func getUserSetting(_ req: Request) throws -> Future<PhoneVisibilitySettingIO> {
-        let userId = try req.parameters.next(Int.self)
-        return User.get(userId, on: req).map { user in
+    func getUserSetting(_ req: Request) throws -> EventLoopFuture<PhoneVisibilitySettingIO> {
+        return User.getParameter(on: req).map { user in
             return PhoneVisibilitySettingIO(user: user)
         }
     }
     
-    func set(_ req: Request) throws -> Future<HTTPStatus> {
-        let auth = try req.requireAuthenticated(User.self)
+    func set(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
+        let auth = try req.auth.require(User.self)
         let input = try req.content.decode(PhoneVisibilitySettingIO.self)
-        return input.flatMap { input in
-            return auth.setPhoneVisibility(setting: input.setting, on: req)
-        }
+        return auth.setPhoneVisibility(setting: input.setting, on: req.db)
     }
 }

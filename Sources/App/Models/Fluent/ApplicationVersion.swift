@@ -6,17 +6,35 @@
 //
 
 import Vapor
-import FluentPostgreSQL
+import Fluent
 
-final class ApplicationVersion: PostgreSQLModel {
+
+final class ApplicationVersion: Model {
+    
+    static let schema = "ApplicationVersion"
+    
+    @ID(key: .id)
     var id: Int?
+    
+    @Field(key: "platform")
     var platform: String
+    
+    @Field(key: "availableVersionName")
     var availableVersionName: String
+    
+    @Field(key: "availableVersionCode")
     var availableVersionCode: Int
+    
+    @Field(key: "requiredVersionName")
     var requiredVersionName: String
+    
+    @Field(key: "requiredVersionCode")
     var requiredVersionCode: Int
+    
+    @OptionalField(key: "downloadLink")
     var downloadLink: String?
     
+    init() {}
     
     init(platform: PlatformType, input: Inputs.ApplicationVersion) {
         self.platform = platform.rawValue
@@ -27,13 +45,13 @@ final class ApplicationVersion: PostgreSQLModel {
         self.downloadLink = input.downloadLink
     }
     
-    func update(input: Inputs.ApplicationVersion, on conn: DatabaseConnectable) -> Future<ApplicationVersion> {
+    func update(input: Inputs.ApplicationVersion, on conn: Database) -> EventLoopFuture<ApplicationVersion> {
         self.availableVersionName = input.availableVersionName
         self.availableVersionCode = input.availableVersionCode
         self.requiredVersionName = input.requiredVersionName
         self.requiredVersionCode = input.requiredVersionCode
         self.downloadLink = input.downloadLink
-        return save(on: conn)
+        return save(on: conn).transform(to: self)
     }
 }
 
@@ -43,23 +61,25 @@ enum PlatformType: String {
 }
 
 extension ApplicationVersion {
-    static func get(platform: PlatformType, on conn: DatabaseConnectable) -> Future<ApplicationVersion> {
-        return query(on: conn).filter(\.platform == platform.rawValue).first().map { item in
+    static func get(platform: PlatformType, on conn: Database) -> EventLoopFuture<ApplicationVersion> {
+        return query(on: conn)
+            .filter(\.$platform == platform.rawValue)
+            .first()
+            .flatMapThrowing { item in
             guard let item = item else {
                 throw Abort(.notFound)
             }
             return item
         }
     }
-    static func update(platform: PlatformType, input: Inputs.ApplicationVersion, on conn: DatabaseConnectable) -> Future<ApplicationVersion> {
+    static func update(platform: PlatformType, input: Inputs.ApplicationVersion, on conn: Database) -> EventLoopFuture<ApplicationVersion> {
         return get(platform: platform, on: conn).flatMap { item in
             return item.update(input: input, on: conn)
         }
     }
 }
 
-extension ApplicationVersion : Migration {}
+//extension ApplicationVersion : Migration {}
 
 extension ApplicationVersion : Content {}
 
-extension ApplicationVersion : Parameter {}

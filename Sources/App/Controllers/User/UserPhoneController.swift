@@ -9,33 +9,36 @@ import Vapor
 
 final class UserPhoneController {
     
-    func getPhoneNumber(_ req: Request) throws -> Future<Outputs.UserPhoneNumber> {
+    func getPhoneNumber(_ req: Request) throws -> EventLoopFuture<Outputs.UserPhoneNumber> {
         
-        let authId = try req.requireAuthenticated(User.self).getId()
+        let authId = try req.auth.require(User.self).getId()
         
-        return try getUserIfPhoneNumberIsAccessible(req).flatMap { user in
-            guard let user = user else {
-                throw Abort(.phoneNumberIsNotAccessible)
-            }
-            
-            let log = try PhoneNumberSeenLog(
-                fromUserId: authId,
-                seenUserId: user.getId(),
-                seenPhoneNumber: user.phoneNumber)
-            
-            let output = Outputs.UserPhoneNumber(phoneNumber: user.phoneNumber)
-            
-            return log.create(on: req).transform(to: output)
+        return try getUserIfPhoneNumberIsAccessible(req)
+            .unwrap(or: Abort(.phoneNumberIsNotAccessible))
+            .flatMap { user in
+                
+                guard let userId = user.id else {
+                    return req.db.makeFailedFuture(.nilUserId)
+                }
+                
+                let log = PhoneNumberSeenLog(
+                    fromUserId: authId,
+                    seenUserId: userId,
+                    seenPhoneNumber: user.phoneNumber)
+                
+                let output = Outputs.UserPhoneNumber(phoneNumber: user.phoneNumber)
+                
+                return log.create(on: req.db)
+                    .transform(to: output)
         }
     }
     
-    private func getUserIfPhoneNumberIsAccessible(_ req: Request) throws -> Future<User?> {
-        let auth = try req.requireAuthenticated(User.self)
+    private func getUserIfPhoneNumberIsAccessible(_ req: Request) throws -> EventLoopFuture<User?> {
+        let auth = try req.auth.require(User.self)
         let isAdmin = auth.isAdmin
         let isCharity = auth.isCharity
-        let userId = try req.parameters.next(Int.self)
         
-        return User.get(userId, on: req).map { user in
+        return User.getParameter(on: req).map { user in
             
             let isPhoneVisibleForAll = user.isPhoneVisibleForAll ?? false
             let isPhoneVisibleForCharities = user.isPhoneVisibleForCharities ?? false

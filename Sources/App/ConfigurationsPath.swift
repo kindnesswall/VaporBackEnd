@@ -74,18 +74,19 @@ struct CertificatesPath: AppDirectoryDetector {
     }
     
     enum FileType {
-        case apns
+//        case apns(APNSFileType)
         case firebase
         
         var name: String {
             switch self {
-            case .apns:
-                return "aps_development.pem"
             case .firebase:
                 return "firebase.json"
             }
         }
     }
+    
+//    enum APNSFileType {
+//    }
     
 }
 

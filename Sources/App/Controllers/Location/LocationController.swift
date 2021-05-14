@@ -10,35 +10,35 @@ import Vapor
 
 final class LocationController {
     
-    func getCountries(_ req: Request) throws -> Future<[Country]> {
-        return Country.query(on: req)
-            .sort(\.sortIndex, .ascending)
-            .sort(\.id, .ascending)
+    func getCountries(_ req: Request) throws -> EventLoopFuture<[Country]> {
+        return Country.query(on: req.db)
+            .sort(\.$sortIndex, .ascending)
+            .sort(\.$id, .ascending)
             .all()
     }
     
-    func getProvinces(_ req: Request) throws -> Future<[Province]> {
-        return try req.parameters.next(Country.self).flatMap { country in
-            return try country.provinces.query(on: req)
-                .sort(\.sortIndex, .ascending)
-                .sort(\.id, .ascending)
+    func getProvinces(_ req: Request) throws -> EventLoopFuture<[Province]> {
+        return Country.getParameter(on: req).flatMap { country in
+            return country.$provinces.query(on: req.db)
+                .sort(\.$sortIndex, .ascending)
+                .sort(\.$id, .ascending)
                 .all()
         }
     }
     
-    func getCities(_ req: Request) throws -> Future<[City]> {
-        return try req.parameters.next(Province.self).flatMap({ province in
-            return try province.cities.query(on: req)
-                .sort(\.sortIndex, .ascending)
-                .sort(\.id, .ascending)
+    func getCities(_ req: Request) throws -> EventLoopFuture<[City]> {
+        return Province.getParameter(on: req).flatMap({ province in
+            return province.$cities.query(on: req.db)
+                .sort(\.$sortIndex, .ascending)
+                .sort(\.$id, .ascending)
                 .all() 
         })
     }
-    func getRegions(_ req: Request) throws -> Future<[Region]> {
-        return try req.parameters.next(City.self).flatMap({ city in
-            return try city.regions.query(on: req)
-                .sort(\.sortIndex, .ascending)
-                .sort(\.id, .ascending)
+    func getRegions(_ req: Request) throws -> EventLoopFuture<[Region]> {
+        return City.getParameter(on: req).flatMap({ city in
+            return city.$regions.query(on: req.db)
+                .sort(\.$sortIndex, .ascending)
+                .sort(\.$id, .ascending)
                 .all()
         })
     }

@@ -6,24 +6,32 @@
 //
 
 import Vapor
-import FluentPostgreSQL
+import Fluent
 
-
-final class Province: PostgreSQLModel {
+final class Province: Model {
+    
+    static let schema = "Province"
+    
+    @ID(key: .id)
     var id:Int?
+    
+    @Field(key: "name")
     var name:String
-    var country_id: Int
+    
+    @Parent(key: "country_id")
+    var country: Country
+    
+    @OptionalField(key: "sortIndex")
     var sortIndex:Int?
+    
+    @Children(for: \.$province)
+    var cities: [City]
+    
+    init() {}
 }
 
-extension Province {
-    var cities : Children<Province,City> {
-        return children(\.province_id)
-    }
-}
-
-extension Province : Migration {}
+//extension Province : Migration {}
 
 extension Province : Content {}
 
-extension Province : Parameter {}
+

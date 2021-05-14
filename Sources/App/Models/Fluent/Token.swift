@@ -6,21 +6,36 @@
 //
 
 import Vapor
-import FluentPostgreSQL
-import Authentication
+import Fluent
 
-final class Token: PostgreSQLModel {
-    var id: Int?
-    var token: String
-    var userID: User.ID
+final class Token: Model {
     
+    static let schema = "Token"
+    
+    @ID(key: .id)
+    var id: Int?
+    
+    @Field(key: "token")
+    var token: String
+    
+    @Parent(key: "userID")
+    var user: User
+    
+    
+    @Timestamp(key: "createdAt", on: .create)
     var createdAt: Date?
+    
+    @Timestamp(key: "updatedAt", on: .update)
     var updatedAt: Date?
+    
+    @Timestamp(key: "deletedAt", on: .delete)
     var deletedAt: Date?
     
-    init(token: String, userID: User.ID) {
+    init() {}
+    
+    init(token: String, userID: User.IDValue) {
         self.token = token
-        self.userID = userID
+        self.$user.id = userID
     }
 
 }
@@ -35,32 +50,23 @@ extension Token {
 }
 
 extension Token {
-    static let createdAtKey: TimestampKey? = \.createdAt
-    static let updatedAtKey: TimestampKey? = \.updatedAt
-    static let deletedAtKey: TimestampKey? = \.deletedAt
-} 
-
-extension Token {
-    static func generate(for user: User) throws -> Token {
-        let random = try CryptoRandom().generateData(count: 16)
-        return try Token(token: random.base64EncodedString(), userID: user.requireID())
+    static func generate(for userId: Int) -> Token {
+        return Token(
+            token: [UInt8].random(count: 16).base64,
+            userID: userId)
     }
 }
 
-extension Token: Authentication.Token {
-    typealias UserType = User
-    
-    static var userIDKey: UserIDKey{
-        return \Token.userID
-    }
-    
-    static var tokenKey: TokenKey {
-        return \Token.token
+extension Token: ModelTokenAuthenticatable {
+    static let valueKey = \Token.$token
+    static let userKey = \Token.$user
+
+    var isValid: Bool {
+        true
     }
 }
 
 
-extension Token : Migration {}
+//extension Token : Migration {}
 extension Token : Content {}
-extension Token : Parameter {}
 

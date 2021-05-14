@@ -9,6 +9,6 @@ import Vapor
 
 extension Request {
     func getAuthId() throws -> Int {
-        return try requireAuthenticated(User.self).getId()
+        return try auth.require(User.self).getId()
     }
 }

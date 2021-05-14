@@ -10,26 +10,26 @@ import Vapor
 
 final class CategoryController {
 
-    func index(_ req: Request) throws -> Future<[Category.Output]> {
+    func index(_ req: Request) throws -> EventLoopFuture<[Category.Output]> {
         
-        return try req.content.decode(Inputs.Country.self).flatMap { input in
+        let input = try req.content.decode(Inputs.Country.self)
+        
+        return Country.findOrFail(
+            input.countryId,
+            on: req.db,
+            error: .countryNotFound).flatMap { country in
             
-            return Country.find(input.countryId, on: req).flatMap { country in
-                
-                guard let country = country else {
-                    throw Abort(.countryNotFound)
-                }
-                
-                return self.localizedCategories(req: req, country: country)
-            }
+            return self.localizedCategories(req: req, country: country)
         }
     }
     
-    private func localizedCategories(req: Request, country: Country) -> Future<[Category.Output]>  {
-        return Category.query(on: req).all().map { categories in
-            categories.map { category in
-                return category.localized(country: country)
-            }
+    private func localizedCategories(req: Request, country: Country) -> EventLoopFuture<[Category.Output]>  {
+        return Category.query(on: req.db)
+            .all()
+            .map { categories in
+                categories.map { category in
+                    return category.localized(country: country)
+                }
         }
     }
     

@@ -11,21 +11,21 @@ final class LogMiddleware: Middleware {
     
     let logDirectory = LogDirectory()
     
-    func respond(to request: Request, chainingTo next: Responder) throws -> EventLoopFuture<Response> {
+    func respond(to request: Request, chainingTo next: Responder) -> EventLoopFuture<Response> {
         
         let log = getLog(request: request)
         try? log.appendToURL(fileURL: logDirectory.filePath)
         
-        return try next.respond(to: request)
+        return next.respond(to: request)
     }
     
     private func getLog(request: Request) -> String {
         
-        let method = request.http.method
-        let url = request.http.url
+        let method = request.method
+        let url = request.url
         let time = Date().description
-        let ip = request.http.remotePeer.hostname ?? ""
-        let user = try? request.requireAuthenticated(User.self)
+        let ip = request.remoteAddress?.hostname ?? ""
+        let user = try? request.auth.require(User.self)
         let userId = user?.id?.description ?? "Guest"
         let spacer = "    "
         

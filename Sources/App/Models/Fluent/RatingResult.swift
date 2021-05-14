@@ -6,17 +6,34 @@
 //
 
 import Vapor
-import FluentPostgreSQL
+import Fluent
 
-final class RatingResult: PostgreSQLModel {
+final class RatingResult: Model {
+    
+    static let schema = "RatingResult"
+    
+    @ID(key: .id)
     var id: Int?
+    
+    @Field(key: "reviewedId")
     var reviewedId: Int
+    
+    @Field(key: "averageRate")
     var averageRate: Double
+    
+    @Field(key: "votersCount")
     var votersCount: Int
     
+    @Timestamp(key: "createdAt", on: .create)
     var createdAt: Date?
+    
+    @Timestamp(key: "updatedAt", on: .update)
     var updatedAt: Date?
+    
+    @Timestamp(key: "deletedAt", on: .delete)
     var deletedAt: Date?
+    
+    init() {}
     
     init(reviewedId: Int, averageRate: AverageRate) {
         self.reviewedId = reviewedId
@@ -26,13 +43,7 @@ final class RatingResult: PostgreSQLModel {
 }
 
 extension RatingResult {
-    static let createdAtKey: TimestampKey? = \.createdAt
-    static let updatedAtKey: TimestampKey? = \.updatedAt
-    static let deletedAtKey: TimestampKey? = \.deletedAt
-}
-
-extension RatingResult {
-    static func set(reviewedId: Int, averageRate: AverageRate, on conn: DatabaseConnectable) -> Future<HTTPStatus>  {
+    static func set(reviewedId: Int, averageRate: AverageRate, on conn: Database) -> EventLoopFuture<HTTPStatus>  {
         
         let input = RatingResult(reviewedId: reviewedId, averageRate: averageRate)
         return _findOrCreate(input: input, on: conn).flatMap { item in
@@ -45,27 +56,27 @@ extension RatingResult {
         }
     }
     
-    static func get(reviewedId: Int, on conn: DatabaseConnectable) -> Future<RatingResult?> {
+    static func get(reviewedId: Int, on conn: Database) -> EventLoopFuture<RatingResult?> {
         return _findQuery(reviewedId: reviewedId, on: conn)
             .first()
     }
 }
 
 extension RatingResult: FindOrCreatable {
-    static func _findQuery(input: RatingResult, on conn: DatabaseConnectable) -> QueryBuilder<PostgreSQLDatabase, RatingResult> {
+    static func _findQuery(input: RatingResult, on conn: Database) -> QueryBuilder<RatingResult> {
         
         return _findQuery(reviewedId: input.reviewedId, on: conn)
     }
     
-    static func _findQuery(reviewedId: Int, on conn: DatabaseConnectable) -> QueryBuilder<PostgreSQLDatabase, RatingResult> {
+    static func _findQuery(reviewedId: Int, on conn: Database) -> QueryBuilder<RatingResult> {
         
         return query(on: conn)
-            .filter(\.reviewedId == reviewedId)
+            .filter(\.$reviewedId == reviewedId)
     }
 }
 
-extension RatingResult : Migration {}
+//extension RatingResult : Migration {}
 
 extension RatingResult : Content {}
 
-extension RatingResult : Parameter {}
+

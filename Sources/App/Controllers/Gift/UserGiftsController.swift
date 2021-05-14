@@ -6,62 +6,86 @@
 //
 
 import Vapor
-import FluentPostgreSQL
+import Fluent
+import FluentPostgresDriver
 
 final class UserGiftsController {
     
-    func registeredGifts(_ req: Request) throws -> Future<[Gift]> {
+    func registeredGifts(_ req: Request) throws -> EventLoopFuture<[Gift]> {
         
-        
-        let auth = try req.requireAuthenticated(User.self)
+        let auth = try req.auth.require(User.self)
         let isAdmin = auth.isAdmin
-        let userId = try req.parameters.next(Int.self)
-        let isOwner = (auth.id == userId)
+        let userId = try req.requireIDParameter()
+        let isOwner = auth.id == userId
+        let requestInput = try req.content.decode(RequestInput.self)
         
-        return User.get(userId, withSoftDeleted: isAdmin, on: req).flatMap { user in
-            
-            return try req.content.decode(RequestInput.self).flatMap { requestInput in
+        return User.findOrFail(
+            userId,
+            withSoftDeleted: isAdmin,
+            on: req.db).flatMap { user in
                 
-                let query = Gift.query(on: req, withSoftDeleted: (isAdmin || isOwner))
-                .filter(\.userId == userId)
+                let query = Gift.query(on: req.db)
+                    .filter(\.$user.$id == userId)
                 
-                if (isOwner && !isAdmin) {
-                    query.filter(\.isDeleted == false)
+                if isAdmin || isOwner {
+                    query.withDeleted()
                 }
                 
-                return Gift.getGiftsWithRequestFilter(query: query, requestInput: requestInput,onlyUndonatedGifts: true, onlyReviewedGifts: !(isAdmin || isOwner))
-            }
+                if isOwner && !isAdmin {
+                    query.filter(\.$isDeleted == false)
+                }
+                
+                return Gift.getGiftsWithRequestFilter(
+                    query: query,
+                    requestInput: requestInput,
+                    onlyUndonatedGifts: true,
+                    onlyReviewedGifts: !(isAdmin || isOwner))
         }
         
     }
     
-    func donatedGifts(_ req: Request) throws -> Future<[Gift]> {
+    func donatedGifts(_ req: Request) throws -> EventLoopFuture<[Gift]> {
         
-        let auth = try req.requireAuthenticated(User.self)
+        let auth = try req.auth.require(User.self)
         let isAdmin = auth.isAdmin
-        let userId = try req.parameters.next(Int.self)
+        let userId = try req.requireIDParameter()
+        let requestInput = try req.content.decode(RequestInput.self)
         
-        return User.get(userId, withSoftDeleted: isAdmin, on: req).flatMap { user in
-            
-            return try req.content.decode(RequestInput.self).flatMap { requestInput in
-                let query = try user.gifts.query(on: req)
-                query.filter(\.donatedToUserId != nil)
-                return Gift.getGiftsWithRequestFilter(query: query, requestInput: requestInput,onlyUndonatedGifts: false, onlyReviewedGifts: true)
-            }
+        return User.findOrFail(
+            userId,
+            withSoftDeleted: isAdmin,
+            on: req.db).flatMap { user in
+                
+                let query = user.$gifts.query(on: req.db)
+                query.filter(\.$donatedToUser.$id != nil)
+                return Gift.getGiftsWithRequestFilter(
+                    query: query,
+                    requestInput: requestInput,
+                    onlyUndonatedGifts: false,
+                    onlyReviewedGifts: true)
+                
         }
     }
     
-    func receivedGifts(_ req: Request) throws -> Future<[Gift]> {
+    func receivedGifts(_ req: Request) throws -> EventLoopFuture<[Gift]> {
         
-        let auth = try req.requireAuthenticated(User.self)
+        let auth = try req.auth.require(User.self)
         let isAdmin = auth.isAdmin
-        let userId = try req.parameters.next(Int.self)
+        let userId = try req.requireIDParameter()
+        let requestInput = try req.content.decode(RequestInput.self)
         
-        return User.get(userId, withSoftDeleted: isAdmin, on: req).flatMap { user in
-            return try req.content.decode(RequestInput.self).flatMap { requestInput in
-                let query = try user.receivedGifts.query(on: req)
-                return Gift.getGiftsWithRequestFilter(query: query, requestInput: requestInput,onlyUndonatedGifts: false, onlyReviewedGifts: true)
-            }
+        return User.findOrFail(
+            userId,
+            withSoftDeleted: isAdmin,
+            on: req.db).flatMap { user in
+                
+                let query = user.$receivedGifts.query(on: req.db)
+                return Gift.getGiftsWithRequestFilter(
+                    query: query,
+                    requestInput: requestInput,
+                    onlyUndonatedGifts: false,
+                    onlyReviewedGifts: true)
+                
         }
     }
     

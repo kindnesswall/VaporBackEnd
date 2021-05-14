@@ -20,7 +20,7 @@ class Configuration {
 
 class MainConfiguration: Codable {
     let stage: AppStage
-    let apiRoute: String
+    let apiPath: [String]
     let domainAddress: URL
     let hostName: String
     let hostPort: Int
@@ -55,9 +55,8 @@ enum SMSTemplatesType: String, Codable {
 }
 
 class APNSConfiguration: Codable {
-    let apnsURL: String
-    let certPass: String
     let bundleId: String
+    let environment: String
 }
 
 class FirebaseConfiguration: Codable {

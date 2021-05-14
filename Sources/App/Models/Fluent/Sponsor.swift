@@ -6,40 +6,49 @@
 //
 
 import Vapor
-import FluentPostgreSQL
+import Fluent
 
-final class Sponsor: PostgreSQLModel {
+final class Sponsor: Model {
+    
+    static let schema = "Sponsor"
+    
+    @ID(key: .id)
     var id: Int?
+    
+    @Field(key: "name")
     var name: String
+    
+    @OptionalField(key: "image")
     var image: String?
+    
+    @OptionalField(key: "description")
     var description: String?
+    
+    @OptionalField(key: "estimatedDonation")
     var estimatedDonation: Double?
     
+    @Timestamp(key: "createdAt", on: .create)
     var createdAt: Date?
+    
+    @Timestamp(key: "updatedAt", on: .update)
     var updatedAt: Date?
+    
+    @Timestamp(key: "deletedAt", on: .delete)
     var deletedAt: Date?
     
-    func update(input: Sponsor, on req: Request) -> Future<HTTPStatus> {
+    init() {}
+    
+    func update(input: Sponsor, on req: Request) -> EventLoopFuture<HTTPStatus> {
         self.name = input.name
         self.image = input.image
         self.description = input.description
         self.estimatedDonation = input.estimatedDonation
-        return update(on: req).transform(to: .ok)
+        return update(on: req.db).transform(to: .ok)
     }
 
 }
 
-extension Sponsor {
-    static func get(_ id: Int, on conn: DatabaseConnectable) -> Future<Sponsor> {
-        return find(id, on: conn).unwrap(or: Abort(.notFound))
-    }
-}
 
-extension Sponsor {
-    static let createdAtKey: TimestampKey? = \.createdAt
-    static let updatedAtKey: TimestampKey? = \.updatedAt
-    static let deletedAtKey: TimestampKey? = \.deletedAt
-}
 
 extension Sponsor {
     var isValid: Bool {
@@ -47,9 +56,9 @@ extension Sponsor {
     }
 }
 
-extension Sponsor : Migration {}
+//extension Sponsor : Migration {}
 
 extension Sponsor : Content {}
 
-extension Sponsor : Parameter {}
+
 

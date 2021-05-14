@@ -9,26 +9,18 @@ import Vapor
 
 final class CharityController {
     
-    func getCharityList(_ req: Request) throws -> Future<[Charity]> {
-        
-        return Charity.getAllCharities(conn: req).map({ result in
-            var list = [Charity]()
-            for each in result {
-                list.append(each.1)
-            }
-            return list
-        })
-        
+    func getCharityList(_ req: Request) throws -> EventLoopFuture<[Charity]> {
+        return Charity.getAllCharities(conn: req.db)
     }
     
-    func getCharityOfUser(_ req: Request) throws -> Future<Charity> {
+    func getCharityOfUser(_ req: Request) throws -> EventLoopFuture<Charity> {
         
-        let userId = try req.parameters.next(Int.self)
-        return User.get(userId, on: req).flatMap { user in
+        let userId = try req.requireIDParameter()
+        return User.findOrFail(userId, on: req.db).flatMap { user in
             guard user.isCharity else {
-                throw Abort(.userIsNotCharity)
+                return req.db.makeFailedFuture(.userIsNotCharity)
             }
-            return try Charity.get(userId: userId, on: req)
+            return Charity.get(userId: userId, on: req.db)
         }
     }
 }

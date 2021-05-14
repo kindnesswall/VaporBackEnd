@@ -7,34 +7,75 @@
 //
 
 import Vapor
-import FluentPostgreSQL
+import Fluent
 
-final class Charity: PostgreSQLModel {
+final class Charity: Model {
+    
+    static let schema = "Charity"
+    
+    @ID(key: .id)
     var id: Int?
+    
+    @OptionalField(key: "userId")
     var userId:Int?
-    var isRejected:Bool? = false
+    
+    @OptionalField(key: "isRejected")
+    var isRejected:Bool?
+    
+    @OptionalField(key: "rejectReason")
     var rejectReason: String?
     
+    @Field(key: "name")
     var name: String
+    
+    @OptionalField(key: "imageUrl")
     var imageUrl: String?
+    
+    @OptionalField(key: "registerId")
     var registerId: String?
+    
+    @OptionalField(key: "registerDate")
     var registerDate: String?
+    
+    @OptionalField(key: "address")
     var address: String?
+    
+    @OptionalField(key: "telephoneNumber")
     var telephoneNumber: String?
+    
+    @OptionalField(key: "mobileNumber")
     var mobileNumber: String?
+    
+    @OptionalField(key: "website")
     var website: String?
+    
+    @OptionalField(key: "email")
     var email: String?
+    
+    @OptionalField(key: "instagram")
     var instagram: String?
+    
+    @OptionalField(key: "telegram")
     var telegram: String?
+    
+    @OptionalField(key: "description")
     var description: String?
     
+    @Timestamp(key: "createdAt", on: .create)
     var createdAt: Date?
+    
+    @Timestamp(key: "updatedAt", on: .update)
     var updatedAt: Date?
+    
+    @Timestamp(key: "deletedAt", on: .delete)
     var deletedAt: Date?
+    
+    init() {}
     
     init(input: Input, userId:Int) {
         
         self.userId = userId
+        self.isRejected = false
         
         self.name = input.name
         self.imageUrl = input.imageUrl
@@ -87,59 +128,51 @@ final class Charity: PostgreSQLModel {
 }
 
 extension Charity {
-    static let createdAtKey: TimestampKey? = \.createdAt
-    static let updatedAtKey: TimestampKey? = \.updatedAt
-    static let deletedAtKey: TimestampKey? = \.deletedAt
-}
-
-extension Charity {
     
-    static func getAllCharities(conn:DatabaseConnectable) -> Future<[(User,Charity)]> {
-        return User.query(on: conn)
-            .filter(\.isCharity == true)
-            .join(\Charity.userId, to: \User.id)
-            .filter(\Charity.deletedAt == nil)
-            .alsoDecode(Charity.self)
+    static func getAllCharities(conn:Database) -> EventLoopFuture<[Charity]> {
+        return Charity.query(on: conn)
+            .filter(\.$deletedAt == nil) //TODO: Is it needed?
+            .join(User.self, on: \Charity.$userId == \User.$id)
+            .filter(User.self, \.$isCharity == true)
             .all()
     }
     
-    static func getCharityReviewList(conn:DatabaseConnectable) -> Future<[Charity]> {
+    static func getCharityReviewList(conn:Database) -> EventLoopFuture<[Charity]> {
         return Charity.query(on: conn)
-            .filter(\.isRejected == false)
-            .join(\User.id, to: \Charity.userId)
-            .filter(\User.deletedAt == nil)
-            .filter(\User.isCharity == false)
+            .filter(\.$isRejected == false)
+            .join(User.self, on: \Charity.$userId == \User.$id)
+            .filter(User.self, \.$deletedAt == nil)
+            .filter(User.self, \.$isCharity == false)
             .all()
     }
     
-    static func getCharityRejectedList(conn:DatabaseConnectable) -> Future<[Charity]> {
+    static func getCharityRejectedList(conn:Database) -> EventLoopFuture<[Charity]> {
         return Charity.query(on: conn)
-            .filter(\.isRejected == true)
-            .join(\User.id, to: \Charity.userId)
-            .filter(\User.deletedAt == nil)
+            .filter(\.$isRejected == true)
+            .join(User.self, on: \Charity.$userId == \User.$id)
+            .filter(User.self, \.$deletedAt == nil)
             .all()
     }
 }
 
 extension Charity {
-    static func find(userId: Int, on conn: DatabaseConnectable) -> Future<Charity?> {
-        return Charity.query(on: conn).filter(\.userId == userId).first()
+    static func find(userId: Int, on conn: Database) -> EventLoopFuture<Charity?> {
+        return Charity.query(on: conn).filter(\.$userId == userId).first()
     }
     
-    static func hasFound(userId: Int, on conn: DatabaseConnectable) -> Future<Bool> {
+    static func hasFound(userId: Int, on conn: Database) -> EventLoopFuture<Bool> {
         return find(userId: userId, on: conn).map { $0 != nil }
     }
     
-    static func get(userId: Int , on conn: DatabaseConnectable) throws -> Future<Charity> {
+    static func get(userId: Int , on conn: Database) -> EventLoopFuture<Charity> {
         return find(userId: userId, on: conn).unwrap(or: Abort(.charityInfoNotFound))
     }
 }
 
-extension Charity : Migration {}
+//extension Charity : Migration {}
 
 extension Charity : Content {}
 
-extension Charity : Parameter {}
 
 
 final class Charity_Status: Content {

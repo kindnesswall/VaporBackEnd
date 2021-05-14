@@ -59,5 +59,7 @@ protocol AppDirectoryDetector {
     static var appDirectory: String { get }
 }
 extension AppDirectoryDetector {
-    static var appDirectory: String { return DirectoryConfig.detect().workDir }
+    static var appDirectory: String {
+        return DirectoryConfiguration.detect().workingDirectory
+    }
 }

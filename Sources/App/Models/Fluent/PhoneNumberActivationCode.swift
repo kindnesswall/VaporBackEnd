@@ -6,51 +6,67 @@
 //
 
 import Vapor
-import FluentPostgreSQL
+import Fluent
 
-final class PhoneNumberActivationCode: PostgreSQLModel {
+final class PhoneNumberActivationCode: Model {
+    
+    static let schema = "PhoneNumberActivationCode"
+    
+    @ID(key: .id)
     var id:Int?
+    
+    @Field(key: "phoneNumber")
     var phoneNumber:String
+    
+    @OptionalField(key: "activationCode")
     var activationCode:String?
+    
+    @Timestamp(key: "createdAt", on: .create)
+    var createdAt: Date?
+    
+    @Timestamp(key: "updatedAt", on: .update)
+    var updatedAt: Date?
+    
+    @Timestamp(key: "deletedAt", on: .delete)
+    var deletedAt: Date?
+    
+    init() {}
     
     init(phoneNumber:String, activationCode:String?) {
         self.phoneNumber = phoneNumber
         self.activationCode = activationCode
     }
     
-    var createdAt: Date?
-    var updatedAt: Date?
-    var deletedAt: Date?
 }
 
 extension PhoneNumberActivationCode {
     
-    static func find(req: Request, phoneNumber: String) -> Future<PhoneNumberActivationCode?> {
-        
-        return PhoneNumberActivationCode.query(on: req).filter(\.phoneNumber == phoneNumber).first()
+    static func find(req: Request, phoneNumber: String) -> EventLoopFuture<PhoneNumberActivationCode?> {
+        return query(on: req.db)
+            .filter(\.$phoneNumber == phoneNumber)
+            .first()
         
     }
     
-    static func check(req: Request, phoneNumber: String, activationCode: String) -> Future<HTTPStatus> {
-        
-        return PhoneNumberActivationCode.query(on: req).filter(\.phoneNumber == phoneNumber).filter(\.activationCode == activationCode).first().flatMap { item in
-            guard let item = item else {
-                throw Abort(.invalidActivationCode)
-            }
-            item.activationCode = nil
-            return item.save(on: req).transform(to: .ok)
+    static func check(req: Request, phoneNumber: String, activationCode: String) -> EventLoopFuture<HTTPStatus> {
+        return query(on: req.db)
+            .filter(\.$phoneNumber == phoneNumber)
+            .filter(\.$activationCode == activationCode)
+            .first()
+            .flatMap { item in
+                guard let item = item else {
+                    return req.db.makeFailedFuture(.invalidActivationCode)
+                }
+                item.activationCode = nil
+                return item
+                    .save(on: req.db)
+                    .transform(to: .ok)
         }
     }
 }
 
-extension PhoneNumberActivationCode {
-    static let createdAtKey: TimestampKey? = \.createdAt
-    static let updatedAtKey: TimestampKey? = \.updatedAt
-    static let deletedAtKey: TimestampKey? = \.deletedAt
-}
-
-extension PhoneNumberActivationCode : Migration {}
+//extension PhoneNumberActivationCode : Migration {}
 
 extension PhoneNumberActivationCode : Content {}
 
-extension PhoneNumberActivationCode : Parameter {}
+

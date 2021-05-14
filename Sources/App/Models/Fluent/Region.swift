@@ -6,21 +6,37 @@
 //
 
 import Vapor
-import FluentPostgreSQL
+import Fluent
 
-
-final class Region : PostgreSQLModel {
+final class Region : Model {
+    
+    static let schema = "Region"
+    
+    @ID(key: .id)
     var id:Int?
-    var city_id:Int
+    
+    @Parent(key: "city_id")
+    var city: City
+    
+    @Field(key: "name")
     var name:String
+    
+    @OptionalField(key: "latitude")
     var latitude:Double?
+    
+    @OptionalField(key: "longitude")
     var longitude:Double?
+    
+    @OptionalField(key: "sortIndex")
     var sortIndex:Int? 
+    
+    init() {}
+    
 }
 
 
-extension Region : Migration {}
+//extension Region : Migration {}
 
 extension Region : Content {}
 
-extension Region : Parameter {}
+

@@ -6,20 +6,43 @@
 //
 
 import Vapor
-import FluentPostgreSQL
+import Fluent
 
-final class UserPhoneNumberLog: PostgreSQLModel {
+final class UserPhoneNumberLog: Model {
+    
+    static let schema = "UserPhoneNumberLog"
+    
+    @ID(key: .id)
     var id:Int?
+    
+    @Field(key: "userId")
     var userId:Int
+    
+    @Field(key: "fromPhoneNumber")
     var fromPhoneNumber:String
+    
+    @Field(key: "toPhoneNumber")
     var toPhoneNumber:String
+    
+    @Field(key: "status")
     var status:String
+    
+    @OptionalField(key: "activationCode_from")
     var activationCode_from:String?
+    
+    @OptionalField(key: "activationCode_to")
     var activationCode_to:String?
     
+    @Timestamp(key: "createdAt", on: .create)
     var createdAt: Date?
+    
+    @Timestamp(key: "updatedAt", on: .update)
     var updatedAt: Date?
+    
+    @Timestamp(key: "deletedAt", on: .delete)
     var deletedAt: Date?
+    
+    init() {}
     
     init(userId: Int, fromPhoneNumber: String, toPhoneNumber: String, status: ChangeStatus) {
         
@@ -39,7 +62,7 @@ final class UserPhoneNumberLog: PostgreSQLModel {
         case completed
     }
     
-    func complete(on conn: DatabaseConnectable) -> Future<HTTPStatus> {
+    func complete(on conn: Database) -> EventLoopFuture<HTTPStatus> {
         activationCode_from = nil
         activationCode_to = nil
         setStatus(status: .completed)
@@ -55,7 +78,7 @@ final class UserPhoneNumberLog: PostgreSQLModel {
         return true
     }
     
-    func set(activationCode: ActivationCode, on conn: DatabaseConnectable) -> Future<HTTPStatus> {
+    func set(activationCode: ActivationCode, on conn: Database) -> EventLoopFuture<HTTPStatus> {
         activationCode_from = activationCode.from
         activationCode_to = activationCode.to
         return save(on: conn).transform(to: .ok)
@@ -86,31 +109,39 @@ final class UserPhoneNumberLog: PostgreSQLModel {
 
 extension UserPhoneNumberLog {
     
-    static func setActivationCode(req: Request, auth: User, toPhoneNumber: String, activationCode: ActivationCode) throws -> Future<HTTPStatus> {
+    static func setActivationCode(req: Request, auth: User, toPhoneNumber: String, activationCode: ActivationCode) -> EventLoopFuture<HTTPStatus> {
         
-        let futureItem = try findOrCreate(req: req, auth: auth, toPhoneNumber: toPhoneNumber)
+        let futureItem = findOrCreate(req: req, auth: auth, toPhoneNumber: toPhoneNumber)
         
         return futureItem.flatMap { item in
-            return item.set(activationCode: activationCode, on: req)
+            return item.set(activationCode: activationCode, on: req.db)
         }
     }
     
-    static func findOrCreate(req: Request, auth: User, toPhoneNumber: String) throws -> Future<UserPhoneNumberLog> {
+    static func findOrCreate(req: Request, auth: User, toPhoneNumber: String) -> EventLoopFuture<UserPhoneNumberLog> {
         
-        let requested = UserPhoneNumberLog(userId: try auth.getId(), fromPhoneNumber: auth.phoneNumber, toPhoneNumber: toPhoneNumber, status: .requested)
+        guard let authId = auth.id else {
+            return req.db.makeFailedFuture(.nilUserId)
+        }
         
-        return getLatest(phoneNumberLog: requested, conn: req).map { found in
+        let requested = UserPhoneNumberLog(userId: authId, fromPhoneNumber: auth.phoneNumber, toPhoneNumber: toPhoneNumber, status: .requested)
+        
+        return getLatest(phoneNumberLog: requested, conn: req.db).map { found in
             let phoneNumberLog = found ?? requested
             return phoneNumberLog
         }
         
     }
     
-    static func check(req: Request, auth: User, toPhoneNumber: String, activationCode: ActivationCode) throws ->  Future<UserPhoneNumberLog> {
+    static func check(req: Request, auth: User, toPhoneNumber: String, activationCode: ActivationCode) ->  EventLoopFuture<UserPhoneNumberLog> {
         
-        let requested = UserPhoneNumberLog(userId: try auth.getId(), fromPhoneNumber: auth.phoneNumber, toPhoneNumber: toPhoneNumber, status: .requested)
+        guard let authId = auth.id else {
+            return req.db.makeFailedFuture(.nilUserId)
+        }
         
-        return getLatest(phoneNumberLog: requested, conn: req).map { item in
+        let requested = UserPhoneNumberLog(userId: authId, fromPhoneNumber: auth.phoneNumber, toPhoneNumber: toPhoneNumber, status: .requested)
+        
+        return getLatest(phoneNumberLog: requested, conn: req.db).flatMapThrowing { item in
             
             guard let item = item else {
                 throw Abort(.invalidPhoneNumber)
@@ -126,24 +157,18 @@ extension UserPhoneNumberLog {
     }
     
     
-    static func getLatest(phoneNumberLog: UserPhoneNumberLog, conn:DatabaseConnectable) -> Future<UserPhoneNumberLog?> {
+    static func getLatest(phoneNumberLog: UserPhoneNumberLog, conn:Database) -> EventLoopFuture<UserPhoneNumberLog?> {
         return query(on: conn)
-            .filter(\.userId == phoneNumberLog.userId)
-            .filter(\.fromPhoneNumber == phoneNumberLog.fromPhoneNumber)
-            .filter(\.toPhoneNumber == phoneNumberLog.toPhoneNumber)
-            .filter(\.status == phoneNumberLog.status)
-        .sort(\.createdAt, .descending).first()
+            .filter(\.$userId == phoneNumberLog.userId)
+            .filter(\.$fromPhoneNumber == phoneNumberLog.fromPhoneNumber)
+            .filter(\.$toPhoneNumber == phoneNumberLog.toPhoneNumber)
+            .filter(\.$status == phoneNumberLog.status)
+        .sort(\.$createdAt, .descending).first()
     }
 }
 
-extension UserPhoneNumberLog {
-    static let createdAtKey: TimestampKey? = \.createdAt
-    static let updatedAtKey: TimestampKey? = \.updatedAt
-    static let deletedAtKey: TimestampKey? = \.deletedAt
-}
-
-extension UserPhoneNumberLog : Migration {}
+//extension UserPhoneNumberLog : Migration {}
 
 extension UserPhoneNumberLog : Content {}
 
-extension UserPhoneNumberLog : Parameter {}
+

@@ -6,21 +6,36 @@
 //
 
 import Vapor
-import FluentPostgreSQL
+import Fluent
+import FluentPostgresDriver
 
 final class AdminStatisticsController {
     
-    func getStatistics(_ req: Request) throws -> Future<Statistics> {
+    func getStatistics(_ req: Request) throws -> EventLoopFuture<Statistics> {
+        let db = req.db
         
-        let registeredGifts = Gift.query(on: req).count()
-        let donatedGifts = Gift.query(on: req).filter(\.donatedToUserId != nil).count()
-        let unreviewedGifts = Gift.query(on: req).filter(\.isReviewed == false).count()
-        let rejectedGifts = Gift.query(on: req, withSoftDeleted: true).filter(\.isRejected == true).count()
-        let deletedGifts = Gift.query(on: req, withSoftDeleted: true).filter(\.isDeleted == true).count()
+        let registeredGifts = Gift.query(on: db).count()
+        let donatedGifts = Gift.query(on: db)
+            .filter(\.$donatedToUser.$id != nil)
+            .count()
+        let unreviewedGifts = Gift.query(on: db)
+            .filter(\.$isReviewed == false)
+            .count()
+        let rejectedGifts = Gift.query(on: db)
+            .withDeleted()
+            .filter(\.$isRejected == true)
+            .count()
+        let deletedGifts = Gift.query(on: db)
+            .withDeleted()
+            .filter(\.$isDeleted == true)
+            .count()
         
-        let activeUsers = User.query(on: req).count()
-        let blockedUsers = User.query(on: req, withSoftDeleted: true).filter(\.deletedAt != nil).count()
-        let chatBlockedUsers = ChatBlock.query(on: req).all().map { chatBlocks -> Int in
+        let activeUsers = User.query(on: db).count()
+        let blockedUsers = User.query(on: db)
+            .withDeleted()
+            .filter(\.$deletedAt != nil)
+            .count()
+        let chatBlockedUsers = ChatBlock.query(on: db).all().map { chatBlocks -> Int in
             return chatBlocks.reduce(into: [Int:Int](), { (result, chatBlock) in
                 result[chatBlock.blockedUserId, default: 0] += 1
             }).count
@@ -37,14 +52,14 @@ final class AdminStatisticsController {
     }
     
     
-    func getStatistics(registeredGifts:Future<Int>,
-                       donatedGifts:Future<Int>,
-                       unreviewedGifts:Future<Int>,
-                       rejectedGifts:Future<Int>,
-                       deletedGifts:Future<Int>,
-                       activeUsers:Future<Int>,
-                       blockedUsers:Future<Int>,
-                       chatBlockedUsers:Future<Int>)->Future<Statistics>{
+    func getStatistics(registeredGifts:EventLoopFuture<Int>,
+                       donatedGifts:EventLoopFuture<Int>,
+                       unreviewedGifts:EventLoopFuture<Int>,
+                       rejectedGifts:EventLoopFuture<Int>,
+                       deletedGifts:EventLoopFuture<Int>,
+                       activeUsers:EventLoopFuture<Int>,
+                       blockedUsers:EventLoopFuture<Int>,
+                       chatBlockedUsers:EventLoopFuture<Int>)->EventLoopFuture<Statistics>{
         
         return registeredGifts.flatMap { registeredGifts in
         return donatedGifts.flatMap { donatedGifts in

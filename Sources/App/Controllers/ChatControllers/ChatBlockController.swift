@@ -6,52 +6,59 @@
 //
 
 import Vapor
-import FluentPostgreSQL
+import Fluent
+import FluentPostgresDriver
 
 class ChatBlockController {
     
-    func blockUser(_ req: Request) throws -> Future<HTTPStatus> {
+    func blockUser(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
         
-        let userId = try getUserId(req)
-        let chatId = try req.parameters.next(Int.self)
+        let authId = try req.auth.require(User.self).requireID()
+        let chatId = try req.requireIDParameter()
         
-        return DirectChat.set(block: true, authId: userId, chatId: chatId, on: req).flatMap { chatBlock in
-            
-            return ChatBlock.find(chatBlock: chatBlock, conn: req).flatMap({ foundChatBlock in
+        return DirectChat.set(
+            block: true,
+            authId: authId,
+            chatId: chatId,
+            on: req.db).flatMap { chatBlock in
                 
-                guard foundChatBlock == nil else {
-                    throw Abort(.userWasAlreadyBlocked)
+                return ChatBlock.find(
+                    chatBlock: chatBlock,
+                    conn: req.db).flatMap { foundChatBlock in
+                        
+                        guard foundChatBlock == nil else {
+                            return req.db.makeFailedFuture(
+                                .userWasAlreadyBlocked)
+                        }
+                        return chatBlock.save(on: req.db)
+                            .transform(to: .ok)
                 }
-                return chatBlock.save(on: req).map({ _ in
-                    return HTTPStatus.ok
-                })
-            })
         }
     }
     
-    func unblockUser(_ req: Request) throws -> Future<HTTPStatus> {
+    func unblockUser(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
         
-        let userId = try getUserId(req)
-        let chatId = try req.parameters.next(Int.self)
+        let authId = try req.auth.require(User.self).requireID()
+        let chatId = try req.requireIDParameter()
         
-        return DirectChat.set(block: false, authId: userId, chatId: chatId, on: req).flatMap { chatBlock in
-            
-            return ChatBlock.find(chatBlock: chatBlock, conn: req).flatMap({ foundChatBlock in
+        return DirectChat.set(
+            block: false,
+            authId: authId,
+            chatId: chatId,
+            on: req.db).flatMap { chatBlock in
                 
-                guard let foundChatBlock = foundChatBlock else {
-                    throw Abort(.userWasAlreadyUnblocked)
+                return ChatBlock.find(
+                    chatBlock: chatBlock,
+                    conn: req.db).flatMap { foundChatBlock in
+                        
+                        guard let foundChatBlock = foundChatBlock else {
+                            return req.db.makeFailedFuture(
+                                .userWasAlreadyUnblocked)
+                        }
+                        return foundChatBlock.delete(on: req.db)
+                            .transform(to: .ok)
                 }
-                return foundChatBlock.delete(on: req).map({ _ in
-                    return HTTPStatus.ok
-                })
-            })
         }
-    }
-    
-    private func getUserId(_ req: Request) throws -> Int {
-        let user = try req.requireAuthenticated(User.self)
-        let userId = try user.getId()
-        return userId
     }
     
 }

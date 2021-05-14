@@ -6,6 +6,7 @@
 //
 
 import Vapor
+import Fluent
 
 enum PhoneVisibilitySetting: String, Codable {
     case all
@@ -26,7 +27,7 @@ extension User {
         return (isPhoneVisibleForAll ?? false) ? .all : ((isPhoneVisibleForCharities ?? false) ? .charity : .none)
     }
     
-    func setPhoneVisibility(setting: PhoneVisibilitySetting, on conn: DatabaseConnectable) -> Future<HTTPStatus> {
+    func setPhoneVisibility(setting: PhoneVisibilitySetting, on conn: Database) -> EventLoopFuture<HTTPStatus> {
         switch setting {
         case .all:
             isPhoneVisibleForAll = true

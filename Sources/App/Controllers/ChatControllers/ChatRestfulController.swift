@@ -14,76 +14,82 @@ class ChatRestfulController: ChatInitializer {
     
     private func getRequestInfo(req: Request) throws -> RequestInfo {
         
-        let user = try req.requireAuthenticated(User.self)
+        let user = try req.auth.require(User.self)
         let userId = try user.getId()
         return RequestInfo(req: req, userId: userId)
     }
     
-    func startChat(_ req: Request) throws -> Future<ContactMessage> {
-        let auth = try req.requireAuthenticated(User.self)
-        return try req.parameters.next(User.self).flatMap({ contact in
+    func startChat(_ req: Request) throws -> EventLoopFuture<ContactMessage> {
+        let auth = try req.auth.require(User.self)
+        return User.getParameter(on: req).flatMap { contact in
             // Use cases:
             // Admin: starts a chat to user/charity
             // User: starts a chat to charity
             guard auth.isAdmin || contact.isCharity else {
-                throw Abort(.chatIsNotAllowed)
+                return req.db.makeFailedFuture(
+                    .chatIsNotAllowed)
             }
-            return try self.findOrCreateChat(user: auth, contact: contact, on: req)
-        })
+            return self.findOrCreateChat(user: auth, contact: contact, on: req)
+        }
     }
     
-    func fetchContacts(_ req: Request) throws -> Future<[ContactMessage]> {
+    func fetchContacts(_ req: Request) throws -> EventLoopFuture<[ContactMessage]> {
         
         let reqInfo = try getRequestInfo(req: req)
-        return try chatController.fetchContacts(reqInfo: reqInfo)
+        return chatController.fetchContacts(reqInfo: reqInfo)
     }
     
-    func fetchBlockedContacts(_ req: Request) throws -> Future<[ContactMessage]> {
+    func fetchBlockedContacts(_ req: Request) throws -> EventLoopFuture<[ContactMessage]> {
         
         let reqInfo = try getRequestInfo(req: req)
-        return try chatController.fetchBlockedContacts(reqInfo: reqInfo)
+        return chatController.fetchBlockedContacts(reqInfo: reqInfo)
     }
     
-    func fetchMessages(_ req: Request) throws -> Future<ContactMessage> {
+    func fetchMessages(_ req: Request) throws -> EventLoopFuture<ContactMessage> {
         
         let reqInfo = try getRequestInfo(req: req)
-        return try req.content.decode(FetchMessagesInput.self).flatMap({ fetchMessagesInput in
-            
-            return try self.chatController.fetchMessages(reqInfo: reqInfo, input: fetchMessagesInput)
-        })
-        
+        let fetchMessagesInput = try req.content.decode(FetchMessagesInput.self)
+        return self.chatController.fetchMessages(reqInfo: reqInfo, input: fetchMessagesInput)
     }
     
-    func sendMessage(_ req: Request) throws -> Future<TextMessage> {
+    func sendMessage(_ req: Request) throws -> EventLoopFuture<TextMessage> {
         
-        return try req.content.decode(Inputs.TextMessage.self).flatMap({ input in
-            return try self.sendMessage(req: req, input: input)
-        })
+        let input = try req.content.decode(Inputs.TextMessage.self)
+        return try self.sendMessage(req: req, input: input)
     }
     
-    private func sendMessage(req: Request, input: Inputs.TextMessage) throws -> Future<TextMessage> {
+    private func sendMessage(req: Request, input: Inputs.TextMessage) throws -> EventLoopFuture<TextMessage> {
         
         let reqInfo = try getRequestInfo(req: req)
         let textMessage = try TextMessage(input: input)
-        let chatId = textMessage.chatId
+        let chatId = textMessage.$chat.id
         
-        return DirectChat.findOrFail(authId: reqInfo.userId, chatId: chatId, on: req).flatMap { chat in
+        return DirectChat.findOrFail(
+            authId: reqInfo.userId,
+            chatId: chatId,
+            on: req.db).flatMap { chat in
             
             guard !chat.userIsBlocked else {
-                throw Abort(.chatHasBlocked)
+                return req.db.makeFailedFuture(
+                    .chatHasBlocked)
             }
             guard !chat.contactIsBlocked else {
-                throw Abort(.chatHasBlockedByUser)
+                return req.db.makeFailedFuture(
+                    .chatHasBlockedByUser)
             }
             
-            return try self.chatController.saveTextMessage(reqInfo: reqInfo, textMessage: textMessage, chatId: chatId, receiverId: chat.contactId).map({ textMessage in
+            return self.chatController.saveTextMessage(
+                reqInfo: reqInfo,
+                textMessage: textMessage,
+                chatId: chatId,
+                receiverId: chat.contactId).flatMapThrowing { textMessage in
                 
                 try self.sendPushNotification(req, toUserId: chat.contactId, textMessage: textMessage)
                 
                 //TODO: Send message to other active devices of the user
                 
                 return textMessage
-            })
+            }
         }
     }
     
@@ -94,13 +100,13 @@ class ChatRestfulController: ChatInitializer {
         
     }
     
-    func ackMessage(_ req: Request) throws -> Future<HTTPStatus> {
+    func ackMessage(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
         
         let reqInfo = try getRequestInfo(req: req)
-        return try req.content.decode(AckMessage.self).flatMap({ ackMessage in
-            return self.chatController.ackMessageIsReceived(reqInfo: reqInfo, ackMessage: ackMessage)
-        })
-        
+        let ackMessage = try req.content.decode(AckMessage.self)
+        return self.chatController.ackMessageIsReceived(
+            reqInfo: reqInfo,
+            ackMessage: ackMessage)
     }
     
 }

@@ -7,104 +7,98 @@
 
 import Vapor
 import FCM
+import APNS
 
 class PushNotificationController {
     
-    func registerPush(_ req: Request) throws -> Future<HTTPStatus> {
-        let user = try req.requireAuthenticated(User.self)
+    func registerPush(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
+        let user = try req.auth.require(User.self)
         let userId = try user.getId()
-        let userToken = try req.requireAuthenticated(Token.self)
+        let userToken = try req.auth.require(Token.self)
         let userTokenId = try userToken.getId()
         
-        return try req.content.decode(Inputs.UserPushNotification.self).flatMap { input in
+        let input = try req.content.decode(Inputs.UserPushNotification.self)
+        
+        guard let _ = PushNotificationType(rawValue: input.type) else {
+            throw Abort(.wrongPushNotificationType)
+        }
+        
+        return UserPushNotification.hasFound(
+            input: input,
+            conn: req.db).flatMap { found in
             
-            guard let _ = PushNotificationType(rawValue: input.type) else {
-                throw Abort(.wrongPushNotificationType)
+            if let found = found {
+                found.userId = userId
+                found.userTokenId = userTokenId
+                return found.save(on: req.db)
+                    .transform(to: .ok)
+            } else {
+                let item = UserPushNotification(
+                    userId: userId,
+                    userTokenId: userTokenId,
+                    input: input)
+                return item.save(on: req.db)
+                    .transform(to: .ok)
             }
-            
-            return UserPushNotification.hasFound(input: input, conn: req).flatMap({ found -> Future<UserPushNotification> in
-                
-                if let found = found {
-                    found.userId = userId
-                    found.userTokenId = userTokenId
-                    return found.save(on: req)
-                } else {
-                    let item = UserPushNotification(userId: userId, userTokenId: userTokenId, input: input)
-                    return item.save(on: req)
-                }
-            }).transform(to: .ok)
-            
         }
     }
     
-    
-    func sendPush(_ req: Request) throws -> Future<HTTPStatus> {
-        return try req.content.decode(SendPushInput.self).map { input in
-            let payload = SamplePushPayload()
-            try PushNotificationController.sendPush(req, userId: input.userId, title: input.title, body: input.body, payload: payload)
-            return .ok
-        }
+    func sendPush(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
+        let input = try req.content.decode(SendPushInput.self)
+        let payload = SamplePushPayload()
+        try PushNotificationController.sendPush(req, userId: input.userId, title: input.title, body: input.body, payload: payload)
+        return req.db.makeSucceededFuture(.ok)
     }
     
     
     static func sendPush<T: PushPayloadable>(_ req: Request, userId:Int, title:String?, body:String, payload: T) throws {
         
-        UserPushNotification.findAllTokens(userId: userId, conn: req).map { allTokens in
-            
+        UserPushNotification.findAllTokens(
+            userId: userId,
+            conn: req.db).flatMapThrowing { allTokens in
             for token in allTokens {
-                try sendPush(req, token: token, title: title, body: body, payload: payload)?.catch({ error in
-                    print(error)
-                })
+                try sendPush(
+                    req,
+                    token: token,
+                    title: title,
+                    body: body,
+                    payload: payload)?
+                    .whenFailure { print($0) }
             }
-        }.catch { error in
-            print(error)
         }
+        .whenFailure { print($0) }
     }
     
-    static func sendPush<T: PushPayloadable>(_ req: Request, token: UserPushNotification, title:String?, body:String, payload: T) throws -> Future<HTTPStatus>? {
+    static func sendPush<T: PushPayloadable>(_ req: Request, token: UserPushNotification, title:String?, body:String, payload: T) throws -> EventLoopFuture<HTTPStatus>? {
         
         guard let pushType = PushNotificationType(rawValue: token.type) else { return nil }
         
         let click_action = try payload.getClickAction(type: pushType)
         
-        return try payload.getContent(on: req).flatMap { content in
+        return payload.getContent(on: req).flatMap { content in
             switch pushType {
             case .APNS:
-                return try sendAPNSPush(req, token: token.devicePushToken, title: title, body: body, content: content)
+                return sendAPNSPush(req, token: token.devicePushToken, title: title, body: body, content: content)
             case .Firebase:
-                return try sendFirebasePush(req, token: token.devicePushToken, title: title, body: body, content: content, click_action: click_action)
+                return sendFirebasePush(req, token: token.devicePushToken, title: title, body: body, content: content, click_action: click_action)
             }
         }
         
     }
     
-    private static func sendAPNSPush(_ req: Request, token: String, title: String?, body: String, content: PushPayloadContent?) throws -> Future<HTTPStatus> {
+    private static func sendAPNSPush(_ req: Request, token: String, title: String?, body: String, content: PushPayloadContent?) -> EventLoopFuture<HTTPStatus> {
         
         guard let payload = APNSPayload(title: title, body: body, data: content?.data).textFormat else {
-            throw Abort(.pushPayloadIsNotValid)
+            return req.db.makeFailedFuture(.pushPayloadIsNotValid)
         }
         
-        guard let configuration = configuration.apns else {
-            throw Abort(.failedToSendAPNSPush)
-        }
+        //TODO: APNS Implementation
+        return req.db.makeFailedFuture(.failedToSendAPNSPush)
         
-        let shell = try req.make(Shell.self)
-        
-        let bundleId = configuration.bundleId
-        let apnsURL = configuration.apnsURL
-        let certPass = configuration.certPass
-        let certPath = CertificatesPath.path(of: .apns)
-        
-        let arguments = ["-d", payload, "-H", "apns-topic:\(bundleId)", "-H", "apns-expiration: 1", "-H", "apns-priority: 10", "--http2", "--cert", "\(certPath):\(certPass)", "\(apnsURL)\(token)"]
-        
-        return try shell.execute(commandName: "curl", arguments: arguments).map({ output in
-            let text = String(data: output, encoding: .utf8)
-            print(text ?? "")
-        }).transform(to: .ok)
+//        req.apns.send(<#T##notification: APNSwiftNotification##APNSwiftNotification#>, to: <#T##String#>)
     }
     
-    private static func sendFirebasePush(_ req: Request, token: String, title: String?, body: String, content: PushPayloadContent?, click_action: String?) throws -> Future<HTTPStatus> {
-        let fcm = try req.make(FCM.self)
+    private static func sendFirebasePush(_ req: Request, token: String, title: String?, body: String, content: PushPayloadContent?, click_action: String?) -> EventLoopFuture<HTTPStatus> {
         
         //TODO: More study about restricted_package_name field in FCMMessage (Android only)
         
@@ -120,9 +114,9 @@ class PushNotificationController {
         if let click_action = click_action {
             message.data["click_action"] = click_action
         }
-
-        return try fcm.sendMessage(req.client(), message: message).map({ output in
+        
+        return req.fcm.send(message, on: req.eventLoop).map { output in
             print(output)
-        }).transform(to: .ok)
+        }.transform(to: .ok)
     }
 }

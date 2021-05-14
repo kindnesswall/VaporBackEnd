@@ -6,65 +6,61 @@
 //
 
 import Vapor
-import FluentPostgreSQL
+import Fluent
+import FluentPostgresDriver
 
 class GiftDonationController {
     
-    func giftsToDonate(_ req: Request) throws -> Future<[Gift]> {
+    func giftsToDonate(_ req: Request) throws -> EventLoopFuture<[Gift]> {
         
-        let user = try req.requireAuthenticated(User.self)
-        guard let userId = user.id else {
-            throw Abort(.nilUserId)
-        }
-        return try req.parameters.next(User.self).flatMap({ contactUser in
+        let auth = try req.auth.require(User.self)
+        let authId = try auth.getId()
+        let requestInput = try req.content.decode(RequestInput.self)
+        
+        return User.getParameter(on: req).flatMap { contactUser in
             guard let contactUserId = contactUser.id else {
-                throw Abort(.nilUserId)
+                return req.db.makeFailedFuture(.nilUserId)
             }
-            return try req.content.decode(RequestInput.self).flatMap({ requestInput in
-                let userGifts = try user.gifts.query(on: req)
-                let query=GiftRequest.getGiftsToDonate(userGifts: userGifts, userId: userId, requestUserId: contactUserId)
-                return Gift.getGiftsWithRequestFilter(query: query, requestInput: requestInput,onlyUndonatedGifts: true, onlyReviewedGifts: true)
-            })
-        })
+            let userGifts = auth.$gifts.query(on: req.db)
+            let query = GiftRequest.getGiftsToDonate(
+                userGifts: userGifts,
+                userId: authId,
+                requestUserId: contactUserId)
+            return Gift.getGiftsWithRequestFilter(
+                query: query,
+                requestInput: requestInput,
+                onlyUndonatedGifts: true,
+                onlyReviewedGifts: true)
+        }
     }
     
-    func donate(_ req: Request) throws -> Future<HTTPStatus> {
-        let user = try req.requireAuthenticated(User.self)
-        let userId = try user.getId()
+    func donate(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
+        let auth = try req.auth.require(User.self)
+        let authId = try auth.getId()
+        let donate = try req.content.decode(Donate.self)
         
-        return try req.content.decode(Donate.self).flatMap({ donate in
-            
-            guard userId != donate.donatedToUserId else {
-                throw Abort(.giftCannotBeDonatedToTheOwner)
+        guard authId != donate.donatedToUserId else {
+            throw Abort(.giftCannotBeDonatedToTheOwner)
+        }
+        
+        return GiftRequest.hasExisted(
+            requestUserId: donate.donatedToUserId,
+            giftId: donate.giftId,
+            conn: req.db).flatMap { giftRequestHasExisted in
+            guard giftRequestHasExisted else {
+                return req.db.makeFailedFuture(.unrequestedGift)
             }
-            
-            return GiftRequest.hasExisted(requestUserId: donate.donatedToUserId, giftId: donate.giftId, conn: req).flatMap({ giftRequestHasExisted in
-                guard giftRequestHasExisted else {
-                    throw Abort(.unrequestedGift)
+            return Gift.findOrFail(donate.giftId, on: req.db).flatMap { gift in
+                
+                do {
+                    return try gift.donate(
+                    to: donate.donatedToUserId,
+                    authId: authId,
+                    on: req.db)
+                } catch(let error) {
+                    return req.db.makeFailedFuture(error)
                 }
-                
-                return Gift.get(donate.giftId, on: req).flatMap({ gift in
-                    
-                    guard userId == gift.userId else {
-                        throw Abort(.unauthorizedGift)
-                    }
-                    
-                    guard gift.isReviewed == true else {
-                        throw Abort(.unreviewedGift)
-                    }
-                    
-                    guard gift.donatedToUserId == nil else {
-                        throw Abort(.giftIsAlreadyDonated)
-                    }
-                    
-                    gift.donatedToUserId = donate.donatedToUserId
-                    return gift.save(on: req).transform(to: .ok)
-                    
-                })
-                
-            })
-            
-            
-        })
+            }
+        }
     }
 }
