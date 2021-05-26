@@ -7,9 +7,12 @@
 
 import Vapor
 import Fluent
-import FluentPostgresDriver
 
-final class ApplicationVersion: PostgreSQLModel {
+
+final class ApplicationVersion: Model {
+    
+    static let schema = "ApplicationVersion"
+    
     var id: Int?
     var platform: String
     var availableVersionName: String
@@ -18,6 +21,7 @@ final class ApplicationVersion: PostgreSQLModel {
     var requiredVersionCode: Int
     var downloadLink: String?
     
+    init() {}
     
     init(platform: PlatformType, input: Inputs.ApplicationVersion) {
         self.platform = platform.rawValue
@@ -28,7 +32,7 @@ final class ApplicationVersion: PostgreSQLModel {
         self.downloadLink = input.downloadLink
     }
     
-    func update(input: Inputs.ApplicationVersion, on conn: DatabaseConnectable) -> EventLoopFuture<ApplicationVersion> {
+    func update(input: Inputs.ApplicationVersion, on conn: Database) -> EventLoopFuture<ApplicationVersion> {
         self.availableVersionName = input.availableVersionName
         self.availableVersionCode = input.availableVersionCode
         self.requiredVersionName = input.requiredVersionName
@@ -44,7 +48,7 @@ enum PlatformType: String {
 }
 
 extension ApplicationVersion {
-    static func get(platform: PlatformType, on conn: DatabaseConnectable) -> EventLoopFuture<ApplicationVersion> {
+    static func get(platform: PlatformType, on conn: Database) -> EventLoopFuture<ApplicationVersion> {
         return query(on: conn).filter(\.platform == platform.rawValue).first().map { item in
             guard let item = item else {
                 throw Abort(.notFound)
@@ -52,7 +56,7 @@ extension ApplicationVersion {
             return item
         }
     }
-    static func update(platform: PlatformType, input: Inputs.ApplicationVersion, on conn: DatabaseConnectable) -> EventLoopFuture<ApplicationVersion> {
+    static func update(platform: PlatformType, input: Inputs.ApplicationVersion, on conn: Database) -> EventLoopFuture<ApplicationVersion> {
         return get(platform: platform, on: conn).flatMap { item in
             return item.update(input: input, on: conn)
         }
@@ -63,4 +67,3 @@ extension ApplicationVersion {
 
 extension ApplicationVersion : Content {}
 
-extension ApplicationVersion : Parameter {}

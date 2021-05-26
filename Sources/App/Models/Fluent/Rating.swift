@@ -7,9 +7,11 @@
 
 import Vapor
 import Fluent
-import FluentPostgresDriver
 
-final class Rating: PostgreSQLModel {
+final class Rating: Model {
+    
+    static let schema = "Rating"
+    
     var id: Int?
     var reviewedId: Int
     var rate: Int
@@ -18,6 +20,8 @@ final class Rating: PostgreSQLModel {
     var createdAt: Date?
     var updatedAt: Date?
     var deletedAt: Date?
+    
+    init() {}
     
     private init(authId voterId: Int, input: Input) {
         self.voterId = voterId
@@ -80,11 +84,11 @@ extension Rating {
 }
 
 extension Rating: FindOrCreatable {
-    static func _findQuery(input: Rating, on conn: DatabaseConnectable) -> QueryBuilder<PostgreSQLDatabase, Rating> {
+    static func _findQuery(input: Rating, on conn: Database) -> QueryBuilder<PostgreSQLDatabase, Rating> {
         return _findQuery(voterId: input.voterId, reviewedId: input.reviewedId, on: conn)
     }
     
-    static func _findQuery(voterId: Int, reviewedId: Int, on conn: DatabaseConnectable) -> QueryBuilder<PostgreSQLDatabase, Rating> {
+    static func _findQuery(voterId: Int, reviewedId: Int, on conn: Database) -> QueryBuilder<PostgreSQLDatabase, Rating> {
         return query(on: conn)
             .filter(\.voterId == voterId)
             .filter(\.reviewedId == reviewedId)
@@ -99,14 +103,14 @@ extension Rating {
 
 extension Rating {
     
-    static func calculateAverageRate(reviewedId: Int, on conn: DatabaseConnectable) -> EventLoopFuture<AverageRate?> {
+    static func calculateAverageRate(reviewedId: Int, on conn: Database) -> EventLoopFuture<AverageRate?> {
         return query(on: conn)
             .filter(\.reviewedId == reviewedId)
             .all()
             .map { $0.averageRate }
     }
     
-    static func updateAverageRate(reviewedId: Int, on conn: DatabaseConnectable) -> EventLoopFuture<HTTPStatus> {
+    static func updateAverageRate(reviewedId: Int, on conn: Database) -> EventLoopFuture<HTTPStatus> {
         return Rating.calculateAverageRate(reviewedId: reviewedId, on: conn)
             .unwrap(or: Abort(.notFound))
             .flatMap { averageRate in
@@ -119,7 +123,7 @@ extension Rating {
 
 extension Rating : Content {}
 
-extension Rating : Parameter {}
+
 
 struct AverageRate: Content {
     var rate: Double

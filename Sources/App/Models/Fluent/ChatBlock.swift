@@ -7,14 +7,17 @@
 
 import Vapor
 import Fluent
-import FluentPostgresDriver
 
-
-final class ChatBlock : PostgreSQLModel {
+final class ChatBlock : Model {
+    
+    static let schema = "ChatBlock"
+    
     var id:Int?
     var chatId:Int
     var blockedUserId:Int
     var byUserId:Int
+    
+    init() {}
     
     init(chatId:Int,blockedUserId:Int,byUserId:Int) {
         self.chatId = chatId
@@ -22,7 +25,7 @@ final class ChatBlock : PostgreSQLModel {
         self.byUserId = byUserId
     }
     
-    static func find(chatBlock:ChatBlock,conn:DatabaseConnectable) -> EventLoopFuture<ChatBlock?> {
+    static func find(chatBlock:ChatBlock,conn:Database) -> EventLoopFuture<ChatBlock?> {
         return ChatBlock.query(on: conn)
             .filter(\.chatId == chatBlock.chatId)
             .filter(\.blockedUserId == chatBlock.blockedUserId)
@@ -34,7 +37,6 @@ final class ChatBlock : PostgreSQLModel {
 
 //extension ChatBlock : Migration {}
 extension ChatBlock : Content {}
-extension ChatBlock : Parameter {}
 
 
 final class BlockStatus: Content {

@@ -7,10 +7,11 @@
 
 import Vapor
 import Fluent
-import FluentPostgresDriver
 
-
-final class TextMessage : PostgreSQLModel {
+final class TextMessage : Model {
+    
+    static let schema = "TextMessage"
+    
     var id:Int?
     var chatId:Int
     var senderId:Int?
@@ -19,6 +20,8 @@ final class TextMessage : PostgreSQLModel {
     var type: String?
     var ack:Bool?
     var createdAt:Date?
+    
+    init() {}
     
     init(input: Inputs.TextMessage) throws {
         self.chatId = input.chatId
@@ -53,7 +56,7 @@ extension TextMessage: PushPayloadable {
 
 extension TextMessage {
     
-    static func calculateNumberOfNotifications(userId:Int,chatId:Int,conn:DatabaseConnectable) -> EventLoopFuture<Int> {
+    static func calculateNumberOfNotifications(userId:Int,chatId:Int,conn:Database) -> EventLoopFuture<Int> {
         
         let query = TextMessage.query(on: conn)
         
@@ -69,4 +72,4 @@ extension TextMessage {
 
 //extension TextMessage : Migration {}
 extension TextMessage : Content {}
-extension TextMessage : Parameter {}
+

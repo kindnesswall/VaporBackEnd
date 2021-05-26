@@ -7,9 +7,11 @@
 
 import Vapor
 import Fluent
-import FluentPostgresDriver
 
-final class DirectChat: PostgreSQLModel {
+final class DirectChat: Model {
+    
+    static let schema = "DirectChat"
+    
     var id: Int?
     var userId:Int
     var contactId: Int
@@ -17,6 +19,8 @@ final class DirectChat: PostgreSQLModel {
     var contactIsBlocked: Bool = false
     var userNotification:Int = 0
     var contactNotification:Int = 0
+    
+    init() {}
     
     init(userId:Int, contactId: Int) {
         self.userId = userId
@@ -84,7 +88,7 @@ extension DirectChat {
 
 extension DirectChat {
     
-    static func findOrFail(authId: Int, chatId: Int, on conn: DatabaseConnectable) -> EventLoopFuture<ContactMessage> {
+    static func findOrFail(authId: Int, chatId: Int, on conn: Database) -> EventLoopFuture<ContactMessage> {
         return find(chatId, on: conn).map { item in
             guard let item = item else {
                 throw Abort(.chatNotFound)
@@ -93,13 +97,13 @@ extension DirectChat {
         }
     }
     
-    static func find(userId: Int, contactId: Int, on conn: DatabaseConnectable) -> EventLoopFuture<ContactMessage?> {
+    static func find(userId: Int, contactId: Int, on conn: Database) -> EventLoopFuture<ContactMessage?> {
         return _find(userId: userId, contactId: contactId, on: conn).first().map { item in
             return try item?.castFor(authId: userId)
         }
     }
     
-    static func findOrCreate(userId: Int, contactId: Int, on conn: DatabaseConnectable) -> EventLoopFuture<ContactMessage> {
+    static func findOrCreate(userId: Int, contactId: Int, on conn: Database) -> EventLoopFuture<ContactMessage> {
         let input = DirectChat(userId: userId, contactId: contactId)
         return _findOrCreate(input: input, on: conn).map { item in
             return try item.castFor(authId: userId)
@@ -110,7 +114,7 @@ extension DirectChat {
 
 extension DirectChat {
     
-    private static func fetch(textMessages: Children<DirectChat, TextMessage>, beforeId: Int?, on conn: DatabaseConnectable) throws -> EventLoopFuture<[TextMessage]> {
+    private static func fetch(textMessages: Children<DirectChat, TextMessage>, beforeId: Int?, on conn: Database) throws -> EventLoopFuture<[TextMessage]> {
         
         let query = try textMessages.query(on: conn)
         
@@ -127,7 +131,7 @@ extension DirectChat {
     }
     
     
-    static func fetchTextMessages(beforeId: Int?, authId: Int, chatId: Int, on conn: DatabaseConnectable) -> EventLoopFuture<ContactMessage> {
+    static func fetchTextMessages(beforeId: Int?, authId: Int, chatId: Int, on conn: Database) -> EventLoopFuture<ContactMessage> {
         return find(chatId, on: conn).flatMap { chat in
             
             guard let chat = chat else {
@@ -150,11 +154,11 @@ extension DirectChat {
 
 extension DirectChat: FindOrCreatable {
     
-    static func _findQuery(input: DirectChat, on conn: DatabaseConnectable) -> QueryBuilder<PostgreSQLDatabase, DirectChat> {
+    static func _findQuery(input: DirectChat, on conn: Database) -> QueryBuilder<PostgreSQLDatabase, DirectChat> {
         return _find(userId: input.userId, contactId: input.contactId, on: conn)
     }
     
-    static private func _find(userId: Int, contactId: Int, on conn: DatabaseConnectable) -> QueryBuilder<PostgreSQLDatabase, DirectChat> {
+    static private func _find(userId: Int, contactId: Int, on conn: Database) -> QueryBuilder<PostgreSQLDatabase, DirectChat> {
         return query(on: conn).group(.or) { query in
             query.group(.and, closure: { query in
                 query.filter(\.userId == userId).filter(\.contactId == contactId)
@@ -196,7 +200,7 @@ extension DirectChat {
 }
 
 extension DirectChat {
-    static func set(notification: Int, receiverId: Int, chatId: Int, on conn: DatabaseConnectable) -> EventLoopFuture<HTTPStatus> {
+    static func set(notification: Int, receiverId: Int, chatId: Int, on conn: Database) -> EventLoopFuture<HTTPStatus> {
         return find(chatId, on: conn).flatMap { item in
             guard let item = item else {
                 throw Abort(.chatNotFound)
@@ -215,7 +219,7 @@ extension DirectChat {
 }
 
 extension DirectChat {
-    static func set(block: Bool, authId: Int, chatId: Int, on conn: DatabaseConnectable) -> EventLoopFuture<ChatBlock> {
+    static func set(block: Bool, authId: Int, chatId: Int, on conn: Database) -> EventLoopFuture<ChatBlock> {
         
         return find(chatId, on: conn).flatMap { item in
             
@@ -245,6 +249,5 @@ extension DirectChat {
 
 //extension DirectChat : Migration {}
 extension DirectChat : Content {}
-extension DirectChat : Parameter {}
 
 

@@ -7,9 +7,11 @@
 
 import Vapor
 import Fluent
-import FluentPostgresDriver
 
-final class Sponsor: PostgreSQLModel {
+final class Sponsor: Model {
+    
+    static let schema = "Sponsor"
+    
     var id: Int?
     var name: String
     var image: String?
@@ -19,6 +21,8 @@ final class Sponsor: PostgreSQLModel {
     var createdAt: Date?
     var updatedAt: Date?
     var deletedAt: Date?
+    
+    init() {}
     
     func update(input: Sponsor, on req: Request) -> EventLoopFuture<HTTPStatus> {
         self.name = input.name
@@ -31,7 +35,7 @@ final class Sponsor: PostgreSQLModel {
 }
 
 extension Sponsor {
-    static func get(_ id: Int, on conn: DatabaseConnectable) -> EventLoopFuture<Sponsor> {
+    static func get(_ id: Int, on conn: Database) -> EventLoopFuture<Sponsor> {
         return find(id, on: conn).unwrap(or: Abort(.notFound))
     }
 }
@@ -52,5 +56,5 @@ extension Sponsor {
 
 extension Sponsor : Content {}
 
-extension Sponsor : Parameter {}
+
 

@@ -7,14 +7,18 @@
 
 import Vapor
 import Fluent
-import FluentPostgresDriver
 
-final class UserPushNotification: PostgreSQLModel {
+final class UserPushNotification: Model {
+    
+    static let schema = "UserPushNotification"
+    
     var id: Int?
     var userId: Int
     var userTokenId: Int
     var type: String
     var devicePushToken: String
+    
+    init() {}
     
     init(userId: Int, userTokenId: Int, input: Inputs.UserPushNotification) {
         self.userId = userId
@@ -23,27 +27,27 @@ final class UserPushNotification: PostgreSQLModel {
         self.devicePushToken = input.devicePushToken
     }
     
-    static func hasFound(input: Inputs.UserPushNotification, conn: DatabaseConnectable)->EventLoopFuture<UserPushNotification?> {
+    static func hasFound(input: Inputs.UserPushNotification, conn: Database)->EventLoopFuture<UserPushNotification?> {
         return query(on: conn)
             .filter(\.type == input.type)
             .filter(\.devicePushToken == input.devicePushToken)
             .first()
     }
     
-    static func findAllTokens(userId:Int, conn: DatabaseConnectable) -> EventLoopFuture<[UserPushNotification]>{
+    static func findAllTokens(userId:Int, conn: Database) -> EventLoopFuture<[UserPushNotification]>{
         return query(on: conn)
             .filter(\.userId == userId)
             .all()
     }
     
-    static func deleteAll(userId: Int, conn: DatabaseConnectable) -> EventLoopFuture<HTTPStatus> {
+    static func deleteAll(userId: Int, conn: Database) -> EventLoopFuture<HTTPStatus> {
         return query(on: conn)
             .filter(\.userId == userId)
             .delete()
             .transform(to: .ok)
     }
     
-    static func delete(userTokenId: Int, conn: DatabaseConnectable) -> EventLoopFuture<HTTPStatus> {
+    static func delete(userTokenId: Int, conn: Database) -> EventLoopFuture<HTTPStatus> {
         return query(on: conn)
             .filter(\.userTokenId == userTokenId)
             .delete()
@@ -67,4 +71,3 @@ enum PushNotificationType: String, Codable {
 
 extension UserPushNotification : Content {}
 
-extension UserPushNotification : Parameter {}

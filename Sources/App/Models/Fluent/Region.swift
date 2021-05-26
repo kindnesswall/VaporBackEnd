@@ -7,16 +7,20 @@
 
 import Vapor
 import Fluent
-import FluentPostgresDriver
 
-
-final class Region : PostgreSQLModel {
+final class Region : Model {
+    
+    static let schema = "Region"
+    
     var id:Int?
     var city_id:Int
     var name:String
     var latitude:Double?
     var longitude:Double?
     var sortIndex:Int? 
+    
+    init() {}
+    
 }
 
 
@@ -24,4 +28,4 @@ final class Region : PostgreSQLModel {
 
 extension Region : Content {}
 
-extension Region : Parameter {}
+

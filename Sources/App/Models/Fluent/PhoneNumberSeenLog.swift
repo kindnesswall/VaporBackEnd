@@ -7,9 +7,10 @@
 
 import Vapor
 import Fluent
-import FluentPostgresDriver
 
-final class PhoneNumberSeenLog: PostgreSQLModel {
+final class PhoneNumberSeenLog: Model {
+    
+    static let schema = "PhoneNumberSeenLog"
     
     var id: Int?
     var fromUserId: Int
@@ -18,6 +19,7 @@ final class PhoneNumberSeenLog: PostgreSQLModel {
     
     var createdAt: Date?
     
+    init() {}
     
     init(fromUserId: Int, seenUserId: Int, seenPhoneNumber: String) {
         self.fromUserId = fromUserId
@@ -34,5 +36,5 @@ extension PhoneNumberSeenLog {
 
 extension PhoneNumberSeenLog : Content {}
 
-extension PhoneNumberSeenLog : Parameter {}
+
 

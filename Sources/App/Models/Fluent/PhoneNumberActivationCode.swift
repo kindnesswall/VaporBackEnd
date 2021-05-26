@@ -7,12 +7,16 @@
 
 import Vapor
 import Fluent
-import FluentPostgresDriver
 
-final class PhoneNumberActivationCode: PostgreSQLModel {
+final class PhoneNumberActivationCode: Model {
+    
+    static let schema = "PhoneNumberActivationCode"
+    
     var id:Int?
     var phoneNumber:String
     var activationCode:String?
+    
+    init() {}
     
     init(phoneNumber:String, activationCode:String?) {
         self.phoneNumber = phoneNumber
@@ -54,4 +58,4 @@ extension PhoneNumberActivationCode {
 
 extension PhoneNumberActivationCode : Content {}
 
-extension PhoneNumberActivationCode : Parameter {}
+

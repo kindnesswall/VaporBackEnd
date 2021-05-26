@@ -7,9 +7,11 @@
 
 import Vapor
 import Fluent
-import FluentPostgresDriver
 
-final class RatingResult: PostgreSQLModel {
+final class RatingResult: Model {
+    
+    static let schema = "RatingResult"
+    
     var id: Int?
     var reviewedId: Int
     var averageRate: Double
@@ -18,6 +20,8 @@ final class RatingResult: PostgreSQLModel {
     var createdAt: Date?
     var updatedAt: Date?
     var deletedAt: Date?
+    
+    init() {}
     
     init(reviewedId: Int, averageRate: AverageRate) {
         self.reviewedId = reviewedId
@@ -33,7 +37,7 @@ extension RatingResult {
 }
 
 extension RatingResult {
-    static func set(reviewedId: Int, averageRate: AverageRate, on conn: DatabaseConnectable) -> EventLoopFuture<HTTPStatus>  {
+    static func set(reviewedId: Int, averageRate: AverageRate, on conn: Database) -> EventLoopFuture<HTTPStatus>  {
         
         let input = RatingResult(reviewedId: reviewedId, averageRate: averageRate)
         return _findOrCreate(input: input, on: conn).flatMap { item in
@@ -46,19 +50,19 @@ extension RatingResult {
         }
     }
     
-    static func get(reviewedId: Int, on conn: DatabaseConnectable) -> EventLoopFuture<RatingResult?> {
+    static func get(reviewedId: Int, on conn: Database) -> EventLoopFuture<RatingResult?> {
         return _findQuery(reviewedId: reviewedId, on: conn)
             .first()
     }
 }
 
 extension RatingResult: FindOrCreatable {
-    static func _findQuery(input: RatingResult, on conn: DatabaseConnectable) -> QueryBuilder<PostgreSQLDatabase, RatingResult> {
+    static func _findQuery(input: RatingResult, on conn: Database) -> QueryBuilder<PostgreSQLDatabase, RatingResult> {
         
         return _findQuery(reviewedId: input.reviewedId, on: conn)
     }
     
-    static func _findQuery(reviewedId: Int, on conn: DatabaseConnectable) -> QueryBuilder<PostgreSQLDatabase, RatingResult> {
+    static func _findQuery(reviewedId: Int, on conn: Database) -> QueryBuilder<PostgreSQLDatabase, RatingResult> {
         
         return query(on: conn)
             .filter(\.reviewedId == reviewedId)
@@ -69,4 +73,4 @@ extension RatingResult: FindOrCreatable {
 
 extension RatingResult : Content {}
 
-extension RatingResult : Parameter {}
+

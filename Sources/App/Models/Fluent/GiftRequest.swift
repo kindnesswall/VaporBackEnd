@@ -7,13 +7,17 @@
 
 import Vapor
 import Fluent
-import FluentPostgresDriver
 
-final class GiftRequest: PostgreSQLModel {
+final class GiftRequest: Model {
+    
+    static let schema = "GiftRequest"
+    
     var id: Int?
     var requestUserId:Int
     var giftId:Int
     var giftOwnerId:Int
+    
+    init() {}
     
     init(requestUserId:Int,giftId:Int,giftOwnerId:Int) {
         self.requestUserId=requestUserId
@@ -23,7 +27,7 @@ final class GiftRequest: PostgreSQLModel {
 }
 
 extension GiftRequest {
-    static func hasExisted(requestUserId:Int,giftId:Int,conn:DatabaseConnectable) -> EventLoopFuture<Bool> {
+    static func hasExisted(requestUserId:Int,giftId:Int,conn:Database) -> EventLoopFuture<Bool> {
         return GiftRequest.query(on: conn).filter(\.requestUserId == requestUserId).filter(\.giftId == giftId).count().map { count in
             if count>0 {
                 return true
@@ -32,7 +36,7 @@ extension GiftRequest {
         }
     }
     
-    static func create(requestUserId:Int,giftId:Int,giftOwnerId:Int,conn:DatabaseConnectable) -> EventLoopFuture<GiftRequest>{
+    static func create(requestUserId:Int,giftId:Int,giftOwnerId:Int,conn:Database) -> EventLoopFuture<GiftRequest>{
         let giftRequest = GiftRequest(requestUserId: requestUserId, giftId: giftId, giftOwnerId: giftOwnerId)
         return giftRequest.save(on: conn)
     }
@@ -46,4 +50,3 @@ extension GiftRequest {
 
 extension GiftRequest : Content {}
 
-extension GiftRequest : Parameter {}

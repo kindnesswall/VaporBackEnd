@@ -8,27 +8,60 @@
 import Vapor
 import FluentSQL
 import Fluent
-import FluentPostgresDriver
 
-final class User : PostgreSQLModel {
+final class User : Model {
+    
+    static let schema = "User"
+    
+    @ID(key: .id)
     var id:Int?
+    
+    @Field(key: "phoneNumber")
     var phoneNumber:String
+    
+    @OptionalField(key: "activationCode")
     var activationCode:String?
+    
+    @Field(key: "isAdmin")
     var isAdmin:Bool = false
+    
+    @Field(key: "isCharity")
     var isCharity:Bool = false
+    
+    @OptionalField(key: "name")
     var name:String?
+    
+    @OptionalField(key: "image")
     var image:String?
     
+    @OptionalField(key: "charityName")
     var charityName:String?
+    
+    @OptionalField(key: "charityImage")
     var charityImage:String?
     
+    @OptionalField(key: "isPhoneVisibleForCharities")
     var isPhoneVisibleForCharities: Bool? = true
+    
+    @OptionalField(key: "isPhoneVisibleForAll")
     var isPhoneVisibleForAll: Bool? = false
 
+    @Children(for: \.$user)
+    var gifts: [Gift]
     
+    @Children(for: \.$donatedToUser)
+    var receivedGifts: [Gift]
+    
+    @Timestamp(key: "createdAt", on: .create)
     var createdAt: Date?
+    
+    @Timestamp(key: "updatedAt", on: .update)
     var updatedAt: Date?
+    
+    @Timestamp(key: "deletedAt", on: .delete)
     var deletedAt: Date?
+    
+    init() {}
     
     func getId() throws -> Int {
         guard let id = self.id else {
@@ -49,11 +82,7 @@ final class User : PostgreSQLModel {
     }
 }
 
-extension User {
-    static let createdAtKey: TimestampKey? = \.createdAt
-    static let updatedAtKey: TimestampKey? = \.updatedAt
-    static let deletedAtKey: TimestampKey? = \.deletedAt
-}
+extension User: Authenticatable {}
 
 extension User {
     func userProfile(req:Request) throws -> UserProfile {
@@ -81,17 +110,17 @@ extension User {
 }
 
 extension User {
-    func change(toPhoneNumber: String, on conn: DatabaseConnectable) -> EventLoopFuture<User> {
+    func change(toPhoneNumber: String, on conn: Database) -> EventLoopFuture<User> {
         self.phoneNumber = toPhoneNumber
         return save(on: conn)
     }
 }
 
 extension User {
-    static func get(_ id: Int, on conn: DatabaseConnectable) -> EventLoopFuture<User> {
+    static func get(_ id: Int, on conn: Database) -> EventLoopFuture<User> {
         return find(id, on: conn).unwrap(or: Abort(.userNotFound))
     }
-    static func get(_ id: Int, withSoftDeleted: Bool, on conn: DatabaseConnectable) -> EventLoopFuture<User> {
+    static func get(_ id: Int, withSoftDeleted: Bool, on conn: Database) -> EventLoopFuture<User> {
         return query(on: conn, withSoftDeleted: withSoftDeleted).filter(\.id == id).first().unwrap(or: Abort(.userNotFound))
     }
 }
@@ -114,7 +143,7 @@ extension User {
         return User.find(req: req, phoneNumber: phoneNumber).transform(to: .ok)
     }
     
-    static func phoneNumberHasExisted(phoneNumber:String,conn:DatabaseConnectable)->EventLoopFuture<Bool>{
+    static func phoneNumberHasExisted(phoneNumber:String,conn: Database)->EventLoopFuture<Bool>{
         return User.query(on: conn, withSoftDeleted: true).filter(\User.phoneNumber == phoneNumber).count().map { count in
             if count != 0 { return true }
             else { return false }
@@ -123,18 +152,18 @@ extension User {
 } 
 
 extension User {
-    static func allActiveUsers(on conn: DatabaseConnectable, queryParam: Inputs.UserQuery?) -> EventLoopFuture<[User]> {
+    static func allActiveUsers(on conn: Database, queryParam: Inputs.UserQuery?) -> EventLoopFuture<[User]> {
         let query =  User.query(on: conn)
         return self.getUsersWithRequestFilter(query: query, queryParam: queryParam)
     }
-    static func allBlockedUsers(on conn: DatabaseConnectable, queryParam: Inputs.UserQuery?) -> EventLoopFuture<[User]> {
+    static func allBlockedUsers(on conn: Database, queryParam: Inputs.UserQuery?) -> EventLoopFuture<[User]> {
         let query = User.query(on: conn, withSoftDeleted: true).filter(\.deletedAt != nil)
         return self.getUsersWithRequestFilter(query: query, queryParam: queryParam)
     }
 }
 
 extension User {
-    static func allChatBlockedUsers(on conn: DatabaseConnectable) -> EventLoopFuture<[User_BlockedReport]> {
+    static func allChatBlockedUsers(on conn: Database) -> EventLoopFuture<[User_BlockedReport]> {
         return User.query(on: conn).join(\ChatBlock.blockedUserId, to: \User.id).alsoDecode(ChatBlock.self).all().map { $0.getStandard() }
     }
 }
@@ -164,23 +193,9 @@ extension User {
     }
 }
 
-extension User {
-    var gifts : Children<User,Gift> {
-        return children(\.userId)
-    }
-    var receivedGifts : Children<User,Gift>{
-        return children(\.donatedToUserId)
-    }
-}
-
-extension User: TokenAuthenticatable {
-    typealias TokenType = Token
-}
-
 //extension User : Migration {}
 
 extension User : Content {}
 
-extension User : Parameter {}
 
 

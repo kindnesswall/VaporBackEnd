@@ -7,12 +7,16 @@
 
 import Vapor
 import Fluent
-import FluentPostgresDriver
 
-final class Category : PostgreSQLModel {
+final class Category : Model {
+    
+    static let schema = "Category"
+    
     var id:Int?
     var title:String
     var title_fa:String?
+    
+    init() {}
     
     init(id:Int?=nil,title:String, title_fa:String?) {
         self.id=id
@@ -49,4 +53,3 @@ extension Category {
 
 extension Category : Content {}
 
-extension Category : Parameter {}

@@ -7,9 +7,11 @@
 
 import Vapor
 import Fluent
-import FluentPostgresDriver
 
-final class Country: PostgreSQLModel {
+final class Country: Model {
+    
+    static let schema = "Country"
+    
     var id:Int?
     var name:String
     var phoneCode: String?
@@ -19,6 +21,9 @@ final class Country: PostgreSQLModel {
     var isFarsi: Bool {
         return localization == "fa"
     }
+    
+    init() {}
+    
 }
 
 extension Country {
@@ -31,4 +36,4 @@ extension Country {
 
 extension Country : Content {}
 
-extension Country : Parameter {}
+

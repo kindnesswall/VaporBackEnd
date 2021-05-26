@@ -7,14 +7,17 @@
 
 import Vapor
 import Fluent
-import FluentPostgresDriver
 
-
-final class Province: PostgreSQLModel {
+final class Province: Model {
+    
+    static let schema = "Province"
+    
     var id:Int?
     var name:String
     var country_id: Int
     var sortIndex:Int?
+    
+    init() {}
 }
 
 extension Province {
@@ -27,4 +30,4 @@ extension Province {
 
 extension Province : Content {}
 
-extension Province : Parameter {}
+

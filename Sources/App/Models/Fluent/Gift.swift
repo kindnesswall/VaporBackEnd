@@ -7,37 +7,88 @@
 
 import Vapor
 import Fluent
-import FluentPostgresDriver
 import FluentSQL
 
-final class Gift : PostgreSQLModel {
+final class Gift : Model {
+    
+    static let schema = "Gift"
+    
+    @ID(key: .id)
     var id:Int?
-    var userId:Int?
-    var donatedToUserId:Int?
+    
+    @OptionalParent(key: "userId")
+    var user: User?
+    
+    @OptionalParent(key: "donatedToUserId")
+    var donatedToUser: User?
+    
+    @Field(key: "isReviewed")
     var isReviewed = false
+    
+    @Field(key: "isRejected")
     var isRejected = false
+    
+    @Field(key: "isDeleted")
     var isDeleted = false
+    
+    @OptionalField(key: "rejectReason")
     var rejectReason: String?
+    
+    @OptionalField(key: "categoryTitle")
     var categoryTitle:String?
+    
+    @OptionalField(key: "countryName")
     var countryName: String?
+    
+    @OptionalField(key: "provinceName")
     var provinceName:String?
+    
+    @OptionalField(key: "cityName")
     var cityName:String?
+    
+    @OptionalField(key: "regionName")
     var regionName:String?
     
+    @Field(key: "title")
     var title:String
+    
+    @Field(key: "description")
     var description:String
+    
+    @Field(key: "price")
     var price:Double
+    
+    @Field(key: "categoryId")
     var categoryId:Int
+    
+    @Field(key: "giftImages")
     var giftImages:[String]
+    
+    @Field(key: "isNew")
     var isNew:Bool
+    
+    @OptionalField(key: "countryId")
     var countryId: Int?
+    
+    @Field(key: "provinceId")
     var provinceId:Int
+    
+    @Field(key: "cityId")
     var cityId:Int
+    
+    @OptionalField(key: "regionId")
     var regionId:Int?
     
+    @Timestamp(key: "createdAt", on: .create)
     var createdAt: Date?
+    
+    @Timestamp(key: "updatedAt", on: .update)
     var updatedAt: Date?
+    
+    @Timestamp(key: "deletedAt", on: .delete)
     var deletedAt: Date?
+    
+    init() {}
     
     func getId() throws -> Int {
         guard let id = self.id else {
@@ -101,17 +152,8 @@ final class Gift : PostgreSQLModel {
     }
 }
 
-extension Gift {
-    static let createdAtKey: TimestampKey? = \.createdAt
-    static let updatedAtKey: TimestampKey? = \.updatedAt
-    static let deletedAtKey: TimestampKey? = \.deletedAt
-    
-}
 
 extension Gift {
-    var user : Parent<Gift,User> {
-        return parent(\.userId)!
-    }
     var category : Parent<Gift,Category> {
         return parent(\.categoryId)
     }
@@ -184,11 +226,11 @@ extension Gift {
 
 extension Gift {
     
-    static func get(_ id: Int, on conn: DatabaseConnectable) -> EventLoopFuture<Gift> {
+    static func get(_ id: Int, on conn: Database) -> EventLoopFuture<Gift> {
         return find(id, on: conn).unwrap(or: Abort(.giftNotFound))
     }
     
-    static func get(_ id: Int, withSoftDeleted: Bool, on conn: DatabaseConnectable) -> EventLoopFuture<Gift> {
+    static func get(_ id: Int, withSoftDeleted: Bool, on conn: Database) -> EventLoopFuture<Gift> {
         return query(on: conn, withSoftDeleted: withSoftDeleted).filter(\.id == id).first().unwrap(or: Abort(.giftNotFound))
     }
 }
@@ -274,5 +316,3 @@ extension Gift {
 /// Allows `Gift` to be encoded to and decoded from HTTP messages.
 extension Gift : Content {}
 
-/// Allows `Gift` to be used as a dynamic parameter in route definitions.
-extension Gift : Parameter {}

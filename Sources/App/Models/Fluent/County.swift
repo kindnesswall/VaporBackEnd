@@ -7,13 +7,18 @@
 
 import Vapor
 import Fluent
-import FluentPostgresDriver
 
-final class County : PostgreSQLModel{
+final class County : Model{
+    
+    static let schema = "County"
+    
     var id:Int?
     var province_id:Int
     var name:String
     var sortIndex:Int? 
+    
+    init() {}
+    
 }
 
 
@@ -21,4 +26,3 @@ final class County : PostgreSQLModel{
 
 extension County : Content {}
 
-extension County : Parameter {}

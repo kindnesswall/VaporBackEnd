@@ -8,9 +8,11 @@
 
 import Vapor
 import Fluent
-import FluentPostgresDriver
 
-final class Charity: PostgreSQLModel {
+final class Charity: Model {
+    
+    static let schema = "Charity"
+    
     var id: Int?
     var userId:Int?
     var isRejected:Bool? = false
@@ -32,6 +34,8 @@ final class Charity: PostgreSQLModel {
     var createdAt: Date?
     var updatedAt: Date?
     var deletedAt: Date?
+    
+    init() {}
     
     init(input: Input, userId:Int) {
         
@@ -95,7 +99,7 @@ extension Charity {
 
 extension Charity {
     
-    static func getAllCharities(conn:DatabaseConnectable) -> EventLoopFuture<[(User,Charity)]> {
+    static func getAllCharities(conn:Database) -> EventLoopFuture<[(User,Charity)]> {
         return User.query(on: conn)
             .filter(\.isCharity == true)
             .join(\Charity.userId, to: \User.id)
@@ -104,7 +108,7 @@ extension Charity {
             .all()
     }
     
-    static func getCharityReviewList(conn:DatabaseConnectable) -> EventLoopFuture<[Charity]> {
+    static func getCharityReviewList(conn:Database) -> EventLoopFuture<[Charity]> {
         return Charity.query(on: conn)
             .filter(\.isRejected == false)
             .join(\User.id, to: \Charity.userId)
@@ -113,7 +117,7 @@ extension Charity {
             .all()
     }
     
-    static func getCharityRejectedList(conn:DatabaseConnectable) -> EventLoopFuture<[Charity]> {
+    static func getCharityRejectedList(conn:Database) -> EventLoopFuture<[Charity]> {
         return Charity.query(on: conn)
             .filter(\.isRejected == true)
             .join(\User.id, to: \Charity.userId)
@@ -123,15 +127,15 @@ extension Charity {
 }
 
 extension Charity {
-    static func find(userId: Int, on conn: DatabaseConnectable) -> EventLoopFuture<Charity?> {
+    static func find(userId: Int, on conn: Database) -> EventLoopFuture<Charity?> {
         return Charity.query(on: conn).filter(\.userId == userId).first()
     }
     
-    static func hasFound(userId: Int, on conn: DatabaseConnectable) -> EventLoopFuture<Bool> {
+    static func hasFound(userId: Int, on conn: Database) -> EventLoopFuture<Bool> {
         return find(userId: userId, on: conn).map { $0 != nil }
     }
     
-    static func get(userId: Int , on conn: DatabaseConnectable) throws -> EventLoopFuture<Charity> {
+    static func get(userId: Int , on conn: Database) throws -> EventLoopFuture<Charity> {
         return find(userId: userId, on: conn).unwrap(or: Abort(.charityInfoNotFound))
     }
 }
@@ -140,7 +144,6 @@ extension Charity {
 
 extension Charity : Content {}
 
-extension Charity : Parameter {}
 
 
 final class Charity_Status: Content {

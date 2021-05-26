@@ -7,9 +7,11 @@
 
 import Vapor
 import Fluent
-import FluentPostgresDriver
 
-final class UserPhoneNumberLog: PostgreSQLModel {
+final class UserPhoneNumberLog: Model {
+    
+    static let schema = "UserPhoneNumberLog"
+    
     var id:Int?
     var userId:Int
     var fromPhoneNumber:String
@@ -21,6 +23,8 @@ final class UserPhoneNumberLog: PostgreSQLModel {
     var createdAt: Date?
     var updatedAt: Date?
     var deletedAt: Date?
+    
+    init() {}
     
     init(userId: Int, fromPhoneNumber: String, toPhoneNumber: String, status: ChangeStatus) {
         
@@ -40,7 +44,7 @@ final class UserPhoneNumberLog: PostgreSQLModel {
         case completed
     }
     
-    func complete(on conn: DatabaseConnectable) -> EventLoopFuture<HTTPStatus> {
+    func complete(on conn: Database) -> EventLoopFuture<HTTPStatus> {
         activationCode_from = nil
         activationCode_to = nil
         setStatus(status: .completed)
@@ -56,7 +60,7 @@ final class UserPhoneNumberLog: PostgreSQLModel {
         return true
     }
     
-    func set(activationCode: ActivationCode, on conn: DatabaseConnectable) -> EventLoopFuture<HTTPStatus> {
+    func set(activationCode: ActivationCode, on conn: Database) -> EventLoopFuture<HTTPStatus> {
         activationCode_from = activationCode.from
         activationCode_to = activationCode.to
         return save(on: conn).transform(to: .ok)
@@ -127,7 +131,7 @@ extension UserPhoneNumberLog {
     }
     
     
-    static func getLatest(phoneNumberLog: UserPhoneNumberLog, conn:DatabaseConnectable) -> EventLoopFuture<UserPhoneNumberLog?> {
+    static func getLatest(phoneNumberLog: UserPhoneNumberLog, conn:Database) -> EventLoopFuture<UserPhoneNumberLog?> {
         return query(on: conn)
             .filter(\.userId == phoneNumberLog.userId)
             .filter(\.fromPhoneNumber == phoneNumberLog.fromPhoneNumber)
@@ -147,4 +151,4 @@ extension UserPhoneNumberLog {
 
 extension UserPhoneNumberLog : Content {}
 
-extension UserPhoneNumberLog : Parameter {}
+

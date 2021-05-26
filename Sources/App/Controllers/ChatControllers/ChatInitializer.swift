@@ -25,7 +25,7 @@ class ChatInitializer {
         }
     }
     
-    func findChat(userId: Int, contactId: Int, on conn: DatabaseConnectable) -> EventLoopFuture<ContactMessage?> {
+    func findChat(userId: Int, contactId: Int, on conn: Database) -> EventLoopFuture<ContactMessage?> {
         return DirectChat.find(userId: userId, contactId: contactId, on: conn)
     }
     
