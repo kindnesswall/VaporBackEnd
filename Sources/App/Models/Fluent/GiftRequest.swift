@@ -12,9 +12,16 @@ final class GiftRequest: Model {
     
     static let schema = "GiftRequest"
     
+    @ID(key: .id)
     var id: Int?
+    
+    @Field(key: "requestUserId")
     var requestUserId:Int
+    
+    @Field(key: "giftId")
     var giftId:Int
+    
+    @Field(key: "giftOwnerId")
     var giftOwnerId:Int
     
     init() {}

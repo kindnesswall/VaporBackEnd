@@ -12,9 +12,16 @@ final class County : Model{
     
     static let schema = "County"
     
+    @ID(key: .id)
     var id:Int?
+    
+    @Field(key: "province_id")
     var province_id:Int
+    
+    @Field(key: "name")
     var name:String
+    
+    @OptionalField(key: "sortIndex")
     var sortIndex:Int? 
     
     init() {}

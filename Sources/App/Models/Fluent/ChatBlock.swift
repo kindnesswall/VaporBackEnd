@@ -12,9 +12,16 @@ final class ChatBlock : Model {
     
     static let schema = "ChatBlock"
     
+    @ID(key: .id)
     var id:Int?
+    
+    @Field(key: "chatId")
     var chatId:Int
+    
+    @Field(key: "blockedUserId")
     var blockedUserId:Int
+    
+    @Field(key: "byUserId")
     var byUserId:Int
     
     init() {}

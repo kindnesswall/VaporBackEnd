@@ -12,10 +12,19 @@ final class Sponsor: Model {
     
     static let schema = "Sponsor"
     
+    @ID(key: .id)
     var id: Int?
+    
+    @Field(key: "name")
     var name: String
+    
+    @OptionalField(key: "image")
     var image: String?
+    
+    @OptionalField(key: "description")
     var description: String?
+    
+    @OptionalField(key: "estimatedDonation")
     var estimatedDonation: Double?
     
     @Timestamp(key: "createdAt", on: .create)

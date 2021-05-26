@@ -12,16 +12,14 @@ final class PhoneNumberActivationCode: Model {
     
     static let schema = "PhoneNumberActivationCode"
     
+    @ID(key: .id)
     var id:Int?
+    
+    @Field(key: "phoneNumber")
     var phoneNumber:String
+    
+    @OptionalField(key: "activationCode")
     var activationCode:String?
-    
-    init() {}
-    
-    init(phoneNumber:String, activationCode:String?) {
-        self.phoneNumber = phoneNumber
-        self.activationCode = activationCode
-    }
     
     @Timestamp(key: "createdAt", on: .create)
     var createdAt: Date?
@@ -31,6 +29,14 @@ final class PhoneNumberActivationCode: Model {
     
     @Timestamp(key: "deletedAt", on: .delete)
     var deletedAt: Date?
+    
+    init() {}
+    
+    init(phoneNumber:String, activationCode:String?) {
+        self.phoneNumber = phoneNumber
+        self.activationCode = activationCode
+    }
+    
 }
 
 extension PhoneNumberActivationCode {

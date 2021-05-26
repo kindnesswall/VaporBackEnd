@@ -12,10 +12,19 @@ final class Country: Model {
     
     static let schema = "Country"
     
+    @ID(key: .id)
     var id:Int?
+    
+    @Field(key: "name")
     var name:String
+    
+    @OptionalField(key: "phoneCode")
     var phoneCode: String?
+    
+    @OptionalField(key: "localization")
     var localization: String?
+    
+    @OptionalField(key: "sortIndex")
     var sortIndex:Int?
     
     var isFarsi: Bool {

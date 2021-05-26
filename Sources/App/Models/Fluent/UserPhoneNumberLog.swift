@@ -12,12 +12,25 @@ final class UserPhoneNumberLog: Model {
     
     static let schema = "UserPhoneNumberLog"
     
+    @ID(key: .id)
     var id:Int?
+    
+    @Field(key: "userId")
     var userId:Int
+    
+    @Field(key: "fromPhoneNumber")
     var fromPhoneNumber:String
+    
+    @Field(key: "toPhoneNumber")
     var toPhoneNumber:String
+    
+    @Field(key: "status")
     var status:String
+    
+    @OptionalField(key: "activationCode_from")
     var activationCode_from:String?
+    
+    @OptionalField(key: "activationCode_to")
     var activationCode_to:String?
     
     @Timestamp(key: "createdAt", on: .create)

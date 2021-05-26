@@ -12,10 +12,19 @@ final class UserPushNotification: Model {
     
     static let schema = "UserPushNotification"
     
+    @ID(key: .id)
     var id: Int?
+    
+    @Field(key: "userId")
     var userId: Int
+    
+    @Field(key: "userTokenId")
     var userTokenId: Int
+    
+    @Field(key: "type")
     var type: String
+    
+    @Field(key: "devicePushToken")
     var devicePushToken: String
     
     init() {}

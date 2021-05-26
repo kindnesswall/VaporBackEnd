@@ -12,9 +12,16 @@ final class PhoneNumberSeenLog: Model {
     
     static let schema = "PhoneNumberSeenLog"
     
+    @ID(key: .id)
     var id: Int?
+    
+    @Field(key: "fromUserId")
     var fromUserId: Int
+    
+    @Field(key: "seenUserId")
     var seenUserId: Int
+    
+    @Field(key: "seenPhoneNumber")
     var seenPhoneNumber: String
     
     @Timestamp(key: "createdAt", on: .create)

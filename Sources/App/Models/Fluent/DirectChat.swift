@@ -12,12 +12,25 @@ final class DirectChat: Model {
     
     static let schema = "DirectChat"
     
+    @ID(key: .id)
     var id: Int?
+    
+    @Field(key: "userId")
     var userId:Int
+    
+    @Field(key: "contactId")
     var contactId: Int
+    
+    @Field(key: "userIsBlocked")
     var userIsBlocked: Bool = false
+    
+    @Field(key: "contactIsBlocked")
     var contactIsBlocked: Bool = false
+    
+    @Field(key: "userNotification")
     var userNotification:Int = 0
+    
+    @Field(key: "contactNotification")
     var contactNotification:Int = 0
     
     init() {}

@@ -12,9 +12,16 @@ final class RatingResult: Model {
     
     static let schema = "RatingResult"
     
+    @ID(key: .id)
     var id: Int?
+    
+    @Field(key: "reviewedId")
     var reviewedId: Int
+    
+    @Field(key: "averageRate")
     var averageRate: Double
+    
+    @Field(key: "votersCount")
     var votersCount: Int
     
     @Timestamp(key: "createdAt", on: .create)

@@ -12,12 +12,25 @@ final class TextMessage : Model {
     
     static let schema = "TextMessage"
     
+    @ID(key: .id)
     var id:Int?
+    
+    @Field(key: "chatId")
     var chatId:Int
+    
+    @OptionalField(key: "senderId")
     var senderId:Int?
+    
+    @OptionalField(key: "receiverId")
     var receiverId:Int?
+    
+    @Field(key: "text")
     var text:String
+    
+    @OptionalField(key: "type")
     var type: String?
+    
+    @OptionalField(key: "ack")
     var ack:Bool?
     
     @Timestamp(key: "createdAt", on: .create)
