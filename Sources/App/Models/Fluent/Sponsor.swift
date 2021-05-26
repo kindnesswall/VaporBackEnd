@@ -18,8 +18,13 @@ final class Sponsor: Model {
     var description: String?
     var estimatedDonation: Double?
     
+    @Timestamp(key: "createdAt", on: .create)
     var createdAt: Date?
+    
+    @Timestamp(key: "updatedAt", on: .update)
     var updatedAt: Date?
+    
+    @Timestamp(key: "deletedAt", on: .delete)
     var deletedAt: Date?
     
     init() {}
@@ -38,12 +43,6 @@ extension Sponsor {
     static func get(_ id: Int, on conn: Database) -> EventLoopFuture<Sponsor> {
         return find(id, on: conn).unwrap(or: Abort(.notFound))
     }
-}
-
-extension Sponsor {
-    static let createdAtKey: TimestampKey? = \.createdAt
-    static let updatedAtKey: TimestampKey? = \.updatedAt
-    static let deletedAtKey: TimestampKey? = \.deletedAt
 }
 
 extension Sponsor {

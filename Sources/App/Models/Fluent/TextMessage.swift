@@ -19,7 +19,9 @@ final class TextMessage : Model {
     var text:String
     var type: String?
     var ack:Bool?
-    var createdAt:Date?
+    
+    @Timestamp(key: "createdAt", on: .create)
+    var createdAt: Date?
     
     init() {}
     
@@ -41,10 +43,6 @@ extension TextMessage {
         case giftRequest
         case giftDonation
     }
-}
-
-extension TextMessage {
-    static let createdAtKey: TimestampKey? = \.createdAt
 }
 
 extension TextMessage: PushPayloadable {

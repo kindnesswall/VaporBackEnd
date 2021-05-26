@@ -17,6 +17,7 @@ final class PhoneNumberSeenLog: Model {
     var seenUserId: Int
     var seenPhoneNumber: String
     
+    @Timestamp(key: "createdAt", on: .create)
     var createdAt: Date?
     
     init() {}
@@ -26,10 +27,6 @@ final class PhoneNumberSeenLog: Model {
         self.seenUserId = seenUserId
         self.seenPhoneNumber = seenPhoneNumber
     }
-}
-
-extension PhoneNumberSeenLog {
-    static let createdAtKey: TimestampKey? = \.createdAt
 }
 
 //extension PhoneNumberSeenLog : Migration {}

@@ -17,8 +17,13 @@ final class RatingResult: Model {
     var averageRate: Double
     var votersCount: Int
     
+    @Timestamp(key: "createdAt", on: .create)
     var createdAt: Date?
+    
+    @Timestamp(key: "updatedAt", on: .update)
     var updatedAt: Date?
+    
+    @Timestamp(key: "deletedAt", on: .delete)
     var deletedAt: Date?
     
     init() {}
@@ -28,12 +33,6 @@ final class RatingResult: Model {
         self.averageRate = averageRate.rate
         self.votersCount = averageRate.votersCount
     }
-}
-
-extension RatingResult {
-    static let createdAtKey: TimestampKey? = \.createdAt
-    static let updatedAtKey: TimestampKey? = \.updatedAt
-    static let deletedAtKey: TimestampKey? = \.deletedAt
 }
 
 extension RatingResult {

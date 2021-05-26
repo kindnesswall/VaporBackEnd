@@ -12,8 +12,13 @@ final class Category : Model {
     
     static let schema = "Category"
     
+    @ID(key: .id)
     var id:Int?
+    
+    @Field(key: "title")
     var title:String
+    
+    @OptionalField(key: "title_fa")
     var title_fa:String?
     
     init() {}

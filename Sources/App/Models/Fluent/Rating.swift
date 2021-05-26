@@ -17,8 +17,13 @@ final class Rating: Model {
     var rate: Int
     var voterId: Int
     
+    @Timestamp(key: "createdAt", on: .create)
     var createdAt: Date?
+    
+    @Timestamp(key: "updatedAt", on: .update)
     var updatedAt: Date?
+    
+    @Timestamp(key: "deletedAt", on: .delete)
     var deletedAt: Date?
     
     init() {}
@@ -93,12 +98,6 @@ extension Rating: FindOrCreatable {
             .filter(\.voterId == voterId)
             .filter(\.reviewedId == reviewedId)
     }
-}
-
-extension Rating {
-    static let createdAtKey: TimestampKey? = \.createdAt
-    static let updatedAtKey: TimestampKey? = \.updatedAt
-    static let deletedAtKey: TimestampKey? = \.deletedAt
 }
 
 extension Rating {

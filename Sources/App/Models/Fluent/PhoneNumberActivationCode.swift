@@ -23,8 +23,13 @@ final class PhoneNumberActivationCode: Model {
         self.activationCode = activationCode
     }
     
+    @Timestamp(key: "createdAt", on: .create)
     var createdAt: Date?
+    
+    @Timestamp(key: "updatedAt", on: .update)
     var updatedAt: Date?
+    
+    @Timestamp(key: "deletedAt", on: .delete)
     var deletedAt: Date?
 }
 
@@ -46,12 +51,6 @@ extension PhoneNumberActivationCode {
             return item.save(on: req).transform(to: .ok)
         }
     }
-}
-
-extension PhoneNumberActivationCode {
-    static let createdAtKey: TimestampKey? = \.createdAt
-    static let updatedAtKey: TimestampKey? = \.updatedAt
-    static let deletedAtKey: TimestampKey? = \.deletedAt
 }
 
 //extension PhoneNumberActivationCode : Migration {}

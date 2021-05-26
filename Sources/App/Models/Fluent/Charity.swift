@@ -13,26 +13,61 @@ final class Charity: Model {
     
     static let schema = "Charity"
     
+    @ID(key: .id)
     var id: Int?
+    
+    @OptionalField(key: "userId")
     var userId:Int?
+    
+    @OptionalField(key: "isRejected")
     var isRejected:Bool? = false
+    
+    @OptionalField(key: "rejectReason")
     var rejectReason: String?
     
+    @Field(key: "name")
     var name: String
+    
+    @OptionalField(key: "imageUrl")
     var imageUrl: String?
+    
+    @OptionalField(key: "registerId")
     var registerId: String?
+    
+    @OptionalField(key: "registerDate")
     var registerDate: String?
+    
+    @OptionalField(key: "address")
     var address: String?
+    
+    @OptionalField(key: "telephoneNumber")
     var telephoneNumber: String?
+    
+    @OptionalField(key: "mobileNumber")
     var mobileNumber: String?
+    
+    @OptionalField(key: "website")
     var website: String?
+    
+    @OptionalField(key: "email")
     var email: String?
+    
+    @OptionalField(key: "instagram")
     var instagram: String?
+    
+    @OptionalField(key: "telegram")
     var telegram: String?
+    
+    @OptionalField(key: "description")
     var description: String?
     
+    @Timestamp(key: "createdAt", on: .create)
     var createdAt: Date?
+    
+    @Timestamp(key: "updatedAt", on: .update)
     var updatedAt: Date?
+    
+    @Timestamp(key: "deletedAt", on: .delete)
     var deletedAt: Date?
     
     init() {}
@@ -89,12 +124,6 @@ final class Charity: Model {
         var telegram: String?
         var description: String?
     }
-}
-
-extension Charity {
-    static let createdAtKey: TimestampKey? = \.createdAt
-    static let updatedAtKey: TimestampKey? = \.updatedAt
-    static let deletedAtKey: TimestampKey? = \.deletedAt
 }
 
 extension Charity {

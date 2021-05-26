@@ -13,12 +13,25 @@ final class ApplicationVersion: Model {
     
     static let schema = "ApplicationVersion"
     
+    @ID(key: .id)
     var id: Int?
+    
+    @Field(key: "platform")
     var platform: String
+    
+    @Field(key: "availableVersionName")
     var availableVersionName: String
+    
+    @Field(key: "availableVersionCode")
     var availableVersionCode: Int
+    
+    @Field(key: "requiredVersionName")
     var requiredVersionName: String
+    
+    @Field(key: "requiredVersionCode")
     var requiredVersionCode: Int
+    
+    @OptionalField(key: "downloadLink")
     var downloadLink: String?
     
     init() {}
