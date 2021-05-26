@@ -213,10 +213,6 @@ class URIs {
         return "\(apiRoute)/phone/visibility"
     }
     
-    var phone_visibility_check: String {
-        return "\(phone_visibility)/check"
-    }
-    
     var phone_visibility_access: String {
         return "\(phone_visibility)/access"
     }

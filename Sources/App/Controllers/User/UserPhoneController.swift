@@ -9,13 +9,6 @@ import Vapor
 
 final class UserPhoneController {
     
-    func checkPhoneNumberAccessibility(_ req: Request) throws -> Future<Outputs.UserPhoneNumberCheck> {
-        return try getUserIfPhoneNumberIsAccessible(req).map { user in
-            return user != nil
-        }
-        .map {Outputs.UserPhoneNumberCheck(isVisible: $0)}
-    }
-    
     func getPhoneNumber(_ req: Request) throws -> Future<Outputs.UserPhoneNumber> {
         
         let authId = try req.requireAuthenticated(User.self).getId()

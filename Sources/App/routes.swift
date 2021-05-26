@@ -179,11 +179,11 @@ public func routes(_ router: Router) throws {
     tokenFetched.get(uris.rating, Int.parameter, use: rating.get)
     
     //Phone Visibility Access
-    tokenProtected.get(uris.phone_visibility_check, Int.parameter, use: userPhone.checkPhoneNumberAccessibility)
     tokenProtected.get(uris.phone_visibility_access, Int.parameter, use: userPhone.getPhoneNumber)
     
     //Phone Visibility Setting
-    tokenProtected.get(uris.phone_visibility_setting, use: phoneVisibilitySetting.get)
+    publicRouter.get(uris.phone_visibility_setting, Int.parameter, use: phoneVisibilitySetting.getUserSetting)
+    tokenProtected.get(uris.phone_visibility_setting, use: phoneVisibilitySetting.getOwnerSetting)
     tokenProtected.post(uris.phone_visibility_setting, use: phoneVisibilitySetting.set)
 }
 

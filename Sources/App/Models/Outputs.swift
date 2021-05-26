@@ -24,9 +24,5 @@ class Outputs {
     struct UserPhoneNumber: Content {
         var phoneNumber: String
     }
-    
-    struct UserPhoneNumberCheck: Content {
-        var isVisible: Bool
-    }
 
 }

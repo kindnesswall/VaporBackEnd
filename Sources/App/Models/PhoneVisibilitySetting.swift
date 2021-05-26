@@ -15,6 +15,10 @@ enum PhoneVisibilitySetting: String, Codable {
 
 struct PhoneVisibilitySettingIO: Content {
     let setting: PhoneVisibilitySetting
+    
+    init(user: User) {
+        setting = user.phoneVisibilitySetting
+    }
 }
 
 extension User {
