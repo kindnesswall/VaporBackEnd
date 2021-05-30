@@ -23,10 +23,10 @@ final class User : Model {
     var activationCode:String?
     
     @Field(key: "isAdmin")
-    var isAdmin:Bool = false
+    var isAdmin:Bool
     
     @Field(key: "isCharity")
-    var isCharity:Bool = false
+    var isCharity:Bool
     
     @OptionalField(key: "name")
     var name:String?
@@ -41,10 +41,10 @@ final class User : Model {
     var charityImage:String?
     
     @OptionalField(key: "isPhoneVisibleForCharities")
-    var isPhoneVisibleForCharities: Bool? = true
+    var isPhoneVisibleForCharities: Bool?
     
     @OptionalField(key: "isPhoneVisibleForAll")
-    var isPhoneVisibleForAll: Bool? = false
+    var isPhoneVisibleForAll: Bool?
 
     @Children(for: \.$user)
     var gifts: [Gift]
@@ -63,6 +63,15 @@ final class User : Model {
     
     init() {}
     
+    init(phoneNumber:String) {
+        self.phoneNumber=phoneNumber
+        
+        self.isAdmin = false
+        self.isCharity = false
+        self.isPhoneVisibleForCharities = true
+        self.isPhoneVisibleForAll = false
+    }
+    
     func getId() throws -> Int {
         guard let id = self.id else {
             throw Abort(.nilUserId)
@@ -75,10 +84,6 @@ final class User : Model {
             return req.future(error: Abort(.nilUserId))
         }
         return req.future(id)
-    }
-    
-    init(phoneNumber:String) {
-        self.phoneNumber=phoneNumber
     }
 }
 

@@ -20,7 +20,7 @@ final class Charity: Model {
     var userId:Int?
     
     @OptionalField(key: "isRejected")
-    var isRejected:Bool? = false
+    var isRejected:Bool?
     
     @OptionalField(key: "rejectReason")
     var rejectReason: String?
@@ -75,6 +75,7 @@ final class Charity: Model {
     init(input: Input, userId:Int) {
         
         self.userId = userId
+        self.isRejected = false
         
         self.name = input.name
         self.imageUrl = input.imageUrl

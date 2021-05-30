@@ -26,13 +26,13 @@ final class Gift : Model {
     var category: Category
     
     @Field(key: "isReviewed")
-    var isReviewed = false
+    var isReviewed:Bool
     
     @Field(key: "isRejected")
-    var isRejected = false
+    var isRejected:Bool
     
     @Field(key: "isDeleted")
-    var isDeleted = false
+    var isDeleted:Bool
     
     @OptionalField(key: "rejectReason")
     var rejectReason: String?
@@ -106,6 +106,9 @@ final class Gift : Model {
     
     private init(input: Gift.Input, authId: Int) {
         self.userId = authId
+        self.isRejected = false
+        self.isDeleted = false
+        self.isReviewed = false
         
         self.title=input.title
         self.description=input.description

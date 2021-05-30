@@ -22,16 +22,16 @@ final class DirectChat: Model {
     var contactId: Int
     
     @Field(key: "userIsBlocked")
-    var userIsBlocked: Bool = false
+    var userIsBlocked: Bool
     
     @Field(key: "contactIsBlocked")
-    var contactIsBlocked: Bool = false
+    var contactIsBlocked: Bool
     
     @Field(key: "userNotification")
-    var userNotification:Int = 0
+    var userNotification:Int
     
     @Field(key: "contactNotification")
-    var contactNotification:Int = 0
+    var contactNotification:Int
     
     @Children(for: \.$chat)
     var textMessages: [TextMessage]
@@ -41,6 +41,11 @@ final class DirectChat: Model {
     init(userId:Int, contactId: Int) {
         self.userId = userId
         self.contactId = contactId
+        
+        self.userIsBlocked = false
+        self.contactIsBlocked = false
+        self.userNotification = 0
+        self.contactNotification = 0
     }
 }
 
