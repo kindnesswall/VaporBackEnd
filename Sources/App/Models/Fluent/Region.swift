@@ -15,8 +15,8 @@ final class Region : Model {
     @ID(key: .id)
     var id:Int?
     
-    @Field(key: "city_id")
-    var city_id:Int
+    @Parent(key: "city_id")
+    var city: City
     
     @Field(key: "name")
     var name:String

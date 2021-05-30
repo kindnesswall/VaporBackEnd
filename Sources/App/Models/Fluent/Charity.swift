@@ -130,7 +130,7 @@ extension Charity {
     
     static func getAllCharities(conn:Database) -> EventLoopFuture<[(User,Charity)]> {
         return User.query(on: conn)
-            .filter(\.isCharity == true)
+            .filter(\.$isCharity == true)
             .join(\Charity.userId, to: \User.id)
             .filter(\Charity.deletedAt == nil)
             .alsoDecode(Charity.self)
@@ -139,7 +139,7 @@ extension Charity {
     
     static func getCharityReviewList(conn:Database) -> EventLoopFuture<[Charity]> {
         return Charity.query(on: conn)
-            .filter(\.isRejected == false)
+            .filter(\.$isRejected == false)
             .join(\User.id, to: \Charity.userId)
             .filter(\User.deletedAt == nil)
             .filter(\User.isCharity == false)
@@ -148,7 +148,7 @@ extension Charity {
     
     static func getCharityRejectedList(conn:Database) -> EventLoopFuture<[Charity]> {
         return Charity.query(on: conn)
-            .filter(\.isRejected == true)
+            .filter(\.$isRejected == true)
             .join(\User.id, to: \Charity.userId)
             .filter(\User.deletedAt == nil)
             .all()
@@ -157,7 +157,7 @@ extension Charity {
 
 extension Charity {
     static func find(userId: Int, on conn: Database) -> EventLoopFuture<Charity?> {
-        return Charity.query(on: conn).filter(\.userId == userId).first()
+        return Charity.query(on: conn).filter(\.$userId == userId).first()
     }
     
     static func hasFound(userId: Int, on conn: Database) -> EventLoopFuture<Bool> {

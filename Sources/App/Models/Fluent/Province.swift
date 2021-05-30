@@ -18,19 +18,16 @@ final class Province: Model {
     @Field(key: "name")
     var name:String
     
-    @Field(key: "country_id")
-    var country_id: Int
+    @Parent(key: "country_id")
+    var country: Country
     
     @OptionalField(key: "sortIndex")
     var sortIndex:Int?
     
+    @Children(for: \.$province)
+    var cities: [City]
+    
     init() {}
-}
-
-extension Province {
-    var cities : Children<Province,City> {
-        return children(\.province_id)
-    }
 }
 
 //extension Province : Migration {}

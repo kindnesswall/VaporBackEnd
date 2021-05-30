@@ -33,6 +33,9 @@ final class DirectChat: Model {
     @Field(key: "contactNotification")
     var contactNotification:Int = 0
     
+    @Children(for: \.$chat)
+    var textMessages: [TextMessage]
+    
     init() {}
     
     init(userId:Int, contactId: Int) {
@@ -90,12 +93,6 @@ extension DirectChat {
         default:
             return false
         }
-    }
-}
-
-extension DirectChat {
-    var textMessages : Children<DirectChat,TextMessage> {
-        return children(\.chatId)
     }
 }
 
@@ -184,14 +181,14 @@ extension DirectChat: FindOrCreatable {
 
 extension DirectChat {
     static func userChats(blocked: Bool, userId: Int, on req: Request) -> EventLoopFuture<[ContactMessage]> {
-        let onUsers = query(on: req)
-            .filter(\.userId == userId)
-            .filter(\.contactIsBlocked == blocked)
+        let onUsers = query(on: req.db)
+            .filter(\.$userId == userId)
+            .filter(\.$contactIsBlocked == blocked)
             .join(\User.id, to: \DirectChat.contactId)
             .alsoDecode(User.self).all()
-        let onContacts = query(on: req)
-            .filter(\.contactId == userId)
-            .filter(\.userIsBlocked == blocked)
+        let onContacts = query(on: req.db)
+            .filter(\.$contactId == userId)
+            .filter(\.$userIsBlocked == blocked)
             .join(\User.id, to: \DirectChat.userId)
             .alsoDecode(User.self).all()
         return onUsers.and(onContacts).map { onUsers, onContacts in

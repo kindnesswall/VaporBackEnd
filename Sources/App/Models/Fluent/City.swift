@@ -15,8 +15,8 @@ final class City : Model{
     @ID(key: .id)
     var id:Int?
     
-    @Field(key: "province_id")
-    var province_id:Int
+    @Parent(key: "province_id")
+    var province: Province
     
     @Field(key: "county_id")
     var county_id:Int
@@ -28,15 +28,12 @@ final class City : Model{
     var hasRegions:Bool?
     
     @OptionalField(key: "sortIndex")
-    var sortIndex:Int? 
+    var sortIndex:Int?
+    
+    @Children(for: \.$city)
+    var regions: [Region]
     
     init() {}
-}
-
-extension City {
-    var regions : Children<City,Region> {
-        return children(\.city_id)
-    }
 }
 
 

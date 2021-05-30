@@ -21,6 +21,9 @@ final class Category : Model {
     @OptionalField(key: "title_fa")
     var title_fa:String?
     
+    @Children(for: \.$category)
+    var gifts: [Gift]
+    
     init() {}
     
     init(id:Int?=nil,title:String, title_fa:String?) {
@@ -45,12 +48,6 @@ final class Category : Model {
     
     func localizedTitle(country: Country) -> String {
         return country.isFarsi ? (title_fa ?? title) : title
-    }
-}
-
-extension Category {
-    var gifts : Children<Category,Gift> {
-        return children(\.categoryId)
     }
 }
 

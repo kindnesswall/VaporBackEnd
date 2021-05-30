@@ -22,6 +22,9 @@ final class Gift : Model {
     @OptionalParent(key: "donatedToUserId")
     var donatedToUser: User?
     
+    @Parent(key: "categoryId")
+    var category: Category
+    
     @Field(key: "isReviewed")
     var isReviewed = false
     
@@ -58,9 +61,6 @@ final class Gift : Model {
     @Field(key: "price")
     var price:Double
     
-    @Field(key: "categoryId")
-    var categoryId:Int
-    
     @Field(key: "giftImages")
     var giftImages:[String]
     
@@ -70,14 +70,14 @@ final class Gift : Model {
     @OptionalField(key: "countryId")
     var countryId: Int?
     
-    @Field(key: "provinceId")
-    var provinceId:Int
+    @Parent(key: "provinceId")
+    var province: Province
     
-    @Field(key: "cityId")
-    var cityId:Int
+    @Parent(key: "cityId")
+    var city: City
     
-    @OptionalField(key: "regionId")
-    var regionId:Int?
+    @OptionalParent(key: "regionId")
+    var region: Region?
     
     @Timestamp(key: "createdAt", on: .create)
     var createdAt: Date?
@@ -149,22 +149,6 @@ final class Gift : Model {
         var provinceId:Int
         var cityId:Int
         var regionId:Int?
-    }
-}
-
-
-extension Gift {
-    var category : Parent<Gift,Category> {
-        return parent(\.categoryId)
-    }
-    var province : Parent<Gift, Province> {
-        return parent(\.provinceId)
-    }
-    var city : Parent<Gift, City> {
-        return parent(\.cityId)
-    }
-    var region : Parent<Gift, Region>? {
-        return parent(\.regionId)
     }
 }
 

@@ -31,14 +31,11 @@ final class Country: Model {
         return localization == "fa"
     }
     
+    @Children(for: \.$country)
+    var provinces: [Province]
+    
     init() {}
     
-}
-
-extension Country {
-    var provinces: Children<Country, Province> {
-        return children(\.country_id)
-    }
 }
 
 //extension Country : Migration {}

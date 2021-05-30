@@ -34,9 +34,9 @@ final class ChatBlock : Model {
     
     static func find(chatBlock:ChatBlock,conn:Database) -> EventLoopFuture<ChatBlock?> {
         return ChatBlock.query(on: conn)
-            .filter(\.chatId == chatBlock.chatId)
-            .filter(\.blockedUserId == chatBlock.blockedUserId)
-            .filter(\.byUserId == chatBlock.byUserId)
+            .filter(\.$chatId == chatBlock.chatId)
+            .filter(\.$blockedUserId == chatBlock.blockedUserId)
+            .filter(\.$byUserId == chatBlock.byUserId)
             .first()
     }
     

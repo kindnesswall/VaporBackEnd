@@ -15,8 +15,8 @@ final class TextMessage : Model {
     @ID(key: .id)
     var id:Int?
     
-    @Field(key: "chatId")
-    var chatId:Int
+    @Parent(key: "chatId")
+    var chat: DirectChat
     
     @OptionalField(key: "senderId")
     var senderId:Int?
