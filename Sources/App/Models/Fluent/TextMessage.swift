@@ -39,7 +39,7 @@ final class TextMessage : Model {
     init() {}
     
     init(input: Inputs.TextMessage) throws {
-        self.chatId = input.chatId
+        self.$chat.id = input.chatId
         self.text = input.text
         
         if let rawType = input.type {
@@ -71,9 +71,9 @@ extension TextMessage {
         
         let query = TextMessage.query(on: conn)
         
-        query.filter(\.chatId == chatId)
-            .filter(\.receiverId == userId)
-            .filter(\.ack == false)
+        query.filter(\.$chat.$id == chatId)
+            .filter(\.$receiverId == userId)
+            .filter(\.$ack == false)
         
         return query.count()
         

@@ -111,7 +111,7 @@ extension Rating {
     
     static func calculateAverageRate(reviewedId: Int, on conn: Database) -> EventLoopFuture<AverageRate?> {
         return query(on: conn)
-            .filter(\.reviewedId == reviewedId)
+            .filter(\.$reviewedId == reviewedId)
             .all()
             .map { $0.averageRate }
     }

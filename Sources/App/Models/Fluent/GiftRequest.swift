@@ -35,7 +35,7 @@ final class GiftRequest: Model {
 
 extension GiftRequest {
     static func hasExisted(requestUserId:Int,giftId:Int,conn:Database) -> EventLoopFuture<Bool> {
-        return GiftRequest.query(on: conn).filter(\.requestUserId == requestUserId).filter(\.giftId == giftId).count().map { count in
+        return GiftRequest.query(on: conn).filter(\.$requestUserId == requestUserId).filter(\.giftId == giftId).count().map { count in
             if count>0 {
                 return true
             }

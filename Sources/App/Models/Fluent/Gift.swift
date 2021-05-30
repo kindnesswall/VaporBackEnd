@@ -98,14 +98,14 @@ final class Gift : Model {
     }
     
     func getUserId() throws -> Int {
-        guard let userId = self.userId else {
+        guard let userId = self.$user.id else {
             throw Abort(.nilGiftUserId)
         }
         return userId
     }
     
     private init(input: Gift.Input, authId: Int) {
-        self.userId = authId
+        self.$user.id = authId
         self.isRejected = false
         self.isDeleted = false
         self.isReviewed = false
@@ -113,13 +113,13 @@ final class Gift : Model {
         self.title=input.title
         self.description=input.description
         self.price=input.price
-        self.categoryId=input.categoryId
+        self.$category.id=input.categoryId
         self.giftImages=input.giftImages
         self.isNew=input.isNew
         self.countryId=input.countryId
-        self.provinceId=input.provinceId
-        self.cityId=input.cityId
-        self.regionId=input.regionId
+        self.$province.id=input.provinceId
+        self.$city.id=input.cityId
+        self.$region.id=input.regionId
     }
     
     private func update(input: Gift.Input) throws {
@@ -127,13 +127,13 @@ final class Gift : Model {
         self.title=input.title
         self.description=input.description
         self.price=input.price
-        self.categoryId=input.categoryId
+        self.$category.id=input.categoryId
         self.giftImages=input.giftImages
         self.isNew=input.isNew
         self.countryId=input.countryId
-        self.provinceId=input.provinceId
-        self.cityId=input.cityId
-        self.regionId=input.regionId
+        self.$province.id=input.provinceId
+        self.$city.id=input.cityId
+        self.$region.id=input.regionId
 
         self.isRejected = false
 //        self.rejectReason = nil // Note: Commented because the reason may help for the next review
@@ -157,7 +157,7 @@ final class Gift : Model {
 
 extension Gift {
     var isDonated: Bool {
-        return donatedToUserId != nil
+        return $donatedToUser.id != nil
     }
 }
 
@@ -170,7 +170,7 @@ extension Gift {
     
     func update(input: Gift.Input, authId: Int, on req: Request) throws -> EventLoopFuture<Gift> {
         
-        guard self.userId == authId else { throw Abort(.unauthorizedGift) }
+        guard self.$user.id == authId else { throw Abort(.unauthorizedGift) }
         guard !self.isDeleted else { throw Abort(.deletedGift) }
         guard !isDonated else { throw Abort(.donatedGiftUnaccepted) }
         
@@ -189,7 +189,7 @@ extension Gift {
             return self.getCategoryTitle(on: req, country: country).flatMap { categoryTitle in
                 self.categoryTitle = categoryTitle
                 
-                return self.province.get(on: req).flatMap { province in
+                return self.$province.get(on: req.db).flatMap { province in
                     self.provinceName = province.name
                     
                     return self.city.get(on: req).flatMap { city in
@@ -218,7 +218,7 @@ extension Gift {
     }
     
     static func get(_ id: Int, withSoftDeleted: Bool, on conn: Database) -> EventLoopFuture<Gift> {
-        return query(on: conn, withSoftDeleted: withSoftDeleted).filter(\.id == id).first().unwrap(or: Abort(.giftNotFound))
+        return query(on: conn, withSoftDeleted: withSoftDeleted).filter(\.$id == id).first().unwrap(or: Abort(.giftNotFound))
     }
 }
 
@@ -231,7 +231,7 @@ extension Gift {
     }
     
     func getCategoryTitle(on req: Request, country: Country) -> EventLoopFuture<String?> {
-        return category.get(on: req).map { category in
+        return $category.get(on: req.db).map { category in
             return category.localizedTitle(country: country)
         }
     }
