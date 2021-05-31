@@ -114,7 +114,7 @@ extension UserPhoneNumberLog {
         let futureItem = try findOrCreate(req: req, auth: auth, toPhoneNumber: toPhoneNumber)
         
         return futureItem.flatMap { item in
-            return item.set(activationCode: activationCode, on: req)
+            return item.set(activationCode: activationCode, on: req.db)
         }
     }
     
@@ -122,7 +122,7 @@ extension UserPhoneNumberLog {
         
         let requested = UserPhoneNumberLog(userId: try auth.getId(), fromPhoneNumber: auth.phoneNumber, toPhoneNumber: toPhoneNumber, status: .requested)
         
-        return getLatest(phoneNumberLog: requested, conn: req).map { found in
+        return getLatest(phoneNumberLog: requested, conn: req.db).map { found in
             let phoneNumberLog = found ?? requested
             return phoneNumberLog
         }
@@ -133,7 +133,7 @@ extension UserPhoneNumberLog {
         
         let requested = UserPhoneNumberLog(userId: try auth.getId(), fromPhoneNumber: auth.phoneNumber, toPhoneNumber: toPhoneNumber, status: .requested)
         
-        return getLatest(phoneNumberLog: requested, conn: req).map { item in
+        return getLatest(phoneNumberLog: requested, conn: req.db).map { item in
             
             guard let item = item else {
                 throw Abort(.invalidPhoneNumber)
@@ -151,11 +151,11 @@ extension UserPhoneNumberLog {
     
     static func getLatest(phoneNumberLog: UserPhoneNumberLog, conn:Database) -> EventLoopFuture<UserPhoneNumberLog?> {
         return query(on: conn)
-            .filter(\.userId == phoneNumberLog.userId)
-            .filter(\.fromPhoneNumber == phoneNumberLog.fromPhoneNumber)
-            .filter(\.toPhoneNumber == phoneNumberLog.toPhoneNumber)
-            .filter(\.status == phoneNumberLog.status)
-        .sort(\.createdAt, .descending).first()
+            .filter(\.$userId == phoneNumberLog.userId)
+            .filter(\.$fromPhoneNumber == phoneNumberLog.fromPhoneNumber)
+            .filter(\.$toPhoneNumber == phoneNumberLog.toPhoneNumber)
+            .filter(\.$status == phoneNumberLog.status)
+        .sort(\.$createdAt, .descending).first()
     }
 }
 

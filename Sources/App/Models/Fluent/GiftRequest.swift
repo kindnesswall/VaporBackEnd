@@ -35,7 +35,7 @@ final class GiftRequest: Model {
 
 extension GiftRequest {
     static func hasExisted(requestUserId:Int,giftId:Int,conn:Database) -> EventLoopFuture<Bool> {
-        return GiftRequest.query(on: conn).filter(\.$requestUserId == requestUserId).filter(\.giftId == giftId).count().map { count in
+        return GiftRequest.query(on: conn).filter(\.$requestUserId == requestUserId).filter(\.$giftId == giftId).count().map { count in
             if count>0 {
                 return true
             }
@@ -48,8 +48,8 @@ extension GiftRequest {
         return giftRequest.save(on: conn)
     }
     
-    static func getGiftsToDonate(userGifts:QueryBuilder<PostgreSQLDatabase, Gift>,userId:Int,requestUserId:Int)-> QueryBuilder<PostgreSQLDatabase, Gift>{
-        return userGifts.join(\GiftRequest.giftId, to: \Gift.id).filter(\GiftRequest.giftOwnerId == userId).filter(\GiftRequest.requestUserId == requestUserId)
+    static func getGiftsToDonate(userGifts:QueryBuilder<Gift>,userId:Int,requestUserId:Int)-> QueryBuilder<Gift>{
+        return userGifts.join(\GiftRequest.giftId, to: \Gift.id).filter(\GiftRequest.$giftOwnerId == userId).filter(\GiftRequest.$requestUserId == requestUserId)
     }
 }
 

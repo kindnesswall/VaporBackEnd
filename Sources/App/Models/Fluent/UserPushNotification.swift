@@ -38,27 +38,27 @@ final class UserPushNotification: Model {
     
     static func hasFound(input: Inputs.UserPushNotification, conn: Database)->EventLoopFuture<UserPushNotification?> {
         return query(on: conn)
-            .filter(\.type == input.type)
-            .filter(\.devicePushToken == input.devicePushToken)
+            .filter(\.$type == input.type)
+            .filter(\.$devicePushToken == input.devicePushToken)
             .first()
     }
     
     static func findAllTokens(userId:Int, conn: Database) -> EventLoopFuture<[UserPushNotification]>{
         return query(on: conn)
-            .filter(\.userId == userId)
+            .filter(\.$userId == userId)
             .all()
     }
     
     static func deleteAll(userId: Int, conn: Database) -> EventLoopFuture<HTTPStatus> {
         return query(on: conn)
-            .filter(\.userId == userId)
+            .filter(\.$userId == userId)
             .delete()
             .transform(to: .ok)
     }
     
     static func delete(userTokenId: Int, conn: Database) -> EventLoopFuture<HTTPStatus> {
         return query(on: conn)
-            .filter(\.userTokenId == userTokenId)
+            .filter(\.$userTokenId == userTokenId)
             .delete()
             .transform(to: .ok)
     }

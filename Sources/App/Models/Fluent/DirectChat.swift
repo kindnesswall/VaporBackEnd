@@ -169,11 +169,11 @@ extension DirectChat {
 
 extension DirectChat: FindOrCreatable {
     
-    static func _findQuery(input: DirectChat, on conn: Database) -> QueryBuilder<PostgreSQLDatabase, DirectChat> {
+    static func _findQuery(input: DirectChat, on conn: Database) -> QueryBuilder<DirectChat> {
         return _find(userId: input.userId, contactId: input.contactId, on: conn)
     }
     
-    static private func _find(userId: Int, contactId: Int, on conn: Database) -> QueryBuilder<PostgreSQLDatabase, DirectChat> {
+    static private func _find(userId: Int, contactId: Int, on conn: Database) -> QueryBuilder<DirectChat> {
         return query(on: conn).group(.or) { query in
             query.group(.and, closure: { query in
                 query.filter(\.userId == userId).filter(\.contactId == contactId)

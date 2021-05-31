@@ -63,7 +63,7 @@ extension Rating {
     
     
     static func find(authId voterId: Int, reviewedId: Int, on req: Request) -> EventLoopFuture<Rating?> {
-        return _findQuery(voterId: voterId, reviewedId: reviewedId, on: req)
+        return _findQuery(voterId: voterId, reviewedId: reviewedId, on: req.db)
             .first()
     }
     
@@ -74,10 +74,10 @@ extension Rating {
         }
         let item = Rating(authId: authId, input: input)
         
-        return Rating.mustNotFind(input: item, on: req).flatMap { _ in
-            return item.create(on: req).flatMap { _ in
+        return Rating.mustNotFind(input: item, on: req.db).flatMap { _ in
+            return item.create(on: req.db).flatMap { _ in
                 return Rating.updateAverageRate(reviewedId: item.reviewedId,
-                                              on: req)
+                                                on: req.db)
             }
         }
     }
@@ -87,23 +87,23 @@ extension Rating {
             return req.future(error: Abort(.invalid))
         }
         update(rate: input.rate)
-        return update(on: req).flatMap { _ in
+        return update(on: req.db).flatMap { _ in
             return Rating.updateAverageRate(reviewedId: self.reviewedId,
-                                          on: req)
+                                            on: req.db)
         }
         
     }
 }
 
 extension Rating: FindOrCreatable {
-    static func _findQuery(input: Rating, on conn: Database) -> QueryBuilder<PostgreSQLDatabase, Rating> {
+    static func _findQuery(input: Rating, on conn: Database) -> QueryBuilder<Rating> {
         return _findQuery(voterId: input.voterId, reviewedId: input.reviewedId, on: conn)
     }
     
-    static func _findQuery(voterId: Int, reviewedId: Int, on conn: Database) -> QueryBuilder<PostgreSQLDatabase, Rating> {
+    static func _findQuery(voterId: Int, reviewedId: Int, on conn: Database) -> QueryBuilder<Rating> {
         return query(on: conn)
-            .filter(\.voterId == voterId)
-            .filter(\.reviewedId == reviewedId)
+            .filter(\.$voterId == voterId)
+            .filter(\.$reviewedId == reviewedId)
     }
 }
 

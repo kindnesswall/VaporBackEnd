@@ -174,7 +174,7 @@ extension Gift {
         guard !self.isDeleted else { throw Abort(.deletedGift) }
         guard !isDonated else { throw Abort(.donatedGiftUnaccepted) }
         
-        return self.restore(on: req).flatMap { gift in
+        return self.restore(on: req.db).flatMap { gift in
             try gift.update(input: input)
             return try gift.setNamesAndSave(on: req)
         }
@@ -192,17 +192,17 @@ extension Gift {
                 return self.$province.get(on: req.db).flatMap { province in
                     self.provinceName = province.name
                     
-                    return self.city.get(on: req).flatMap { city in
+                    return self.$city.get(on: req.db).flatMap { city in
                         self.cityName = city.name
                         
-                        if let region = self.region {
-                            return region.get(on: req).flatMap { region in
-                                self.regionName = region.name
+                        if self.$region.id != nil {
+                            return self.$region.get(on: req.db).flatMap { region in
+                                self.regionName = region?.name
                                 return self.save(on: req)
                             }
                         } else {
                             self.regionName = nil
-                            return self.save(on: req)
+                            return self.save(on: req.db)
                         }
                     }
                 }
@@ -218,7 +218,12 @@ extension Gift {
     }
     
     static func get(_ id: Int, withSoftDeleted: Bool, on conn: Database) -> EventLoopFuture<Gift> {
-        return query(on: conn, withSoftDeleted: withSoftDeleted).filter(\.$id == id).first().unwrap(or: Abort(.giftNotFound))
+        let query = Self.query(on: conn)
+        if withSoftDeleted { query.withDeleted() }
+        return query
+            .filter(\.$id == id)
+            .first()
+            .unwrap(or: Abort(.giftNotFound))
     }
 }
 
@@ -227,7 +232,7 @@ extension Gift {
         guard let countryId = self.countryId else {
             throw Abort(.nilCountryId)
         }
-        return Country.find(countryId, on: req).unwrap(or: Abort(.countryNotFound))
+        return Country.find(countryId, on: req.db).unwrap(or: Abort(.countryNotFound))
     }
     
     func getCategoryTitle(on req: Request, country: Country) -> EventLoopFuture<String?> {
@@ -239,20 +244,20 @@ extension Gift {
 
 extension Gift {
     
-    static func getGiftsWithRequestFilter(query:QueryBuilder<PostgreSQLDatabase, Gift>,requestInput:RequestInput?,onlyUndonatedGifts:Bool,onlyReviewedGifts:Bool)->EventLoopFuture<[Gift]>{
+    static func getGiftsWithRequestFilter(query:QueryBuilder<Gift>,requestInput:RequestInput?,onlyUndonatedGifts:Bool,onlyReviewedGifts:Bool)->EventLoopFuture<[Gift]>{
         
         if let searchWord = requestInput?.searchWord {
             query.group(.or) { query in
                 query
-                    .filter(\.title ~~ searchWord)
-                    .filter(\.description ~~ searchWord)
+                    .filter(\.$title ~~ searchWord)
+                    .filter(\.$description ~~ searchWord)
             }
         }
         
         if let categoryIds = requestInput?.categoryIds {
             query.group(.or) { query in
                 for categoryId in categoryIds {
-                    query.filter(\.categoryId == categoryId)
+                    query.filter(\.$category.$id == categoryId)
                 }
             }
         }
@@ -260,38 +265,38 @@ extension Gift {
         if let regionIds = requestInput?.regionIds {
             query.group(.or) { query in
                 for regionId in regionIds {
-                    query.filter(\.regionId == regionId)
+                    query.filter(\.$region.$id == regionId)
                 }
             }
         } else {
             if let cityId = requestInput?.cityId {
-                query.filter(\.cityId == cityId)
+                query.filter(\.$city.$id == cityId)
             } else {
                 if let provinceId = requestInput?.provinceId {
-                    query.filter(\.provinceId == provinceId)
+                    query.filter(\.$province.$id == provinceId)
                 } else {
                     if let countryId = requestInput?.countryId {
-                        query.filter(\.countryId == countryId)
+                        query.filter(\.$countryId == countryId)
                     }
                 }
             }
         }
         
         if let beforeId = requestInput?.beforeId {
-            query.filter(\.id < beforeId)
+            query.filter(\.$id < beforeId)
         }
         
         if onlyUndonatedGifts {
-            query.filter(\.donatedToUserId == nil)
+            query.filter(\.$donatedToUser.$id == nil)
         }
         
         if onlyReviewedGifts {
-            query.filter(\.isReviewed == true)
+            query.filter(\.$isReviewed == true)
         }
         
         let count = Constants.maxFetchCount(bound: requestInput?.count)
         
-        return query.sort(\.id, .descending).range(0..<count).all()
+        return query.sort(\.$id, .descending).range(0..<count).all()
     }
     
     

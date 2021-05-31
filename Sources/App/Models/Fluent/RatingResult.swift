@@ -63,15 +63,15 @@ extension RatingResult {
 }
 
 extension RatingResult: FindOrCreatable {
-    static func _findQuery(input: RatingResult, on conn: Database) -> QueryBuilder<PostgreSQLDatabase, RatingResult> {
+    static func _findQuery(input: RatingResult, on conn: Database) -> QueryBuilder<RatingResult> {
         
         return _findQuery(reviewedId: input.reviewedId, on: conn)
     }
     
-    static func _findQuery(reviewedId: Int, on conn: Database) -> QueryBuilder<PostgreSQLDatabase, RatingResult> {
+    static func _findQuery(reviewedId: Int, on conn: Database) -> QueryBuilder<RatingResult> {
         
         return query(on: conn)
-            .filter(\.reviewedId == reviewedId)
+            .filter(\.$reviewedId == reviewedId)
     }
 }
 

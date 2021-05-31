@@ -126,7 +126,13 @@ extension User {
         return find(id, on: conn).unwrap(or: Abort(.userNotFound))
     }
     static func get(_ id: Int, withSoftDeleted: Bool, on conn: Database) -> EventLoopFuture<User> {
-        return query(on: conn, withSoftDeleted: withSoftDeleted).filter(\.id == id).first().unwrap(or: Abort(.userNotFound))
+        
+        let query = Self.query(on: conn)
+        if withSoftDeleted { query.withDeleted() }
+        return query
+            .filter(\.$id == id)
+            .first()
+            .unwrap(or: Abort(.userNotFound))
     }
 }
 
@@ -134,7 +140,7 @@ extension User {
     
     static func find(req: Request, phoneNumber: String) -> EventLoopFuture<User?> {
         
-        return User.query(on: req, withSoftDeleted: true).filter(\User.phoneNumber == phoneNumber).first().map({ foundUser in
+        return User.query(on: req.db).withDeleted().filter(\User.$phoneNumber == phoneNumber).first().map({ foundUser in
             
             guard foundUser?.deletedAt == nil else {
                 throw Abort(.userAccessIsDenied)
@@ -149,7 +155,7 @@ extension User {
     }
     
     static func phoneNumberHasExisted(phoneNumber:String,conn: Database)->EventLoopFuture<Bool>{
-        return User.query(on: conn, withSoftDeleted: true).filter(\User.phoneNumber == phoneNumber).count().map { count in
+        return User.query(on: conn).withDeleted().filter(\User.$phoneNumber == phoneNumber).count().map { count in
             if count != 0 { return true }
             else { return false }
         }
@@ -162,7 +168,7 @@ extension User {
         return self.getUsersWithRequestFilter(query: query, queryParam: queryParam)
     }
     static func allBlockedUsers(on conn: Database, queryParam: Inputs.UserQuery?) -> EventLoopFuture<[User]> {
-        let query = User.query(on: conn, withSoftDeleted: true).filter(\.deletedAt != nil)
+        let query = User.query(on: conn).withDeleted().filter(\.$deletedAt != nil)
         return self.getUsersWithRequestFilter(query: query, queryParam: queryParam)
     }
 }
@@ -175,19 +181,19 @@ extension User {
 
 extension User {
     
-    static func getUsersWithRequestFilter(query: QueryBuilder<PostgreSQLDatabase, User>, queryParam: Inputs.UserQuery?) -> EventLoopFuture<[User]> {
+    static func getUsersWithRequestFilter(query: QueryBuilder<User>, queryParam: Inputs.UserQuery?) -> EventLoopFuture<[User]> {
         
         if let phoneNumber = queryParam?.phoneNumber {
-            query.filter(\.phoneNumber ~~ phoneNumber)
+            query.filter(\.$phoneNumber ~~ phoneNumber)
         }
         
         if let beforeId = queryParam?.beforeId {
-            query.filter(\.id < beforeId)
+            query.filter(\.$id < beforeId)
         }
         
         let count = Constants.maxFetchCount(bound: queryParam?.count)
         
-        return query.sort(\.id, .descending).range(0..<count).all()
+        return query.sort(\.$id, .descending).range(0..<count).all()
     }
 }
 

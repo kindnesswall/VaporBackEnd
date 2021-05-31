@@ -43,7 +43,7 @@ final class Sponsor: Model {
         self.image = input.image
         self.description = input.description
         self.estimatedDonation = input.estimatedDonation
-        return update(on: req).transform(to: .ok)
+        return update(on: req.db).transform(to: .ok)
     }
 
 }
