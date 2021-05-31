@@ -104,7 +104,7 @@ extension DirectChat {
 extension DirectChat {
     
     static func findOrFail(authId: Int, chatId: Int, on conn: Database) -> EventLoopFuture<ContactMessage> {
-        return find(chatId, on: conn).map { item in
+        return find(chatId, on: conn).flatMapThrowing { item in
             guard let item = item else {
                 throw Abort(.chatNotFound)
             }
@@ -113,14 +113,14 @@ extension DirectChat {
     }
     
     static func find(userId: Int, contactId: Int, on conn: Database) -> EventLoopFuture<ContactMessage?> {
-        return _find(userId: userId, contactId: contactId, on: conn).first().map { item in
+        return _find(userId: userId, contactId: contactId, on: conn).first().flatMapThrowing { item in
             return try item?.castFor(authId: userId)
         }
     }
     
     static func findOrCreate(userId: Int, contactId: Int, on conn: Database) -> EventLoopFuture<ContactMessage> {
         let input = DirectChat(userId: userId, contactId: contactId)
-        return _findOrCreate(input: input, on: conn).map { item in
+        return _findOrCreate(input: input, on: conn).flatMapThrowing { item in
             return try item.castFor(authId: userId)
         }
         
@@ -129,40 +129,40 @@ extension DirectChat {
 
 extension DirectChat {
     
-    private static func fetch(textMessages: Children<DirectChat, TextMessage>, beforeId: Int?, on conn: Database) throws -> EventLoopFuture<[TextMessage]> {
+    private static func fetch(textMessages: ChildrenProperty<DirectChat, TextMessage>, beforeId: Int?, on conn: Database) -> EventLoopFuture<[TextMessage]> {
         
-        let query = try textMessages.query(on: conn)
+        let query = textMessages.query(on: conn)
         
         if let beforeId = beforeId {
-            query.filter(\.id < beforeId)
+            query.filter(\.$id < beforeId)
         }
         let maximumCount = Constants.maxFetchCount
         
         //TODO: For performance issue
         //      is sort(\.id, .descending) necessary?
         
-        return query.sort(\.id, .descending).range(0..<maximumCount).all()
+        return query.sort(\.$id, .descending).range(0..<maximumCount).all()
         
     }
     
     
-    static func fetchTextMessages(beforeId: Int?, authId: Int, chatId: Int, on conn: Database) -> EventLoopFuture<ContactMessage> {
-        return find(chatId, on: conn).flatMap { chat in
+    static func fetchTextMessages(beforeId: Int?, authId: Int, chatId: Int, on db: Database) -> EventLoopFuture<ContactMessage> {
+        return find(chatId, on: db).flatMap { chat in
             
             guard let chat = chat else {
-                throw Abort(.chatNotFound)
+                return db.makeFailedFuture(.chatNotFound)
             }
             guard chat.isAuthenticated(authId: authId) else {
-                throw Abort(.unauthorizedRequest)
+                return db.makeFailedFuture(.unauthorizedRequest)
             }
             
-            return try fetch(textMessages: chat.textMessages, beforeId: beforeId, on: conn).map({ textMessages in
+            return fetch(textMessages: chat.$textMessages, beforeId: beforeId, on: db).flatMapThrowing { textMessages in
                 
                 let item = try chat.castFor(authId: authId)
                 item.textMessages = textMessages
                 return item
                 
-            })
+            }
         }
     }
 }
@@ -175,11 +175,13 @@ extension DirectChat: FindOrCreatable {
     
     static private func _find(userId: Int, contactId: Int, on conn: Database) -> QueryBuilder<DirectChat> {
         return query(on: conn).group(.or) { query in
-            query.group(.and, closure: { query in
-                query.filter(\.userId == userId).filter(\.contactId == contactId)
-            }).group(.and, closure: { query in
-                query.filter(\.userId == contactId).filter(\.contactId == userId)
-            })
+            query.group(.and) { query in
+                query.filter(\.$userId == userId)
+                    .filter(\.$contactId == contactId)
+            }.group(.and) { query in
+                query.filter(\.$userId == contactId)
+                    .filter(\.$contactId == userId)
+            }
         }
     }
 }
@@ -215,10 +217,11 @@ extension DirectChat {
 }
 
 extension DirectChat {
-    static func set(notification: Int, receiverId: Int, chatId: Int, on conn: Database) -> EventLoopFuture<HTTPStatus> {
-        return find(chatId, on: conn).flatMap { item in
+    static func set(notification: Int, receiverId: Int, chatId: Int, on db: Database) -> EventLoopFuture<HTTPStatus> {
+        
+        return find(chatId, on: db).flatMap { item in
             guard let item = item else {
-                throw Abort(.chatNotFound)
+                return db.makeFailedFuture(.chatNotFound)
             }
             switch receiverId {
             case item.userId:
@@ -226,20 +229,20 @@ extension DirectChat {
             case item.contactId:
                 item.contactNotification = notification
             default:
-                throw Abort(.unauthorizedRequest)
+                return db.makeFailedFuture(.unauthorizedRequest)
             }
-            return item.save(on: conn).transform(to: .ok)
+            return item.save(on: db).transform(to: .ok)
         }
     }
 }
 
 extension DirectChat {
-    static func set(block: Bool, authId: Int, chatId: Int, on conn: Database) -> EventLoopFuture<ChatBlock> {
+    static func set(block: Bool, authId: Int, chatId: Int, on db: Database) -> EventLoopFuture<ChatBlock> {
         
-        return find(chatId, on: conn).flatMap { item in
+        return find(chatId, on: db).flatMap { item in
             
             guard let item = item else {
-                throw Abort(.chatNotFound)
+                return db.makeFailedFuture(.chatNotFound)
             }
             
             let blockedUserId: Int
@@ -251,10 +254,10 @@ extension DirectChat {
                 item.userIsBlocked = block
                 blockedUserId = item.userId
             default:
-                throw Abort(.unauthorizedRequest)
+                return db.makeFailedFuture(.unauthorizedRequest)
             }
             
-            return item.save(on: conn).transform(to:
+            return item.save(on: db).transform(to:
                 ChatBlock(chatId: chatId, blockedUserId: blockedUserId, byUserId: authId)
             )
         }

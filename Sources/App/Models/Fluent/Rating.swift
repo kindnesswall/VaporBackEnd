@@ -70,7 +70,7 @@ extension Rating {
     
     static func create(authId: Int, input: Input, on req: Request) -> EventLoopFuture<HTTPStatus> {
         guard input.isValid, authId != input.reviewedUserId  else {
-            return req.future(error: Abort(.invalid))
+            return req.db.makeFailedFuture(.invalid)
         }
         let item = Rating(authId: authId, input: input)
         
@@ -84,7 +84,7 @@ extension Rating {
     
     func update(input: Input, on req: Request) -> EventLoopFuture<HTTPStatus> {
         guard input.isValid else {
-            return req.future(error: Abort(.invalid))
+            return req.db.makeFailedFuture(.invalid)
         }
         update(rate: input.rate)
         return update(on: req.db).flatMap { _ in

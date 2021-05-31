@@ -62,7 +62,10 @@ enum PlatformType: String {
 
 extension ApplicationVersion {
     static func get(platform: PlatformType, on conn: Database) -> EventLoopFuture<ApplicationVersion> {
-        return query(on: conn).filter(\.$platform == platform.rawValue).first().map { item in
+        return query(on: conn)
+            .filter(\.$platform == platform.rawValue)
+            .first()
+            .flatMapThrowing { item in
             guard let item = item else {
                 throw Abort(.notFound)
             }

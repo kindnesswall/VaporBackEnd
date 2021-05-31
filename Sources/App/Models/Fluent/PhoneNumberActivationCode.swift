@@ -42,19 +42,25 @@ final class PhoneNumberActivationCode: Model {
 extension PhoneNumberActivationCode {
     
     static func find(req: Request, phoneNumber: String) -> EventLoopFuture<PhoneNumberActivationCode?> {
-        
-        return PhoneNumberActivationCode.query(on: req.db).filter(\.$phoneNumber == phoneNumber).first()
+        return query(on: req.db)
+            .filter(\.$phoneNumber == phoneNumber)
+            .first()
         
     }
     
     static func check(req: Request, phoneNumber: String, activationCode: String) -> EventLoopFuture<HTTPStatus> {
-        
-        return PhoneNumberActivationCode.query(on: req.db).filter(\.$phoneNumber == phoneNumber).filter(\.$activationCode == activationCode).first().flatMap { item in
-            guard let item = item else {
-                throw Abort(.invalidActivationCode)
-            }
-            item.activationCode = nil
-            return item.save(on: req).transform(to: .ok)
+        return query(on: req.db)
+            .filter(\.$phoneNumber == phoneNumber)
+            .filter(\.$activationCode == activationCode)
+            .first()
+            .flatMap { item in
+                guard let item = item else {
+                    return req.db.makeFailedFuture(.invalidActivationCode)
+                }
+                item.activationCode = nil
+                return item
+                    .save(on: req.db)
+                    .transform(to: .ok)
         }
     }
 }

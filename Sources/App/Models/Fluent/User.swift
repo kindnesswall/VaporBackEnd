@@ -81,9 +81,9 @@ final class User : Model {
     
     func getIdFuture(req:Request) -> EventLoopFuture<Int> {
         guard let id = self.id else {
-            return req.future(error: Abort(.nilUserId))
+            return req.db.makeFailedFuture(.nilUserId)
         }
-        return req.future(id)
+        return req.db.makeSucceededFuture(id)
     }
 }
 
@@ -127,9 +127,9 @@ extension User {
     }
     static func get(_ id: Int, withSoftDeleted: Bool, on conn: Database) -> EventLoopFuture<User> {
         
-        let query = Self.query(on: conn)
-        if withSoftDeleted { query.withDeleted() }
-        return query
+        let qb = query(on: conn)
+        if withSoftDeleted { qb.withDeleted() }
+        return qb
             .filter(\.$id == id)
             .first()
             .unwrap(or: Abort(.userNotFound))
@@ -140,14 +140,18 @@ extension User {
     
     static func find(req: Request, phoneNumber: String) -> EventLoopFuture<User?> {
         
-        return User.query(on: req.db).withDeleted().filter(\User.$phoneNumber == phoneNumber).first().map({ foundUser in
-            
-            guard foundUser?.deletedAt == nil else {
-                throw Abort(.userAccessIsDenied)
-            }
-            
-            return foundUser
-        })
+        return query(on: req.db)
+            .withDeleted()
+            .filter(\.$phoneNumber == phoneNumber)
+            .first()
+            .flatMapThrowing { foundUser in
+                
+                guard foundUser?.deletedAt == nil else {
+                    throw Abort(.userAccessIsDenied)
+                }
+                
+                return foundUser
+        }
     }
     
     static func isNotDeleted(req: Request, phoneNumber: String) -> EventLoopFuture<HTTPStatus> {

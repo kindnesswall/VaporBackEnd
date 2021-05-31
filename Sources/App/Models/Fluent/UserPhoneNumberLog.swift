@@ -133,7 +133,7 @@ extension UserPhoneNumberLog {
         
         let requested = UserPhoneNumberLog(userId: try auth.getId(), fromPhoneNumber: auth.phoneNumber, toPhoneNumber: toPhoneNumber, status: .requested)
         
-        return getLatest(phoneNumberLog: requested, conn: req.db).map { item in
+        return getLatest(phoneNumberLog: requested, conn: req.db).flatMapThrowing { item in
             
             guard let item = item else {
                 throw Abort(.invalidPhoneNumber)

@@ -122,7 +122,7 @@ final class Gift : Model {
         self.$region.id=input.regionId
     }
     
-    private func update(input: Gift.Input) throws {
+    private func update(input: Gift.Input) {
         
         self.title=input.title
         self.description=input.description
@@ -163,9 +163,9 @@ extension Gift {
 
 extension Gift {
     
-    static func create(input: Gift.Input, authId: Int, on req: Request) throws -> EventLoopFuture<Gift> {
+    static func create(input: Gift.Input, authId: Int, on req: Request) -> EventLoopFuture<Gift> {
         let gift = Gift(input: input, authId: authId)
-        return try gift.setNamesAndSave(on: req)
+        return gift.setNamesAndSave(on: req)
     }
     
     func update(input: Gift.Input, authId: Int, on req: Request) throws -> EventLoopFuture<Gift> {
@@ -175,15 +175,15 @@ extension Gift {
         guard !isDonated else { throw Abort(.donatedGiftUnaccepted) }
         
         return self.restore(on: req.db).flatMap { gift in
-            try gift.update(input: input)
-            return try gift.setNamesAndSave(on: req)
+            gift.update(input: input)
+            return gift.setNamesAndSave(on: req)
         }
     }
 }
 
 extension Gift {
-    private func setNamesAndSave(on req: Request) throws ->  EventLoopFuture<Gift> {
-        return try getCountry(on: req).flatMap { country in
+    private func setNamesAndSave(on req: Request) ->  EventLoopFuture<Gift> {
+        return getCountry(on: req).flatMap { country in
             self.countryName = country.name
             
             return self.getCategoryTitle(on: req, country: country).flatMap { categoryTitle in
@@ -218,9 +218,9 @@ extension Gift {
     }
     
     static func get(_ id: Int, withSoftDeleted: Bool, on conn: Database) -> EventLoopFuture<Gift> {
-        let query = Self.query(on: conn)
-        if withSoftDeleted { query.withDeleted() }
-        return query
+        let qb = query(on: conn)
+        if withSoftDeleted { qb.withDeleted() }
+        return qb
             .filter(\.$id == id)
             .first()
             .unwrap(or: Abort(.giftNotFound))
@@ -228,11 +228,13 @@ extension Gift {
 }
 
 extension Gift {
-    func getCountry(on req: Request) throws -> EventLoopFuture<Country>  {
+    func getCountry(on req: Request) -> EventLoopFuture<Country>  {
         guard let countryId = self.countryId else {
-            throw Abort(.nilCountryId)
+            return req.db.makeFailedFuture(.nilCountryId)
         }
-        return Country.find(countryId, on: req.db).unwrap(or: Abort(.countryNotFound))
+        return Country
+            .find(countryId, on: req.db)
+            .unwrap(or: Abort(.countryNotFound))
     }
     
     func getCategoryTitle(on req: Request, country: Country) -> EventLoopFuture<String?> {
