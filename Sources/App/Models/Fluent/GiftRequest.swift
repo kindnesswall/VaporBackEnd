@@ -45,7 +45,7 @@ extension GiftRequest {
     
     static func create(requestUserId:Int,giftId:Int,giftOwnerId:Int,conn:Database) -> EventLoopFuture<GiftRequest>{
         let giftRequest = GiftRequest(requestUserId: requestUserId, giftId: giftId, giftOwnerId: giftOwnerId)
-        return giftRequest.save(on: conn)
+        return giftRequest.save(on: conn).transform(to: giftRequest)
     }
     
     static func getGiftsToDonate(userGifts:QueryBuilder<Gift>,userId:Int,requestUserId:Int)-> QueryBuilder<Gift>{

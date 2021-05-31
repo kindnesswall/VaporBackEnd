@@ -51,7 +51,7 @@ final class ApplicationVersion: Model {
         self.requiredVersionName = input.requiredVersionName
         self.requiredVersionCode = input.requiredVersionCode
         self.downloadLink = input.downloadLink
-        return save(on: conn)
+        return save(on: conn).transform(to: self)
     }
 }
 

@@ -174,9 +174,9 @@ extension Gift {
         guard !self.isDeleted else { throw Abort(.deletedGift) }
         guard !isDonated else { throw Abort(.donatedGiftUnaccepted) }
         
-        return self.restore(on: req.db).flatMap { gift in
-            gift.update(input: input)
-            return gift.setNamesAndSave(on: req)
+        return self.restore(on: req.db).flatMap {
+            self.update(input: input)
+            return self.setNamesAndSave(on: req)
         }
     }
 }
@@ -198,11 +198,11 @@ extension Gift {
                         if self.$region.id != nil {
                             return self.$region.get(on: req.db).flatMap { region in
                                 self.regionName = region?.name
-                                return self.save(on: req)
+                                return self.save(on: req.db).transform(to: self)
                             }
                         } else {
                             self.regionName = nil
-                            return self.save(on: req.db)
+                            return self.save(on: req.db).transform(to: self)
                         }
                     }
                 }

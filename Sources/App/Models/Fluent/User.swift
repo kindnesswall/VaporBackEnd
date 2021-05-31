@@ -117,7 +117,7 @@ extension User {
 extension User {
     func change(toPhoneNumber: String, on conn: Database) -> EventLoopFuture<User> {
         self.phoneNumber = toPhoneNumber
-        return save(on: conn)
+        return save(on: conn).transform(to: self)
     }
 }
 
