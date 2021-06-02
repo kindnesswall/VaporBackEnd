@@ -7,16 +7,18 @@
 
 import Vapor
 
-
 final class GuardCharityMiddleware: Middleware {
-    func respond(to request: Request, chainingTo next: Responder) throws -> EventLoopFuture<Response> {
+    
+    func respond(to request: Request, chainingTo next: Responder) -> EventLoopFuture<Response> {
         
-        let user = try request.auth.require(User.self)
-        
-        guard user.isCharity else {
-            throw Abort(.unauthorizedRequest)
+        guard
+            let user = request.auth.get(User.self),
+            user.isCharity
+            else {
+                return request.eventLoop.future(
+                    error: Abort(.unauthorizedRequest))
         }
         
-        return try next.respond(to: request)
+        return next.respond(to: request)
     }
 }

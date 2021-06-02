@@ -11,12 +11,12 @@ final class LogMiddleware: Middleware {
     
     let logDirectory = LogDirectory()
     
-    func respond(to request: Request, chainingTo next: Responder) throws -> EventLoopFuture<Response> {
+    func respond(to request: Request, chainingTo next: Responder) -> EventLoopFuture<Response> {
         
         let log = getLog(request: request)
         try? log.appendToURL(fileURL: logDirectory.filePath)
         
-        return try next.respond(to: request)
+        return next.respond(to: request)
     }
     
     private func getLog(request: Request) -> String {
