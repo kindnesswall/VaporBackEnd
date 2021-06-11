@@ -20,7 +20,7 @@ class Configuration {
 
 class MainConfiguration: Codable {
     let stage: AppStage
-    let apiRoute: String
+    let apiPath: [String]
     let domainAddress: URL
     let hostName: String
     let hostPort: Int
