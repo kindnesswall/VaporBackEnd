@@ -23,8 +23,7 @@ final class GiftController {
     }
     
     func itemAt(_ req: Request) throws -> EventLoopFuture<Gift> {
-        let giftId = try req.parameters.next(Int.self)
-        return Gift.get(giftId, on: req).map { gift in
+        return Gift.getParameter(on: req).flatMapThrowing { gift in
             guard gift.isReviewed else { throw Abort(.unreviewedGift) }
             return gift
         }
@@ -41,20 +40,19 @@ final class GiftController {
     
     func update(_ req: Request) throws -> EventLoopFuture<Gift> {
         let authId = try req.auth.require(User.self).getId()
-        let giftId = try req.parameters.next(Int.self)
+        let giftId = req.idParameter
+        let input = try req.content.decode(Gift.Input.self)
         
-        return Gift.get(giftId, withSoftDeleted: true, on: req).flatMap { gift in
-            
-            return try req.content.decode(Gift.Input.self).flatMap { input -> EventLoopFuture<Gift> in
-                return try gift.update(input: input, authId: authId, on: req)
-            }
+        return Gift.findOrFail(giftId, withSoftDeleted: true, on: req.db).flatMap { gift in
+            return try gift.update(input: input, authId: authId, on: req)
         }
     }
     
     /// Deletes a parameterized `Gift`.
     func delete(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
         let authId = try req.auth.require(User.self).getId()
-        return try req.parameters.next(Gift.self).flatMap { (gift) -> EventLoopFuture<Void> in
+        
+        return Gift.getParameter(on: req).flatMap { (gift) -> EventLoopFuture<Void> in
             guard gift.userId == authId else { throw Abort(.unauthorizedGift) }
             guard !gift.isDonated else { throw Abort(.donatedGiftUnaccepted) }
             gift.isDeleted = true

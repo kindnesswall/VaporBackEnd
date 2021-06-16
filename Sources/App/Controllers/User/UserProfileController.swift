@@ -11,9 +11,9 @@ import Vapor
 final class UserProfileController {
     
     func show(_ req: Request) throws -> EventLoopFuture<UserProfile> {
-        return try req.parameters.next(User.self).map({ user in
+        return User.getParameter(on: req).flatMapThrowing { user in
             return try user.userProfile(req: req)
-        })
+        }
     }
  
     func update(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {

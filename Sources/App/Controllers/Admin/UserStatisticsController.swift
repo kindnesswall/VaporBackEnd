@@ -31,7 +31,7 @@ final class UserStatisticsController {
     }
     
     func userStatistics(_ req: Request) throws -> EventLoopFuture<UserStatistic> {
-        return try req.parameters.next(User.self).flatMap({ user in
+        return User.getParameter(on: req).flatMap({ user in
             return self.getUserStatistic(req: req, user: user)
         })
     }

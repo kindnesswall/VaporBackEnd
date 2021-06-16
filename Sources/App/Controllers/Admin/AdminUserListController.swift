@@ -12,14 +12,14 @@ final class AdminUserListController {
     func userAllowAccess(_ req: Request) throws -> EventLoopFuture<User> {
         let db = req.db
         let input = try req.content.decode(UserAllowAccessInput.self)
-        return User.get(input.userId, withSoftDeleted: true, on: db).flatMap { user in
+        return User.findOrFail(input.userId, withSoftDeleted: true, on: db).flatMap { user in
             return user.restore(on: db).transform(to: user)
         }
         
     }
     func userDenyAccess(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
-        return try req.parameters.next(User.self).flatMap({ user in
-            return user.delete(on: req).flatMap({ _ in
+        return User.getParameter(on: req).flatMap({ user in
+            return user.delete(on: req.db).flatMap({ _ in
                 return try LogoutController.logoutAllDevices(req: req, user: user)
             })
         })

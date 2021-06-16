@@ -21,7 +21,7 @@ class ChatRestfulController: ChatInitializer {
     
     func startChat(_ req: Request) throws -> EventLoopFuture<ContactMessage> {
         let auth = try req.auth.require(User.self)
-        return try req.parameters.next(User.self).flatMap({ contact in
+        return User.getParameter(on: req).flatMap({ contact in
             // Use cases:
             // Admin: starts a chat to user/charity
             // User: starts a chat to charity

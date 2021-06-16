@@ -18,7 +18,7 @@ final class LocationController {
     }
     
     func getProvinces(_ req: Request) throws -> EventLoopFuture<[Province]> {
-        return try req.parameters.next(Country.self).flatMap { country in
+        return Country.getParameter(on: req).flatMap { country in
             return try country.provinces.query(on: req)
                 .sort(\.sortIndex, .ascending)
                 .sort(\.id, .ascending)
@@ -27,7 +27,7 @@ final class LocationController {
     }
     
     func getCities(_ req: Request) throws -> EventLoopFuture<[City]> {
-        return try req.parameters.next(Province.self).flatMap({ province in
+        return Province.getParameter(on: req).flatMap({ province in
             return try province.cities.query(on: req)
                 .sort(\.sortIndex, .ascending)
                 .sort(\.id, .ascending)
@@ -35,7 +35,7 @@ final class LocationController {
         })
     }
     func getRegions(_ req: Request) throws -> EventLoopFuture<[Region]> {
-        return try req.parameters.next(City.self).flatMap({ city in
+        return City.getParameter(on: req).flatMap({ city in
             return try city.regions.query(on: req)
                 .sort(\.sortIndex, .ascending)
                 .sort(\.id, .ascending)

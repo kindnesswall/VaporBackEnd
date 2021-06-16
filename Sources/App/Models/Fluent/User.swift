@@ -122,21 +122,6 @@ extension User {
 }
 
 extension User {
-    static func get(_ id: Int, on conn: Database) -> EventLoopFuture<User> {
-        return find(id, on: conn).unwrap(or: Abort(.userNotFound))
-    }
-    static func get(_ id: Int, withSoftDeleted: Bool, on conn: Database) -> EventLoopFuture<User> {
-        
-        let qb = query(on: conn)
-        if withSoftDeleted { qb.withDeleted() }
-        return qb
-            .filter(\.$id == id)
-            .first()
-            .unwrap(or: Abort(.userNotFound))
-    }
-}
-
-extension User {
     
     static func find(req: Request, phoneNumber: String) -> EventLoopFuture<User?> {
         

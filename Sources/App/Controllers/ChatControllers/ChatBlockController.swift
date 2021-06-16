@@ -14,7 +14,7 @@ class ChatBlockController {
     func blockUser(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
         
         let userId = try getUserId(req)
-        let chatId = try req.parameters.next(Int.self)
+        let chatId = req.idParameter
         
         return DirectChat.set(block: true, authId: userId, chatId: chatId, on: req).flatMap { chatBlock in
             
@@ -33,7 +33,7 @@ class ChatBlockController {
     func unblockUser(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
         
         let userId = try getUserId(req)
-        let chatId = try req.parameters.next(Int.self)
+        let chatId = req.idParameter
         
         return DirectChat.set(block: false, authId: userId, chatId: chatId, on: req).flatMap { chatBlock in
             

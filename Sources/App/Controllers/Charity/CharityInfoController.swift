@@ -12,7 +12,7 @@ final class CharityInfoController {
     private func validate(_ req: Request) throws -> Int {
         
         let auth = try req.auth.require(User.self)
-        let userId = try req.parameters.next(Int.self)
+        let userId = req.idParameter
         
         guard auth.isAdmin || auth.id == userId else {
             throw Abort(.unauthorizedRequest)
@@ -24,7 +24,7 @@ final class CharityInfoController {
         
         let userId = try validate(req)
         
-        return User.get(userId, on: req).flatMap { user in
+        return User.findOrFail(userId, on: req.db).flatMap { user in
             return Charity.find(userId: userId, on: req).map { charity in
                 let status = self.getCharityStatus(user: user, charity: charity)
                 
@@ -75,7 +75,7 @@ final class CharityInfoController {
                 
                 charity.update(input: input)
                 return charity.save(on: req).flatMap { charity in
-                    return User.get(userId, on: req).flatMap { user in
+                    return User.findOrFail(userId, on: req.db).flatMap { user in
                         if user.isCharity {
                             user.charityName = input.name
                             user.charityImage = input.imageUrl
@@ -91,7 +91,7 @@ final class CharityInfoController {
         
         let userId = try validate(req)
         
-        return User.get(userId, on: req).flatMap { user in
+        return User.findOrFail(userId, on: req.db).flatMap { user in
             
             user.isCharity = false
             user.charityName = nil

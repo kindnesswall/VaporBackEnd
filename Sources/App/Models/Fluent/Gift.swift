@@ -212,22 +212,6 @@ extension Gift {
 }
 
 extension Gift {
-    
-    static func get(_ id: Int, on conn: Database) -> EventLoopFuture<Gift> {
-        return find(id, on: conn).unwrap(or: Abort(.giftNotFound))
-    }
-    
-    static func get(_ id: Int, withSoftDeleted: Bool, on conn: Database) -> EventLoopFuture<Gift> {
-        let qb = query(on: conn)
-        if withSoftDeleted { qb.withDeleted() }
-        return qb
-            .filter(\.$id == id)
-            .first()
-            .unwrap(or: Abort(.giftNotFound))
-    }
-}
-
-extension Gift {
     func getCountry(on req: Request) -> EventLoopFuture<Country>  {
         guard let countryId = self.countryId else {
             return req.db.makeFailedFuture(.nilCountryId)

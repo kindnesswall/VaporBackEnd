@@ -16,10 +16,10 @@ final class UserGiftsController {
         
         let auth = try req.auth.require(User.self)
         let isAdmin = auth.isAdmin
-        let userId = try req.parameters.next(Int.self)
+        let userId = req.idParameter
         let isOwner = (auth.id == userId)
         
-        return User.get(userId, withSoftDeleted: isAdmin, on: req).flatMap { user in
+        return User.findOrFail(userId, withSoftDeleted: isAdmin, on: req).flatMap { user in
             
             return try req.content.decode(RequestInput.self).flatMap { requestInput in
                 
@@ -40,9 +40,9 @@ final class UserGiftsController {
         
         let auth = try req.auth.require(User.self)
         let isAdmin = auth.isAdmin
-        let userId = try req.parameters.next(Int.self)
+        let userId = req.idParameter
         
-        return User.get(userId, withSoftDeleted: isAdmin, on: req).flatMap { user in
+        return User.findOrFail(userId, withSoftDeleted: isAdmin, on: req).flatMap { user in
             
             return try req.content.decode(RequestInput.self).flatMap { requestInput in
                 let query = try user.gifts.query(on: req)
@@ -56,9 +56,9 @@ final class UserGiftsController {
         
         let auth = try req.auth.require(User.self)
         let isAdmin = auth.isAdmin
-        let userId = try req.parameters.next(Int.self)
+        let userId = req.idParameter
         
-        return User.get(userId, withSoftDeleted: isAdmin, on: req).flatMap { user in
+        return User.findOrFail(userId, withSoftDeleted: isAdmin, on: req).flatMap { user in
             return try req.content.decode(RequestInput.self).flatMap { requestInput in
                 let query = try user.receivedGifts.query(on: req)
                 return Gift.getGiftsWithRequestFilter(query: query, requestInput: requestInput,onlyUndonatedGifts: false, onlyReviewedGifts: true)

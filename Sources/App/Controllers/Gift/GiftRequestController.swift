@@ -15,7 +15,7 @@ final class GiftRequestController: ChatInitializer {
         guard let userId = user.id else {
             throw Abort(.nilUserId)
         }
-        return try req.parameters.next(Gift.self).flatMap { gift in
+        return Gift.getParameter(on: req).flatMap { gift in
             guard let giftId = gift.id else {
                 throw Abort(.nilGiftId)
             }
@@ -53,9 +53,9 @@ final class GiftRequestController: ChatInitializer {
     
     public func requestStatus(_ req: Request) throws -> EventLoopFuture<GiftRequestStatus> {
         let authId = try req.auth.require(User.self).getId()
-        let giftId = try req.parameters.next(Int.self)
+        let giftId = req.idParameter
         
-        return Gift.get(giftId, on: req).flatMap { gift in
+        return Gift.findOrFail(giftId, on: req.db).flatMap { gift in
             
             let ownerId = try gift.getUserId()
             

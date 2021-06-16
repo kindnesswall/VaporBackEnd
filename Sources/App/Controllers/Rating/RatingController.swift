@@ -11,7 +11,7 @@ final class RatingController {
     
     func get(_ req: Request) throws -> EventLoopFuture<Outputs.Rating> {
         
-        let reviewedId = try req.parameters.next(Int.self)
+        let reviewedId = req.idParameter
         let authId = try? req.getAuthId()
         
         return RatingResult.get(reviewedId: reviewedId, on: req).flatMap { ratingResult in

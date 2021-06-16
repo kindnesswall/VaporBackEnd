@@ -23,8 +23,8 @@ final class CharityController {
     
     func getCharityOfUser(_ req: Request) throws -> EventLoopFuture<Charity> {
         
-        let userId = try req.parameters.next(Int.self)
-        return User.get(userId, on: req).flatMap { user in
+        let userId = req.idParameter
+        return User.findOrFail(userId, on: req).flatMap { user in
             guard user.isCharity else {
                 throw Abort(.userIsNotCharity)
             }

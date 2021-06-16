@@ -17,7 +17,7 @@ class GiftDonationController {
         guard let userId = user.id else {
             throw Abort(.nilUserId)
         }
-        return try req.parameters.next(User.self).flatMap({ contactUser in
+        return User.getParameter(on: req).flatMap({ contactUser in
             guard let contactUserId = contactUser.id else {
                 throw Abort(.nilUserId)
             }
@@ -44,7 +44,7 @@ class GiftDonationController {
                     throw Abort(.unrequestedGift)
                 }
                 
-                return Gift.get(donate.giftId, on: req).flatMap({ gift in
+                return Gift.findOrFail(donate.giftId, on: req.db).flatMap({ gift in
                     
                     guard userId == gift.userId else {
                         throw Abort(.unauthorizedGift)

@@ -13,7 +13,7 @@ final class GiftAdminController {
     
     func rejectGift(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
         
-        return try req.parameters.next(Gift.self).flatMap { (gift) -> EventLoopFuture<Void> in
+        return Gift.getParameter(on: req).flatMap { (gift) -> EventLoopFuture<Void> in
             
             return try req.content.decode(Inputs.RejectReason.self).flatMap({ input in 
                 
@@ -31,7 +31,7 @@ final class GiftAdminController {
     
     func acceptGift(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
         
-        return try req.parameters.next(Gift.self).flatMap { (gift) -> EventLoopFuture<Gift> in
+        return Gift.getParameter(on: req).flatMap { (gift) -> EventLoopFuture<Gift> in
             
             gift.isReviewed = true
             gift.isRejected = false

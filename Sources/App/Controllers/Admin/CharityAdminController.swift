@@ -20,7 +20,7 @@ final class CharityAdminController {
     }
     
     func acceptCharity(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
-        return try req.parameters.next(User.self).flatMap { user in
+        return User.getParameter(on: req).flatMap { user in
             
             return try Charity.get(userId: try user.getId(), on: req).flatMap { foundCharity in
                 foundCharity.isRejected = false
@@ -36,7 +36,7 @@ final class CharityAdminController {
     }
     
     func rejectCharity(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
-        return try req.parameters.next(User.self).flatMap { user in
+        return User.getParameter(on: req).flatMap { user in
             
             return try req.content.decode(Inputs.RejectReason.self).flatMap({ input in 
                 

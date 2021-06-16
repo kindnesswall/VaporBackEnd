@@ -48,11 +48,7 @@ final class Sponsor: Model {
 
 }
 
-extension Sponsor {
-    static func get(_ id: Int, on conn: Database) -> EventLoopFuture<Sponsor> {
-        return find(id, on: conn).unwrap(or: Abort(.notFound))
-    }
-}
+
 
 extension Sponsor {
     var isValid: Bool {

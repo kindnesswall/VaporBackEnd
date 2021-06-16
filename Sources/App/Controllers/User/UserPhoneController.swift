@@ -40,9 +40,9 @@ final class UserPhoneController {
         let auth = try req.auth.require(User.self)
         let isAdmin = auth.isAdmin
         let isCharity = auth.isCharity
-        let userId = try req.parameters.next(Int.self)
+        let userId = req.idParameter
         
-        return User.get(userId, on: req).map { user in
+        return User.findOrFail(userId, on: req).map { user in
             
             let isPhoneVisibleForAll = user.isPhoneVisibleForAll ?? false
             let isPhoneVisibleForCharities = user.isPhoneVisibleForCharities ?? false
