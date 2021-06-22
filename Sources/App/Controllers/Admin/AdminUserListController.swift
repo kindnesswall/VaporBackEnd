@@ -18,11 +18,11 @@ final class AdminUserListController {
         
     }
     func userDenyAccess(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
-        return User.getParameter(on: req).flatMap({ user in
-            return user.delete(on: req.db).flatMap({ _ in
-                return try LogoutController.logoutAllDevices(req: req, user: user)
-            })
-        })
+        return User.getParameter(on: req).flatMap { user in
+            return user.delete(on: req.db).flatMap { _ in
+                return LogoutController.logoutAllDevices(req: req, user: user)
+            }
+        }
     }
     
     func usersActiveList(_ req: Request) throws -> EventLoopFuture<[User]> {

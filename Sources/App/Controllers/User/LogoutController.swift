@@ -17,21 +17,30 @@ class LogoutController {
     func logoutAllDevices(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
 
         let auth = try req.auth.require(User.self)
-        return try LogoutController.logoutAllDevices(req: req, user: auth)
+        return LogoutController.logoutAllDevices(req: req, user: auth)
     }
     
-    static func logoutAllDevices(req: Request, user:User) throws -> EventLoopFuture<HTTPStatus> {
+    static func logoutAllDevices(req: Request, user:User) -> EventLoopFuture<HTTPStatus> {
         
-        let userId = try user.getId()
-        return try user.authTokens.query(on: req).delete().flatMap({ _ in
-            return UserPushNotification.deleteAll(userId: userId, conn: req)
-        })
+        guard let userId = user.id else {
+            return req.db.makeFailedFuture(.nilUserId)
+        }
+        
+        return user
+            .$authTokens
+            .query(on: req.db)
+            .delete()
+            .flatMap { _ in
+                return UserPushNotification.deleteAll(
+                    userId: userId,
+                    conn: req.db)
+            }
     }
     
     static func logout(req: Request, userToken: Token) throws -> EventLoopFuture<HTTPStatus> {
         let userTokenId = try userToken.getId()
         return userToken.delete(on: req).flatMap { _ in
-            return UserPushNotification.delete(userTokenId: userTokenId, conn: req)
+            return UserPushNotification.delete(userTokenId: userTokenId, conn: req.db)
         }
     }
 }

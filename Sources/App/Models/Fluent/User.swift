@@ -47,6 +47,9 @@ final class User : Model {
     var isPhoneVisibleForAll: Bool?
 
     @Children(for: \.$user)
+    var authTokens: [Token]
+    
+    @Children(for: \.$user)
     var gifts: [Gift]
     
     @Children(for: \.$donatedToUser)
