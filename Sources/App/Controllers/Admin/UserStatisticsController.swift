@@ -59,26 +59,38 @@ extension UserStatisticsController {
     }
     
     func getUserStatistic(req:Request,user:User)->EventLoopFuture<UserStatistic> {
-        return user.getIdFuture(req: req).flatMap({ userId in
-            
-            let registeredGifts = Gift.query(on: req, withSoftDeleted: true)
-                .filter(\.userId == userId).count()
-            let rejectedGifts = Gift.query(on: req, withSoftDeleted: true)
-                .filter(\.userId == userId)
-                .filter(\.isRejected == true).count()
-            
-            let donatedGifts = try user.gifts.query(on: req).filter(\.donatedToUserId != nil).count()
-            let receivedGifts = try user.receivedGifts.query(on: req).count()
-            
-            let blockedChats = ChatBlock.query(on: req).filter(\ChatBlock.blockedUserId == userId).count()
-            
-            return self.getUserStatistic(user: user,
-                                         registeredGifts: registeredGifts,
-                                         rejectedGifts: rejectedGifts,
-                                         donatedGifts: donatedGifts,
-                                         receivedGifts: receivedGifts,
-                                         blockedChats: blockedChats)
-        })
+        
+        guard let userId = user.id else {
+            return req.db.makeFailedFuture(.nilUserId)
+        }
+        
+        let registeredGifts = Gift.query(on: req.db)
+            .withDeleted()
+            .filter(\.$user.$id == userId)
+            .count()
+        let rejectedGifts = Gift.query(on: req.db)
+            .withDeleted()
+            .filter(\.$user.$id == userId)
+            .filter(\.$isRejected == true)
+            .count()
+        
+        let donatedGifts = user.$gifts.query(on: req.db)
+            .filter(\.$donatedToUser.$id != nil)
+            .count()
+        let receivedGifts = user.$receivedGifts.query(on: req.db)
+            .count()
+        
+        let blockedChats = ChatBlock.query(on: req.db)
+            .filter(\.$blockedUserId == userId)
+            .count()
+        
+        return self.getUserStatistic(user: user,
+                                     registeredGifts: registeredGifts,
+                                     rejectedGifts: rejectedGifts,
+                                     donatedGifts: donatedGifts,
+                                     receivedGifts: receivedGifts,
+                                     blockedChats: blockedChats)
+        
     }
     
     func getUserStatistic(user:User,
