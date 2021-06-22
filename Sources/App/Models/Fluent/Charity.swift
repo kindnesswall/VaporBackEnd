@@ -165,7 +165,7 @@ extension Charity {
         return find(userId: userId, on: conn).map { $0 != nil }
     }
     
-    static func get(userId: Int , on conn: Database) throws -> EventLoopFuture<Charity> {
+    static func get(userId: Int , on conn: Database) -> EventLoopFuture<Charity> {
         return find(userId: userId, on: conn).unwrap(or: Abort(.charityInfoNotFound))
     }
 }
