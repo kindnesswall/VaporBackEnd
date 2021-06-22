@@ -13,21 +13,18 @@ final class UserStatisticsController {
     
     func usersActiveList(_ req: Request) throws -> EventLoopFuture<[UserStatistic]> {
         
-        return try req.content.decode(Inputs.UserQuery.self).flatMap({ queryParam in
-            return User.allActiveUsers(on: req, queryParam: queryParam).flatMap({ users in
-                return self.getUserStatistics(req: req, users: users)
-            })
-        })
-        
+        let queryParam = try req.content.decode(Inputs.UserQuery.self)
+        return User.allActiveUsers(on: req.db, queryParam: queryParam).flatMap { users in
+            return self.getUserStatistics(req: req, users: users)
+        }
     }
     
     func usersBlockedList(_ req: Request) throws -> EventLoopFuture<[UserStatistic]> {
-        return try req.content.decode(Inputs.UserQuery.self).flatMap({ queryParam in
-            return User.allBlockedUsers(on: req, queryParam: queryParam).flatMap({ users in
-                return self.getUserStatistics(req: req, users: users)
-            })
-        })
         
+        let queryParam = try req.content.decode(Inputs.UserQuery.self)
+        return User.allBlockedUsers(on: req.db, queryParam: queryParam).flatMap { users in
+            return self.getUserStatistics(req: req, users: users)
+        }
     }
     
     func userStatistics(_ req: Request) throws -> EventLoopFuture<UserStatistic> {
