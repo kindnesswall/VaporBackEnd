@@ -35,7 +35,7 @@ final class UserStatisticsController {
     
     func usersChatBlockedList(_ req: Request) throws -> EventLoopFuture<[UserStatistic]> {
         
-        return User.allChatBlockedUsers(on: req).map { list in
+        return User.allChatBlockedUsers(on: req.db).map { list in
             return list.map { $0.user }
         }.flatMap({ users in
             return self.getUserStatistics(req: req, users: users)
