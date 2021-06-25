@@ -6,10 +6,13 @@
 //
 
 import Vapor
+import Fluent
 
 class RequestInfo {
     let req: Request
     let userId: Int
+    
+    var db: Database { req.db }
     
     init(req: Request, userId: Int) {
         self.req = req
