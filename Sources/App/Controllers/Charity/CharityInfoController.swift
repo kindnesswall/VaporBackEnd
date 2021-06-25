@@ -12,7 +12,7 @@ final class CharityInfoController {
     private func validate(_ req: Request) throws -> Int {
         
         let auth = try req.auth.require(User.self)
-        let userId = req.idParameter
+        let userId = try req.requireIDParameter()
         
         guard auth.isAdmin || auth.id == userId else {
             throw Abort(.unauthorizedRequest)
@@ -25,9 +25,8 @@ final class CharityInfoController {
         let userId = try validate(req)
         
         return User.findOrFail(userId, on: req.db).flatMap { user in
-            return Charity.find(userId: userId, on: req).map { charity in
+            return Charity.find(userId: userId, on: req.db).map { charity in
                 let status = self.getCharityStatus(user: user, charity: charity)
-                
                 return Charity_Status(charity: charity, status: status)
             }
         }
@@ -54,36 +53,36 @@ final class CharityInfoController {
     func create(_ req: Request) throws -> EventLoopFuture<Charity> {
         
         let userId = try validate(req)
+        let input = try req.content.decode(Charity.Input.self)
         
-        return Charity.hasFound(userId: userId, on: req).flatMap { hasFound in
+        return Charity.hasFound(userId: userId, on: req.db).flatMap { hasFound in
             guard !hasFound else {
-                throw Abort(.charityInfoAlreadyExists)
+                return req.db.makeFailedFuture(.charityInfoAlreadyExists)
             }
-            return try req.content.decode(Charity.Input.self).flatMap { input in
-                return Charity(input: input, userId: userId).save(on: req)
-            }
+            let charity = Charity(input: input, userId: userId)
+            return charity.save(on: req.db)
+                .transform(to: charity)
         }
     }
     
     func update(_ req: Request) throws -> EventLoopFuture<Charity> {
         
         let userId = try validate(req)
+        let input = try req.content.decode(Charity.Input.self)
         
-        return try Charity.get(userId: userId, on: req).flatMap { charity in
-            
-            return try req.content.decode(Charity.Input.self).flatMap { input in
-                
-                charity.update(input: input)
-                return charity.save(on: req).flatMap { charity in
-                    return User.findOrFail(userId, on: req.db).flatMap { user in
-                        if user.isCharity {
-                            user.charityName = input.name
-                            user.charityImage = input.imageUrl
-                        }
-                        return user.save(on: req).transform(to: charity)
+        return Charity.get(userId: userId, on: req.db).flatMap { charity in
+            charity.update(input: input)
+            return charity.save(on: req.db).flatMap { _ in
+                return User.findOrFail(userId, on: req.db).flatMap { user in
+                    if user.isCharity {
+                        user.charityName = charity.name
+                        user.charityImage = charity.imageUrl
                     }
+                    return user.save(on: req.db)
+                        .transform(to: charity)
                 }
             }
+            
         }
     }
     
@@ -97,10 +96,11 @@ final class CharityInfoController {
             user.charityName = nil
             user.charityImage = nil
             
-            return user.save(on: req).flatMap { _ in
-                return try Charity.get(userId: userId, on: req).flatMap({ foundCharity in
-                    return foundCharity.delete(on: req).transform(to: .ok)
-                })
+            return user.save(on: req.db).flatMap { _ in
+                return Charity.get(userId: userId, on: req.db).flatMap { foundCharity in
+                    return foundCharity.delete(on: req.db)
+                        .transform(to: .ok)
+                }
             }
         }
     }

@@ -129,29 +129,28 @@ final class Charity: Model {
 
 extension Charity {
     
-    static func getAllCharities(conn:Database) -> EventLoopFuture<[(User,Charity)]> {
-        return User.query(on: conn)
-            .filter(\.$isCharity == true)
-            .join(\Charity.userId, to: \User.id)
-            .filter(\Charity.deletedAt == nil)
-            .alsoDecode(Charity.self)
+    static func getAllCharities(conn:Database) -> EventLoopFuture<[Charity]> {
+        return Charity.query(on: conn)
+            .filter(\.$deletedAt == nil) //TODO: Is it needed?
+            .join(User.self, on: \Charity.$userId == \User.$id)
+            .filter(User.self, \.$isCharity == true)
             .all()
     }
     
     static func getCharityReviewList(conn:Database) -> EventLoopFuture<[Charity]> {
         return Charity.query(on: conn)
             .filter(\.$isRejected == false)
-            .join(\User.id, to: \Charity.userId)
-            .filter(\User.deletedAt == nil)
-            .filter(\User.isCharity == false)
+            .join(User.self, on: \Charity.$userId == \User.$id)
+            .filter(User.self, \.$deletedAt == nil)
+            .filter(User.self, \.$isCharity == false)
             .all()
     }
     
     static func getCharityRejectedList(conn:Database) -> EventLoopFuture<[Charity]> {
         return Charity.query(on: conn)
             .filter(\.$isRejected == true)
-            .join(\User.id, to: \Charity.userId)
-            .filter(\User.deletedAt == nil)
+            .join(User.self, on: \Charity.$userId == \User.$id)
+            .filter(User.self, \.$deletedAt == nil)
             .all()
     }
 }
