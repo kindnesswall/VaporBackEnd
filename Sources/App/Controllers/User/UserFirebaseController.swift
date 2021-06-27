@@ -29,22 +29,23 @@ class UserFirebaseController: UserControllerCore {
         
     }
     
-    private func sendFirebaseRequest(_ req: Request, idToken:String) throws -> EventLoopFuture<String?> {
+    private func sendFirebaseRequest(_ req: Request, idToken:String) -> EventLoopFuture<String?> {
         
         let apiInput = Inputs.FirebaseLogin(idToken: idToken)
         guard let configuration = configuration.googleIdentityToolkit else {
-            throw Abort(.failedToLoginWithFirebase)
+            return req.db.makeFailedFuture(.failedToLoginWithFirebase)
         }
         let url = "\(configuration.url)\(configuration.apiKey)"
         
-        return try APICurl.curl(req: req, url: url, httpMethod: .POST, input: apiInput).map({ data in
-            
-            APICurl.log(data: data)
-            
-            let output = try? JSONDecoder().decode(FirebaseAuthOutput.self, from: data)
-            let user = output?.users.first
-            let phoneNumber = user?.phoneNumber
-            return phoneNumber
-        })
+        return APICall.call(
+            req: req,
+            url: url,
+            httpMethod: .POST,
+            input: apiInput).map { response in
+                let output = try? response.content.decode(FirebaseAuthOutput.self)
+                let user = output?.users.first
+                let phoneNumber = user?.phoneNumber
+                return phoneNumber
+        }
     }
 }
