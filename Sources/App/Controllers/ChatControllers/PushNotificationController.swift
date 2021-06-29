@@ -7,6 +7,7 @@
 
 import Vapor
 import FCM
+import APNS
 
 class PushNotificationController {
     
@@ -85,29 +86,16 @@ class PushNotificationController {
         
     }
     
-    private static func sendAPNSPush(_ req: Request, token: String, title: String?, body: String, content: PushPayloadContent?) throws -> EventLoopFuture<HTTPStatus> {
+    private static func sendAPNSPush(_ req: Request, token: String, title: String?, body: String, content: PushPayloadContent?) -> EventLoopFuture<HTTPStatus> {
         
         guard let payload = APNSPayload(title: title, body: body, data: content?.data).textFormat else {
-            throw Abort(.pushPayloadIsNotValid)
+            return req.db.makeFailedFuture(.pushPayloadIsNotValid)
         }
         
-        guard let configuration = configuration.apns else {
-            throw Abort(.failedToSendAPNSPush)
-        }
+        //TODO: APNS Implementation
+        return req.db.makeFailedFuture(.failedToSendAPNSPush)
         
-        let shell = try req.make(Shell.self)
-        
-        let bundleId = configuration.bundleId
-        let apnsURL = configuration.apnsURL
-        let certPass = configuration.certPass
-        let certPath = CertificatesPath.path(of: .apns)
-        
-        let arguments = ["-d", payload, "-H", "apns-topic:\(bundleId)", "-H", "apns-expiration: 1", "-H", "apns-priority: 10", "--http2", "--cert", "\(certPath):\(certPass)", "\(apnsURL)\(token)"]
-        
-        return try shell.execute(commandName: "curl", arguments: arguments).map({ output in
-            let text = String(data: output, encoding: .utf8)
-            print(text ?? "")
-        }).transform(to: .ok)
+//        req.apns.send(<#T##notification: APNSwiftNotification##APNSwiftNotification#>, to: <#T##String#>)
     }
     
     private static func sendFirebasePush(_ req: Request, token: String, title: String?, body: String, content: PushPayloadContent?, click_action: String?) -> EventLoopFuture<HTTPStatus> {

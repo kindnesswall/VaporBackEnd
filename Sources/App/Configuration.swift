@@ -55,9 +55,8 @@ enum SMSTemplatesType: String, Codable {
 }
 
 class APNSConfiguration: Codable {
-    let apnsURL: String
-    let certPass: String
     let bundleId: String
+    let environment: String
 }
 
 class FirebaseConfiguration: Codable {

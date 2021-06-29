@@ -4,6 +4,7 @@ import Fluent
 import FluentPostgresDriver
 import Leaf
 import FCM
+import APNS
 
 /// Called before your application initializes.
 public func configure(_ app: Application) throws {
@@ -78,6 +79,17 @@ public func configure(_ app: Application) throws {
 //    migrations.add(migration: ApplicationVersionSeed.self, database: .psql)
     
 //    services.register(migrations)
+    
+    //TODO: APNS Configuration
+//    if
+//        let configuration = configuration.apns,
+//        let environment = configuration.getEnvironment()
+//    {
+//        app.apns.configuration = try .init(
+//            authenticationMethod: <#T##APNSwiftConfiguration.AuthenticationMethod#>,
+//            topic: configuration.bundleId,
+//            environment:  environment)
+//    }
     
     
     //Firebase
