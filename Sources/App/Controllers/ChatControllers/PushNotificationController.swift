@@ -78,9 +78,9 @@ class PushNotificationController {
         return try payload.getContent(on: req).flatMap { content in
             switch pushType {
             case .APNS:
-                return try sendAPNSPush(req, token: token.devicePushToken, title: title, body: body, content: content)
+                return sendAPNSPush(req, token: token.devicePushToken, title: title, body: body, content: content)
             case .Firebase:
-                return try sendFirebasePush(req, token: token.devicePushToken, title: title, body: body, content: content, click_action: click_action)
+                return sendFirebasePush(req, token: token.devicePushToken, title: title, body: body, content: content, click_action: click_action)
             }
         }
         
