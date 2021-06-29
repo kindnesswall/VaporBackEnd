@@ -170,14 +170,27 @@ extension Gift {
     
     func update(input: Gift.Input, authId: Int, on req: Request) throws -> EventLoopFuture<Gift> {
         
-        guard self.$user.id == authId else { throw Abort(.unauthorizedGift) }
+        guard $user.id == authId else { throw Abort(.unauthorizedGift) }
         guard !self.isDeleted else { throw Abort(.deletedGift) }
         guard !isDonated else { throw Abort(.donatedGiftUnaccepted) }
         
+        //TODO: Restore it only when it is deleted.
         return self.restore(on: req.db).flatMap {
             self.update(input: input)
             return self.setNamesAndSave(on: req)
         }
+    }
+    
+    func delete(authId: Int, on db: Database) throws -> EventLoopFuture<HTTPStatus> {
+        
+        guard $user.id == authId else { throw Abort(.unauthorizedGift) }
+        guard !isDonated else { throw Abort(.donatedGiftUnaccepted) }
+        isDeleted = true
+        return save(on: db).flatMap {
+            return self.delete(on: db)
+                .transform(to: .ok)
+        }
+        
     }
 }
 

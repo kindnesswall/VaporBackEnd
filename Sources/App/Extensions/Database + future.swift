@@ -14,6 +14,11 @@ extension Database {
     }
     
     func makeFailedFuture<T>(_ error: ErrorType) -> EventLoopFuture<T> {
-        return eventLoop.makeFailedFuture(Abort(error))
+        return makeFailedFuture(Abort(error))
     }
+    
+    func makeFailedFuture<T>(_ error: Error) -> EventLoopFuture<T> {
+        return eventLoop.makeFailedFuture(error)
+    }
+    
 }
