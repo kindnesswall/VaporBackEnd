@@ -48,8 +48,14 @@ extension GiftRequest {
         return giftRequest.save(on: conn).transform(to: giftRequest)
     }
     
-    static func getGiftsToDonate(userGifts:QueryBuilder<Gift>,userId:Int,requestUserId:Int)-> QueryBuilder<Gift>{
-        return userGifts.join(\GiftRequest.giftId, to: \Gift.id).filter(\GiftRequest.$giftOwnerId == userId).filter(\GiftRequest.$requestUserId == requestUserId)
+    static func getGiftsToDonate(
+        userGifts: QueryBuilder<Gift>,
+        userId: Int,
+        requestUserId: Int) -> QueryBuilder<Gift> {
+        return userGifts
+            .join(GiftRequest.self, on: \Gift.$id == \GiftRequest.$giftId)
+            .filter(GiftRequest.self, \.$giftOwnerId == userId)
+            .filter(GiftRequest.self, \.$requestUserId == requestUserId)
     }
 }
 

@@ -195,6 +195,20 @@ extension Gift {
 }
 
 extension Gift {
+    func donate(to donatedToUserId: Int, authId: Int, on db: Database) throws -> EventLoopFuture<HTTPStatus> {
+        
+        guard $user.id == authId else { throw Abort(.unauthorizedGift) }
+        guard isReviewed == true else { throw Abort(.unreviewedGift) }
+        guard $donatedToUser.id == nil else {
+            throw Abort(.giftIsAlreadyDonated)
+        }
+        $donatedToUser.id = donatedToUserId
+        return save(on: db)
+            .transform(to: .ok)
+    }
+}
+
+extension Gift {
     private func setNamesAndSave(on req: Request) ->  EventLoopFuture<Gift> {
         return getCountry(on: req).flatMap { country in
             self.countryName = country.name
