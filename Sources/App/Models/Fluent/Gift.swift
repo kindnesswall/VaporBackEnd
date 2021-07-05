@@ -97,13 +97,6 @@ final class Gift : Model {
         return id
     }
     
-    func getUserId() throws -> Int {
-        guard let userId = self.$user.id else {
-            throw Abort(.nilGiftUserId)
-        }
-        return userId
-    }
-    
     private init(input: Gift.Input, authId: Int) {
         self.$user.id = authId
         self.isRejected = false
