@@ -16,19 +16,26 @@ final class UserController: UserControllerCore, PhoneNumberValidator {
     
     func registerHandler(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
         
-        return try req.content.decode(Inputs.Login.self).flatMap{ (inputUser)->EventLoopFuture<HTTPStatus> in
-            
-            let phoneNumber = try self.validate(phoneNumber: inputUser.phoneNumber)
-            
-            if self.isDemoAccount(phoneNumber: phoneNumber) {
-                return req.future(.ok)
-            }
-            
-            let activationCode = User.generateActivationCode()
-            
-            return self.setActvatioCode(req: req, phoneNumber: phoneNumber, activationCode: activationCode).flatMap { _ in
-                return try SMSController.send(phoneNumber: phoneNumber, code: activationCode, template: .register, on: req)
-            }
+        let inputUser = try req.content.decode(Inputs.Login.self)
+        
+        let phoneNumber = try self.validate(phoneNumber: inputUser.phoneNumber)
+        
+        if self.isDemoAccount(phoneNumber: phoneNumber) {
+            return req.db.makeSucceededFuture(.ok)
+        }
+        
+        let activationCode = User.generateActivationCode()
+        
+        return self.setActvatioCode(
+            req: req,
+            phoneNumber: phoneNumber,
+            activationCode: activationCode)
+            .flatMap { _ in
+                return SMSController.send(
+                    phoneNumber: phoneNumber,
+                    code: activationCode,
+                    template: .register,
+                    on: req)
         }
     }
     
@@ -36,21 +43,27 @@ final class UserController: UserControllerCore, PhoneNumberValidator {
     
     func loginHandler(_ req: Request) throws -> EventLoopFuture<AuthOutput> {
         
-        return try req.content.decode(Inputs.Login.self).flatMap{ inputUser in
-            
-            let phoneNumber = try self.validate(phoneNumber: inputUser.phoneNumber)
-
-            guard let activationCode = inputUser.activationCode else {
-                throw Abort(.invalidActivationCode)
-            }
-            
-            return try self.checkActivationCode(req: req, phoneNumber: phoneNumber, activationCode: activationCode).flatMap { _ in
-                
-                return self.findOrCreateUser(req: req, phoneNumber: phoneNumber).flatMap { user in
-                    return try self.getToken(req: req, user: user)
-                }
-            }
+        let inputUser = try req.content.decode(Inputs.Login.self)
+        
+        let phoneNumber = try self.validate(phoneNumber: inputUser.phoneNumber)
+        
+        guard let activationCode = inputUser.activationCode else {
+            throw Abort(.invalidActivationCode)
         }
+        
+        return try self.checkActivationCode(
+            req: req,
+            phoneNumber: phoneNumber,
+            activationCode: activationCode)
+            .flatMap { _ in
+                return self.findOrCreateUser(
+                    req: req,
+                    phoneNumber: phoneNumber)
+                    .flatMap { user in
+                        return self.getToken(req: req, user: user)
+                }
+        }
+        
     }
     
     // Only for development purpose
@@ -62,11 +75,13 @@ final class UserController: UserControllerCore, PhoneNumberValidator {
             throw Abort(.unauthorizedRequest)
         }
         
-        return try req.content.decode(Inputs.Login.self).flatMap({ inputUser in
-            
-            let phoneNumber = try self.validate(phoneNumber: inputUser.phoneNumber)
-            
-            return PhoneNumberActivationCode.find(req: req, phoneNumber: phoneNumber).map { item in
+        let inputUser = try req.content.decode(Inputs.Login.self)
+        let phoneNumber = try self.validate(phoneNumber: inputUser.phoneNumber)
+        
+        return PhoneNumberActivationCode.find(
+            req: req,
+            phoneNumber: phoneNumber)
+            .flatMapThrowing { item in
                 
                 guard let item = item else {
                     throw Abort(.invalidPhoneNumber)
@@ -77,8 +92,8 @@ final class UserController: UserControllerCore, PhoneNumberValidator {
                 }
                 
                 return AuthAdminAccessOutput(activationCode: activationCode)
-            }
-        })
+        }
+        
     }
     
 }
