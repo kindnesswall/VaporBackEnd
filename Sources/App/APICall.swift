@@ -13,6 +13,7 @@ class APICall {
         req: Request,
         url: String,
         httpMethod: HTTPMethod,
+        headers: [(String, String)]? = nil,
         input: InputCodable?) -> EventLoopFuture<ClientResponse> {
         
         guard
@@ -25,17 +26,20 @@ class APICall {
             req: req,
             url: url,
             httpMethod: httpMethod,
+            headers: headers,
             payload: ByteBuffer(data: data))
     }
     
     static func call(
         req: Request,
         url: String,
-        httpMethod: HTTPMethod) -> EventLoopFuture<ClientResponse> {
+        httpMethod: HTTPMethod,
+        headers: [(String, String)]? = nil) -> EventLoopFuture<ClientResponse> {
         return call(
             req: req,
             url: url,
             httpMethod: httpMethod,
+            headers: headers,
             payload: nil)
     }
     
@@ -43,13 +47,14 @@ class APICall {
         req: Request,
         url: String,
         httpMethod: HTTPMethod,
+        headers: [(String, String)]?,
         payload: ByteBuffer?) -> EventLoopFuture<ClientResponse> {
         
-        let headers = [("Content-Type", "application/json")]
+        let defaultHeaders = [("Content-Type", "application/json")]
         let clientRequest = ClientRequest(
             method: httpMethod,
             url: URI(string: url),
-            headers: HTTPHeaders(headers),
+            headers: HTTPHeaders(headers ?? defaultHeaders),
             body: payload)
         return req.client.send(clientRequest)
         

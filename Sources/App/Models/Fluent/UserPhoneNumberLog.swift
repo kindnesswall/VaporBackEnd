@@ -109,18 +109,22 @@ final class UserPhoneNumberLog: Model {
 
 extension UserPhoneNumberLog {
     
-    static func setActivationCode(req: Request, auth: User, toPhoneNumber: String, activationCode: ActivationCode) throws -> EventLoopFuture<HTTPStatus> {
+    static func setActivationCode(req: Request, auth: User, toPhoneNumber: String, activationCode: ActivationCode) -> EventLoopFuture<HTTPStatus> {
         
-        let futureItem = try findOrCreate(req: req, auth: auth, toPhoneNumber: toPhoneNumber)
+        let futureItem = findOrCreate(req: req, auth: auth, toPhoneNumber: toPhoneNumber)
         
         return futureItem.flatMap { item in
             return item.set(activationCode: activationCode, on: req.db)
         }
     }
     
-    static func findOrCreate(req: Request, auth: User, toPhoneNumber: String) throws -> EventLoopFuture<UserPhoneNumberLog> {
+    static func findOrCreate(req: Request, auth: User, toPhoneNumber: String) -> EventLoopFuture<UserPhoneNumberLog> {
         
-        let requested = UserPhoneNumberLog(userId: try auth.getId(), fromPhoneNumber: auth.phoneNumber, toPhoneNumber: toPhoneNumber, status: .requested)
+        guard let authId = auth.id else {
+            return req.db.makeFailedFuture(.nilUserId)
+        }
+        
+        let requested = UserPhoneNumberLog(userId: authId, fromPhoneNumber: auth.phoneNumber, toPhoneNumber: toPhoneNumber, status: .requested)
         
         return getLatest(phoneNumberLog: requested, conn: req.db).map { found in
             let phoneNumberLog = found ?? requested
@@ -129,9 +133,13 @@ extension UserPhoneNumberLog {
         
     }
     
-    static func check(req: Request, auth: User, toPhoneNumber: String, activationCode: ActivationCode) throws ->  EventLoopFuture<UserPhoneNumberLog> {
+    static func check(req: Request, auth: User, toPhoneNumber: String, activationCode: ActivationCode) ->  EventLoopFuture<UserPhoneNumberLog> {
         
-        let requested = UserPhoneNumberLog(userId: try auth.getId(), fromPhoneNumber: auth.phoneNumber, toPhoneNumber: toPhoneNumber, status: .requested)
+        guard let authId = auth.id else {
+            return req.db.makeFailedFuture(.nilUserId)
+        }
+        
+        let requested = UserPhoneNumberLog(userId: authId, fromPhoneNumber: auth.phoneNumber, toPhoneNumber: toPhoneNumber, status: .requested)
         
         return getLatest(phoneNumberLog: requested, conn: req.db).flatMapThrowing { item in
             
