@@ -6,6 +6,7 @@
 //
 
 import Vapor
+import Fluent
 
 enum PhoneVisibilitySetting: String, Codable {
     case all

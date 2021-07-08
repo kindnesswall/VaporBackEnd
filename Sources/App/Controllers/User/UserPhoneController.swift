@@ -20,19 +20,23 @@ final class UserPhoneController {
         
         let authId = try req.auth.require(User.self).getId()
         
-        return try getUserIfPhoneNumberIsAccessible(req).flatMap { user in
-            guard let user = user else {
-                throw Abort(.phoneNumberIsNotAccessible)
-            }
-            
-            let log = try PhoneNumberSeenLog(
-                fromUserId: authId,
-                seenUserId: user.getId(),
-                seenPhoneNumber: user.phoneNumber)
-            
-            let output = Outputs.UserPhoneNumber(phoneNumber: user.phoneNumber)
-            
-            return log.create(on: req).transform(to: output)
+        return try getUserIfPhoneNumberIsAccessible(req)
+            .unwrap(or: Abort(.phoneNumberIsNotAccessible))
+            .flatMap { user in
+                
+                guard let userId = user.id else {
+                    return req.db.makeFailedFuture(.nilUserId)
+                }
+                
+                let log = PhoneNumberSeenLog(
+                    fromUserId: authId,
+                    seenUserId: userId,
+                    seenPhoneNumber: user.phoneNumber)
+                
+                let output = Outputs.UserPhoneNumber(phoneNumber: user.phoneNumber)
+                
+                return log.create(on: req.db)
+                    .transform(to: output)
         }
     }
     
@@ -42,7 +46,7 @@ final class UserPhoneController {
         let isCharity = auth.isCharity
         let userId = req.idParameter
         
-        return User.findOrFail(userId, on: req).map { user in
+        return User.findOrFail(userId, on: req.db).map { user in
             
             let isPhoneVisibleForAll = user.isPhoneVisibleForAll ?? false
             let isPhoneVisibleForCharities = user.isPhoneVisibleForCharities ?? false
