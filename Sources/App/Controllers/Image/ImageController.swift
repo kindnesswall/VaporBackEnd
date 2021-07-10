@@ -9,28 +9,25 @@ import Vapor
 
 final class ImageController {
     
-    func uploadImage(_ req: Request) throws -> EventLoopFuture<ImageOutput> {
+    func uploadImage(_ req: Request) throws -> ImageOutput {
         
-        let user = try req.auth.require(User.self)
-        guard let userId = user.id else {
-            throw Abort(.nilUserId)
-        }
+        let auth = try req.auth.require(User.self)
+        let authId = try auth.getId()
         
-        return try req.content.decode(ImageInput.self).map({ (imageInput) -> ImageOutput in
-            
-            let imageFormat = imageInput.imageFormat ?? "jpeg"
-            let imageName = "image_\(String.getCurrentDate(withClock: true)).\(imageFormat)"
-            
-            let appDirectory = AppFileManager()
-            let imageDirectory = appDirectory.appendUserDirectory(toURL: appDirectory.appImagesDirecory, userId: userId)
-            try appDirectory.createDirectoryIfDoesNotExist(path: imageDirectory)
-            let imageAddress = imageDirectory.appendingPathComponent(imageName)
-            appDirectory.saveFile(path: imageAddress, data: imageInput.image)
-            
-            let imageOutputAddress = appDirectory.getOutputImageAddress(domainAddress: configuration.main.domainAddress, userId: userId, fileName: imageName)
-            
-            return ImageOutput(address: imageOutputAddress)
-        })
+        let imageInput = try req.content.decode(ImageInput.self)
+        
+        let imageFormat = imageInput.imageFormat ?? "jpeg"
+        let imageName = "image_\(String.getCurrentDate(withClock: true)).\(imageFormat)"
+        
+        let appDirectory = AppFileManager()
+        let imageDirectory = appDirectory.appendUserDirectory(toURL: appDirectory.appImagesDirecory, userId: authId)
+        try appDirectory.createDirectoryIfDoesNotExist(path: imageDirectory)
+        let imageAddress = imageDirectory.appendingPathComponent(imageName)
+        appDirectory.saveFile(path: imageAddress, data: imageInput.image)
+        
+        let imageOutputAddress = appDirectory.getOutputImageAddress(domainAddress: configuration.main.domainAddress, userId: authId, fileName: imageName)
+        
+        return ImageOutput(address: imageOutputAddress)
         
     }
 }
