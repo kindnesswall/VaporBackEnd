@@ -168,7 +168,7 @@ extension User {
 extension User {
     static func allChatBlockedUsers(on conn: Database) -> EventLoopFuture<[User_BlockedReport]> {
         
-        let a = User.query(on: conn)
+        return User.query(on: conn)
             .join(ChatBlock.self,
                   on: \User.$id == \ChatBlock.$blockedUserId)
             .all()

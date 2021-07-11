@@ -9,6 +9,6 @@ import Vapor
 
 extension Request {
     var idParameter: Int? { parameters.get("id") }
-    func requireIDParameter() throws -> Int { parameters.require("id") }
+    func requireIDParameter() throws -> Int { try parameters.require("id") }
 }
 
