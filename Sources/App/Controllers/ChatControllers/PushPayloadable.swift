@@ -15,7 +15,7 @@ protocol PushPayloadable: Content {
     var pushContentName: String? { get }
     
     func getClickAction(type: PushNotificationType) throws -> String?
-    func getContent(on req: Request) throws -> EventLoopFuture<PushPayloadContent?>
+    func getContent(on req: Request) -> EventLoopFuture<PushPayloadContent?>
     
 }
 
@@ -46,11 +46,11 @@ extension PushPayloadable {
         
         return components.url?.absoluteString
     }
-    
-    func getContent(on req: Request) throws -> EventLoopFuture<PushPayloadContent?> {
+    func getContent(on req: Request) -> EventLoopFuture<PushPayloadContent?> {
         let name = pushContentName
-        return try encode(for: req).map { response in
-            guard let data = response.http.body.data else {
+        return encodeResponse(for: req).map { response in
+            
+            guard let data = response.body.data else {
                 return nil
             }
             guard let text = String(data: data, encoding: .utf8) else {

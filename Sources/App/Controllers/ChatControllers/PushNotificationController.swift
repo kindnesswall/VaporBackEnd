@@ -75,7 +75,7 @@ class PushNotificationController {
         
         let click_action = try payload.getClickAction(type: pushType)
         
-        return try payload.getContent(on: req).flatMap { content in
+        return payload.getContent(on: req).flatMap { content in
             switch pushType {
             case .APNS:
                 return sendAPNSPush(req, token: token.devicePushToken, title: title, body: body, content: content)
