@@ -187,32 +187,27 @@ extension DirectChat: FindOrCreatable {
 }
 
 extension DirectChat {
-    static func userChats(blocked: Bool, userId: Int, on req: Request) -> EventLoopFuture<[ContactMessage]> {
+    static func userChats(blocked: Bool, authId: Int, on req: Request) -> EventLoopFuture<[ContactMessage]> {
         let onUsers = query(on: req.db)
-            .filter(\.$userId == userId)
+            .filter(\.$userId == authId)
             .filter(\.$contactIsBlocked == blocked)
-            .join(\User.id, to: \DirectChat.contactId)
-            .alsoDecode(User.self).all()
+            .join(User.self, on: \DirectChat.$contactId == \User.$id)
+            .all()
         let onContacts = query(on: req.db)
-            .filter(\.$contactId == userId)
+            .filter(\.$contactId == authId)
             .filter(\.$userIsBlocked == blocked)
-            .join(\User.id, to: \DirectChat.userId)
-            .alsoDecode(User.self).all()
-        return onUsers.and(onContacts).map { onUsers, onContacts in
-            let merged = merge(onUsers: onUsers, onContacts: onContacts)
-            return try merged.map { each in
-                let item = try each.0.castFor(authId: userId)
-                item.contactProfile = try each.1.userProfile(req: req)
+            .join(User.self, on: \DirectChat.$userId == \User.$id)
+            .all()
+        
+        return onUsers.and(onContacts).flatMapThrowing {
+            return try ($0.0 + $0.1).map {
+                let item = try $0.castFor(authId: authId)
+                item.contactProfile = try $0
+                    .joined(User.self)
+                    .userProfile(req: req)
                 return item
             }
         }
-    }
-    
-    private static func merge(onUsers: [(DirectChat, User)], onContacts: [(DirectChat, User)]) -> [(DirectChat, User)] {
-        var merged = [(DirectChat, User)]()
-        merged.append(contentsOf: onUsers)
-        merged.append(contentsOf: onContacts)
-        return merged
     }
 }
 

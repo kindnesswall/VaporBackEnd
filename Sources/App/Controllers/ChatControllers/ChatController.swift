@@ -69,7 +69,7 @@ class ChatController {
         
         return DirectChat.userChats(
             blocked: false,
-            userId: reqInfo.userId,
+            authId: reqInfo.userId,
             on: reqInfo.req)
     }
     
@@ -77,7 +77,7 @@ class ChatController {
         
         return DirectChat.userChats(
             blocked: true,
-            userId: reqInfo.userId,
+            authId: reqInfo.userId,
             on: reqInfo.req)
     }
     
