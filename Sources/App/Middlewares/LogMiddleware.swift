@@ -21,10 +21,10 @@ final class LogMiddleware: Middleware {
     
     private func getLog(request: Request) -> String {
         
-        let method = request.http.method
-        let url = request.http.url
+        let method = request.method
+        let url = request.url
         let time = Date().description
-        let ip = request.http.remotePeer.hostname ?? ""
+        let ip = request.remoteAddress?.hostname ?? ""
         let user = try? request.auth.require(User.self)
         let userId = user?.id?.description ?? "Guest"
         let spacer = "    "
