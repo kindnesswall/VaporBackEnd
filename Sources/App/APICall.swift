@@ -61,10 +61,12 @@ class APICall {
     }
     
     static func log(_ response: ClientResponse){
-        guard
+        if
             let buffer = response.body,
             let text = String(data: Data(buffer: buffer), encoding: .utf8)
-            else { print("Null data") }
-        print(text)
+        {
+            print(text)
+        }
+        print("Null data")
     }
 }
