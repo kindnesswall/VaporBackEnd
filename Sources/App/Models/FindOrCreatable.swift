@@ -9,8 +9,8 @@ import Vapor
 import Fluent
 import FluentPostgresDriver
 
-protocol FindOrCreatable: PostgreSQLModel {
-    static func _findQuery(input: Self, on conn: Database) -> QueryBuilder<PostgreSQLDatabase, Self>
+protocol FindOrCreatable: Model {
+    static func _findQuery(input: Self, on conn: Database) -> QueryBuilder<Self>
     static func _findFirst(input: Self, on conn: Database) -> EventLoopFuture<Self?>
     static func _count(input: Self, on conn: Database) -> EventLoopFuture<Int>
     static func mustBeUnique(input: Self, on conn: Database) -> EventLoopFuture<HTTPStatus>
@@ -29,7 +29,7 @@ extension FindOrCreatable {
     }
     
     static func mustBeUnique(input: Self, on conn: Database) -> EventLoopFuture<HTTPStatus> {
-        return _count(input: input, on: conn).map { count in
+        return _count(input: input, on: conn).flatMapThrowing { count in
             guard count == 1 else {
                 throw Abort(.transactionFailed)
             }
@@ -38,7 +38,7 @@ extension FindOrCreatable {
     }
     
     static func mustNotFind(input: Self, on conn: Database) -> EventLoopFuture<HTTPStatus> {
-        return _count(input: input, on: conn).map { count in
+        return _count(input: input, on: conn).flatMapThrowing { count in
             guard count == 0 else {
                 throw Abort(.alreadyExists)
             }
@@ -46,16 +46,16 @@ extension FindOrCreatable {
         }
     }
     
-    static func _findOrCreate(input: Self, on conn: Database) -> EventLoopFuture<Self> {
+    static func _findOrCreate(input: Self, on db: Database) -> EventLoopFuture<Self> {
         
-        return _findFirst(input: input, on: conn).flatMap { foundItem in
-           
+        return _findFirst(input: input, on: db).flatMap { foundItem in
+            
             if let foundItem = foundItem {
-                return conn.future(foundItem)
+                return db.makeSucceededFuture(foundItem)
             }
-            return conn.transaction(on: .psql) { conn in
-                return input.create(on: conn).flatMap { input in
-                    return mustBeUnique(input: input, on: conn)
+            return db.transaction { db in
+                return input.create(on: db).flatMap {
+                    return mustBeUnique(input: input, on: db)
                         .transform(to: input)
                 }
             }
