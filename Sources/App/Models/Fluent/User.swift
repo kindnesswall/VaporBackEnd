@@ -60,6 +60,7 @@ extension User {
         let id = try self.getId()
         let auth = try? req.requireAuthenticated(User.self)
         let phoneNumber = (auth?.isAdmin == true || id == auth?.id) ? self.phoneNumber : nil
+        let isAdmin = (auth?.isAdmin == true) ? self.isAdmin : nil
         
         let charityName = self.isCharity ? self.charityName : nil
         let charityImage = self.isCharity ? self.charityImage : nil
@@ -74,7 +75,8 @@ extension User {
             isCharity: self.isCharity,
             charityName: charityName,
             charityImage: charityImage,
-            isSupporter: isSupporter)
+            isSupporter: isSupporter,
+            isAdmin: isAdmin)
         
         return userProfile
     }
