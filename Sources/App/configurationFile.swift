@@ -14,7 +14,7 @@ public func readConfigurations() {
     do {
         configuration.main = try load(path: .main, type: MainConfiguration.self)
     } catch {
-        fatalError("Config file is missing!")
+        fatalError("Config file error: \(error)")
     }
     
     configuration.replica = try? load(path: .replica, type: ReplicaConfiguration.self)
