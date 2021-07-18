@@ -100,7 +100,7 @@ public func routes(_ router: Router) throws {
     tokenProtected.post(uris.donate, use: giftDonationController.donate)
     
     //Routes Gift Request
-    charityProtected.get(uris.gifts_request,Gift.parameter, use: giftRequestController.requestGift)
+    tokenProtected.get(uris.gifts_request,Gift.parameter, use: giftRequestController.requestGift)
     tokenProtected.get(uris.gifts_request_status, Int.parameter, use: giftRequestController.requestStatus)
     
     //Routes Chat
