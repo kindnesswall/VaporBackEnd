@@ -1,7 +1,8 @@
 
 import Vapor
 import Crypto
-//TODO: Guardian
+import Gatekeeper
+
 /// Register your application's routes here.
 public func routes(_ app: Application) throws {
     
@@ -43,10 +44,7 @@ public func routes(_ app: Application) throws {
     let guardAuthMiddleware = User.guardMiddleware()
     let guardAdminMiddleware = GuardAdminMiddleware()
     let guardCharityMiddleware = GuardCharityMiddleware()
-    //TODO:
-//    let guardianMiddleware = GuardianMiddleware(rate: Rate(limit: 3, interval: .minute),closure:{ _ in
-//        throw Abort(.tryOneMinuteLater)
-//    })
+    let gatekeeperMiddleware = GatekeeperMiddleware()
     
     //Groups
     let publicRouter = app.grouped(
@@ -68,27 +66,24 @@ public func routes(_ app: Application) throws {
         guardAuthMiddleware,
         guardCharityMiddleware,
         logMiddleware)
-    //TODO:
-//    let guardianProtected = app.grouped(
-//        guardianMiddleware,
-//        logMiddleware)
-//    let guardianTokenProtected = app.grouped(
-//        tokenAuthMiddleware,
-//        guardAuthMiddleware,
-//        guardianMiddleware,
-//        logMiddleware)
+    let gatekeeperProtected = app.grouped(
+        gatekeeperMiddleware,
+        logMiddleware)
+    let gatekeeperTokenProtected = app.grouped(
+        tokenAuthMiddleware,
+        guardAuthMiddleware,
+        gatekeeperMiddleware,
+        logMiddleware)
     
     //Home
     publicRouter.get(uris.root, use: landing.redirectHome)
     publicRouter.get(uris.home, use: landing.present)
     
     //Routes Login
-    //TODO: It must be guardianProtected
-    publicRouter.post(uris.register, use: userController.registerHandler)
+    gatekeeperProtected.post(uris.register, use: userController.registerHandler)
     publicRouter.post(uris.login, use: userController.loginHandler)
     
-    //TODO: It must be guardianTokenProtected
-    tokenProtected.post(uris.register_phoneNumberChange_request, use: phoneChangeController.changePhoneNumberRequest)
+    gatekeeperProtected.post(uris.register_phoneNumberChange_request, use: phoneChangeController.changePhoneNumberRequest)
     tokenProtected.post(uris.register_phoneNumberChange_validate, use: phoneChangeController.changePhoneNumberValidate)
     
     tokenProtected.get(uris.logout, use: logoutController.logout)

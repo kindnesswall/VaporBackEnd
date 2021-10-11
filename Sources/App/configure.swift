@@ -5,6 +5,7 @@ import FluentPostgresDriver
 import Leaf
 import FCM
 import APNS
+import Gatekeeper
 
 /// Called before your application initializes.
 public func configure(_ app: Application) throws {
@@ -95,4 +96,6 @@ public func configure(_ app: Application) throws {
     //Firebase
     let path = CertificatesPath.path(of: .firebase)
     app.fcm.configuration = .init(pathToServiceAccountKey: path)
+    
+    app.gatekeeper.config = .init(maxRequests: 3, per: .minute)
 }
