@@ -12,7 +12,7 @@ final class DirectChat: Model {
     
     static let schema = "DirectChat"
     
-    @ID(key: .id)
+    @ID(custom: .id)
     var id: Int?
     
     @Field(key: "userId")

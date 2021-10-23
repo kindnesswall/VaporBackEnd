@@ -12,7 +12,7 @@ final class GiftRequest: Model {
     
     static let schema = "GiftRequest"
     
-    @ID(key: .id)
+    @ID(custom: .id)
     var id: Int?
     
     @Field(key: "requestUserId")

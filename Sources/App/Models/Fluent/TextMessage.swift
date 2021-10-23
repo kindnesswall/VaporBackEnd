@@ -12,7 +12,7 @@ final class TextMessage : Model {
     
     static let schema = "TextMessage"
     
-    @ID(key: .id)
+    @ID(custom: .id)
     var id:Int?
     
     @Parent(key: "chatId")

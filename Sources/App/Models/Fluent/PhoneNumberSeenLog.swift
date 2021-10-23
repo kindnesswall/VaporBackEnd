@@ -12,7 +12,7 @@ final class PhoneNumberSeenLog: Model {
     
     static let schema = "PhoneNumberSeenLog"
     
-    @ID(key: .id)
+    @ID(custom: .id)
     var id: Int?
     
     @Field(key: "fromUserId")

@@ -12,7 +12,7 @@ final class Category : Model {
     
     static let schema = "Category"
     
-    @ID(key: .id)
+    @ID(custom: .id)
     var id:Int?
     
     @Field(key: "title")

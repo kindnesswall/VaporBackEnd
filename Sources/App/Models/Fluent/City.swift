@@ -12,7 +12,7 @@ final class City : Model{
     
     static let schema = "City"
     
-    @ID(key: .id)
+    @ID(custom: .id)
     var id:Int?
     
     @Parent(key: "province_id")

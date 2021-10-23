@@ -13,7 +13,7 @@ final class Gift : Model {
     
     static let schema = "Gift"
     
-    @ID(key: .id)
+    @ID(custom: .id)
     var id:Int?
     
     @OptionalParent(key: "userId")

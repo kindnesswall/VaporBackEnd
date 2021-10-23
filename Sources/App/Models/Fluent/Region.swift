@@ -12,7 +12,7 @@ final class Region : Model {
     
     static let schema = "Region"
     
-    @ID(key: .id)
+    @ID(custom: .id)
     var id:Int?
     
     @Parent(key: "city_id")

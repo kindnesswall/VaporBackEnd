@@ -12,7 +12,7 @@ final class PhoneNumberActivationCode: Model {
     
     static let schema = "PhoneNumberActivationCode"
     
-    @ID(key: .id)
+    @ID(custom: .id)
     var id:Int?
     
     @Field(key: "phoneNumber")

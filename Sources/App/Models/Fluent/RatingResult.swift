@@ -12,7 +12,7 @@ final class RatingResult: Model {
     
     static let schema = "RatingResult"
     
-    @ID(key: .id)
+    @ID(custom: .id)
     var id: Int?
     
     @Field(key: "reviewedId")

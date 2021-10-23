@@ -12,7 +12,7 @@ final class ChatBlock : Model {
     
     static let schema = "ChatBlock"
     
-    @ID(key: .id)
+    @ID(custom: .id)
     var id:Int?
     
     @Field(key: "chatId")

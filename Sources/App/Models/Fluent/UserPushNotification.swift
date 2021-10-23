@@ -12,7 +12,7 @@ final class UserPushNotification: Model {
     
     static let schema = "UserPushNotification"
     
-    @ID(key: .id)
+    @ID(custom: .id)
     var id: Int?
     
     @Field(key: "userId")

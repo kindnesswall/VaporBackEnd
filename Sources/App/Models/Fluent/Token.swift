@@ -12,7 +12,7 @@ final class Token: Model {
     
     static let schema = "Token"
     
-    @ID(key: .id)
+    @ID(custom: .id)
     var id: Int?
     
     @Field(key: "token")

@@ -13,7 +13,7 @@ final class ApplicationVersion: Model {
     
     static let schema = "ApplicationVersion"
     
-    @ID(key: .id)
+    @ID(custom: .id)
     var id: Int?
     
     @Field(key: "platform")

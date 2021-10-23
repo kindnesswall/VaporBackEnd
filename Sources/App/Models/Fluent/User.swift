@@ -13,7 +13,7 @@ final class User : Model {
     
     static let schema = "User"
     
-    @ID(key: .id)
+    @ID(custom: .id)
     var id:Int?
     
     @Field(key: "phoneNumber")

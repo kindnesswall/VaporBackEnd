@@ -12,7 +12,7 @@ final class County : Model{
     
     static let schema = "County"
     
-    @ID(key: .id)
+    @ID(custom: .id)
     var id:Int?
     
     @Field(key: "province_id")

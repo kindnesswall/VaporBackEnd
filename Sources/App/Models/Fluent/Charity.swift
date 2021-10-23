@@ -13,7 +13,7 @@ final class Charity: Model {
     
     static let schema = "Charity"
     
-    @ID(key: .id)
+    @ID(custom: .id)
     var id: Int?
     
     @OptionalField(key: "userId")
