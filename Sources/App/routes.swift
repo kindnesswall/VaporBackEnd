@@ -108,7 +108,7 @@ public func routes(_ app: Application) throws {
     tokenProtected.put(uris.gifts_id, use: giftController.update)
     tokenProtected.delete(uris.gifts_id, use: giftController.delete)
     
-    tokenProtected.post(uris.image_upload, use: imageController.uploadImage)
+    tokenProtected.on(.POST, uris.image_upload, body: .collect(maxSize: "20mb"), use: imageController.uploadImage)
     
     tokenProtected.post(uris.gifts_userRegistered_id, use: userGifts.registeredGifts)
     tokenProtected.post(uris.gifts_userDonated_id, use: userGifts.donatedGifts)
