@@ -173,6 +173,12 @@ extension DirectChat: FindOrCreatable {
         return _find(userId: input.userId, contactId: input.contactId, on: conn)
     }
     
+    //TODO:
+    // - now (userId, contactId) pairs are unique.
+    // - however, (1,2) and (2,1) may be considered valid in the database, which is not valid.
+    // - check if it happens and if it happens:
+    //     - how rare is it happens?
+    //     - what is its consequences?
     static private func _find(userId: Int, contactId: Int, on conn: Database) -> QueryBuilder<DirectChat> {
         return query(on: conn).group(.or) { query in
             query.group(.and) { query in

@@ -92,6 +92,9 @@ public func configure(_ app: Application) throws {
 //            environment:  environment)
 //    }
     
+    app.migrations.add(UserUniquePhoneNumberMigration())
+    app.migrations.add(DirectChatUniqueUserIdAndContactIdMigration())
+    app.migrations.add(RatingResultUniqueReviewedIdMigration())
     
     //Firebase
     let path = CertificatesPath.path(of: .firebase)
