@@ -53,14 +53,9 @@ extension FindOrCreatable {
             if let foundItem = foundItem {
                 return db.makeSucceededFuture(foundItem)
             }
-            return db.transaction { db in
-                return input.create(on: db).flatMap {
-                    return mustBeUnique(input: input, on: db)
-                        .transform(to: input)
-                }
-            }
+            
+            return input.create(on: db)
+                .transform(to: input)
         }
-        
     }
-    
 }
