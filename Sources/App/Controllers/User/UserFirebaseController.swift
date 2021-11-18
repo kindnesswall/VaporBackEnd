@@ -14,7 +14,7 @@ class UserFirebaseController: UserControllerCore {
         
         let input = try req.content.decode(Inputs.FirebaseLogin.self)
         
-        return try self.sendFirebaseRequest(req, idToken: input.idToken).flatMap { phoneNumber in
+        return self.sendFirebaseRequest(req, idToken: input.idToken).flatMap { phoneNumber in
             
             guard let phoneNumber = phoneNumber else {
                 return req.db.makeFailedFuture(

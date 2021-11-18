@@ -17,10 +17,15 @@ class UserControllerCore: UserDemoAccountable {
             req: req,
             phoneNumber: phoneNumber)
             .flatMap { foundUser in
-                let user = foundUser ?? User(phoneNumber: phoneNumber)
-                return user.save(on: req.db)
+                
+                if let foundUser = foundUser {
+                    return req.db.makeSucceededFuture(foundUser)
+                }
+                
+                return User(phoneNumber: phoneNumber)
+                    .save(on: req.db)
                     .transform(to: user)
-        }
+            }
     }
     
     func setActvatioCode(req: Request, phoneNumber: String, activationCode: String) -> EventLoopFuture<HTTPStatus> {
@@ -79,7 +84,7 @@ class UserControllerCore: UserDemoAccountable {
             return req.db.makeFailedFuture(.nilUserId)
         }
         
-        let token = try Token.generate(for: userId)
+        let token = Token.generate(for: userId)
         
         return token.save(on: req.db)
             .map {
