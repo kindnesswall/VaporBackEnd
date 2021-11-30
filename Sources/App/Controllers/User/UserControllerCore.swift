@@ -22,7 +22,8 @@ class UserControllerCore: UserDemoAccountable {
                     return req.db.makeSucceededFuture(foundUser)
                 }
                 
-                return User(phoneNumber: phoneNumber)
+                let user = User(phoneNumber: phoneNumber)
+                return user
                     .save(on: req.db)
                     .transform(to: user)
             }
