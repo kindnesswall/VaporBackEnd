@@ -10,7 +10,7 @@ import Vapor
 
 final class ContactMessage: Content {
     var chat: ChatContacts
-    var textMessages: [TextMessage]?
+    var textMessages: [TextMessage.Output]?
     var contactProfile: UserProfile?
     var notificationCount: Int
     var blockStatus: BlockStatus
@@ -30,7 +30,7 @@ final class ContactMessage: Content {
         return blockStatus.contactIsBlocked
     }
     
-    init(chat: ChatContacts, textMessages: [TextMessage]? = nil, contactProfile: UserProfile? = nil, notificationCount: Int, blockStatus: BlockStatus) {
+    init(chat: ChatContacts, textMessages: [TextMessage.Output]? = nil, contactProfile: UserProfile? = nil, notificationCount: Int, blockStatus: BlockStatus) {
         self.chat = chat
         self.textMessages = textMessages
         self.contactProfile = contactProfile

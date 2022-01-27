@@ -159,7 +159,7 @@ extension DirectChat {
             return fetch(textMessages: chat.$textMessages, beforeId: beforeId, on: db).flatMapThrowing { textMessages in
                 
                 let item = try chat.castFor(authId: authId)
-                item.textMessages = textMessages
+                item.textMessages = textMessages.outputArray
                 return item
                 
             }

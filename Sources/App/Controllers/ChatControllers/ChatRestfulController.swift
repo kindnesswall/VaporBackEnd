@@ -52,10 +52,11 @@ class ChatRestfulController: ChatInitializer {
         return self.chatController.fetchMessages(reqInfo: reqInfo, input: fetchMessagesInput)
     }
     
-    func sendMessage(_ req: Request) throws -> EventLoopFuture<TextMessage> {
+    func sendMessage(_ req: Request) throws -> EventLoopFuture<TextMessage.Output> {
         
         let input = try req.content.decode(Inputs.TextMessage.self)
         return try self.sendMessage(req: req, input: input)
+            .outputObject
     }
     
     private func sendMessage(req: Request, input: Inputs.TextMessage) throws -> EventLoopFuture<TextMessage> {

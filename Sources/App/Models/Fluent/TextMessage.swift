@@ -49,6 +49,29 @@ final class TextMessage : Model {
             self.type = type.rawValue
         }
     }
+    
+    var outputObject: Output {
+        .init(
+            id: id,
+            chatId: $chat.id,
+            senderId: senderId,
+            receiverId: receiverId,
+            text: text,
+            type: type,
+            ack: ack,
+            createdAt: createdAt)
+    }
+    
+    struct Output: Content {
+        let id:Int?
+        let chatId:Int
+        let senderId:Int?
+        let receiverId:Int?
+        let text:String
+        let type: String?
+        let ack:Bool?
+        let createdAt:Date?
+    }
 }
 
 extension TextMessage {
@@ -84,3 +107,14 @@ extension TextMessage {
 //extension TextMessage : Migration {}
 extension TextMessage : Content {}
 
+extension Array where Element == TextMessage {
+    var outputArray: [TextMessage.Output] {
+        map { $0.outputObject }
+    }
+}
+
+extension EventLoopFuture where Value == TextMessage {
+    var outputObject: EventLoopFuture<TextMessage.Output> {
+        map { $0.outputObject }
+    }
+}
