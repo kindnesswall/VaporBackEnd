@@ -8,11 +8,11 @@
 import Vapor
 
 final class AuthOutput : Content {
-    let token: Token
+    let token: Token.Output
     let isAdmin: Bool
     let isCharity: Bool
     
-    init(token: Token, isAdmin: Bool, isCharity: Bool) {
+    init(token: Token.Output, isAdmin: Bool, isCharity: Bool) {
         self.token = token
         self.isAdmin = isAdmin
         self.isCharity = isCharity

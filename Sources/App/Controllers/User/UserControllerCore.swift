@@ -90,7 +90,7 @@ class UserControllerCore: UserDemoAccountable {
         return token.save(on: req.db)
             .map {
                 return AuthOutput(
-                    token: token,
+                    token: token.outputObject,
                     isAdmin: user.isAdmin,
                     isCharity: user.isCharity)
         }

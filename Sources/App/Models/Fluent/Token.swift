@@ -37,6 +37,26 @@ final class Token: Model {
         self.token = token
         self.$user.id = userID
     }
+    
+    var outputObject: Output {
+        .init(
+            id: id,
+            token: token,
+            userID: $user.id,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt)
+    }
+    
+    struct Output: Content {
+        let id: Int?
+        let token: String
+        let userID: Int?
+        
+        let createdAt: Date?
+        let updatedAt: Date?
+        let deletedAt: Date?
+    }
 
 }
 
