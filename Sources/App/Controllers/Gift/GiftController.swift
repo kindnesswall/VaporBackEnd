@@ -35,13 +35,14 @@ final class GiftController {
     
     
     /// Saves a decoded `Gift` to the database.
-    func create(_ req: Request) throws -> EventLoopFuture<Gift> {
+    func create(_ req: Request) throws -> EventLoopFuture<Gift.Output> {
         let authId = try req.auth.require(User.self).getId()
         let input = try req.content.decode(Gift.Input.self)
         return Gift.create(input: input, authId: authId, on: req)
+            .outputObject
     }
     
-    func update(_ req: Request) throws -> EventLoopFuture<Gift> {
+    func update(_ req: Request) throws -> EventLoopFuture<Gift.Output> {
         let authId = try req.auth.require(User.self).getId()
         let giftId = req.idParameter
         let input = try req.content.decode(Gift.Input.self)
@@ -53,6 +54,7 @@ final class GiftController {
                 return req.db.makeFailedFuture(error)
             }
         }
+        .outputObject
     }
     
     /// Deletes a parameterized `Gift`.

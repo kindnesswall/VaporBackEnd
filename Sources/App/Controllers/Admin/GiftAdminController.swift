@@ -36,7 +36,7 @@ final class GiftAdminController {
         }
     }
     
-    func unreviewedGifts(_ req: Request) throws -> EventLoopFuture<[Gift]> {
+    func unreviewedGifts(_ req: Request) throws -> EventLoopFuture<[Gift.Output]> {
         
         let requestInput = try req.content.decode(RequestInput.self)
         let query = Gift.query(on: req.db)
@@ -46,6 +46,7 @@ final class GiftAdminController {
             requestInput: requestInput,
             onlyUndonatedGifts: false,
             onlyReviewedGifts: false)
+            .outputArray
     }
     
 }
