@@ -28,10 +28,35 @@ final class Province: Model {
     var cities: [City]
     
     init() {}
+    
+    var outputObject: Output {
+        .init(
+            id: id,
+            name: name,
+            country_id: $country.id,
+            sortIndex: sortIndex)
+    }
+    
+    struct Output: Content {
+        let id:Int?
+        let name:String
+        let country_id: Int
+        let sortIndex:Int?
+    }
 }
 
 //extension Province : Migration {}
 
 extension Province : Content {}
 
+extension Array where Element == Province {
+    var outputArray: [Province.Output] {
+        map { $0.outputObject }
+    }
+}
 
+extension EventLoopFuture where Value == [Province] {
+    var outputArray: EventLoopFuture<[Province.Output]> {
+        map { $0.outputArray }
+    }
+}

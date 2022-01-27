@@ -34,6 +34,25 @@ final class City : Model{
     var regions: [Region]
     
     init() {}
+    
+    var outputObject: Output {
+        .init(
+            id: id,
+            province_id: $province.id,
+            county_id: county_id,
+            name: name,
+            hasRegions: hasRegions,
+            sortIndex: sortIndex)
+    }
+    
+    struct Output: Content {
+        let id:Int?
+        let province_id:Int
+        let county_id:Int
+        let name:String
+        let hasRegions:Bool?
+        let sortIndex:Int? 
+    }
 }
 
 
@@ -41,4 +60,14 @@ final class City : Model{
 
 extension City : Content {}
 
+extension Array where Element == City {
+    var outputArray: [City.Output] {
+        map { $0.outputObject }
+    }
+}
 
+extension EventLoopFuture where Value == [City] {
+    var outputArray: EventLoopFuture<[City.Output]> {
+        map { $0.outputArray }
+    }
+}
