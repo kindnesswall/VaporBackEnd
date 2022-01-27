@@ -11,7 +11,7 @@ import FluentPostgresDriver
 
 final class UserGiftsController {
     
-    func registeredGifts(_ req: Request) throws -> EventLoopFuture<[Gift]> {
+    func registeredGifts(_ req: Request) throws -> EventLoopFuture<[Gift.Output]> {
         
         let auth = try req.auth.require(User.self)
         let isAdmin = auth.isAdmin
@@ -40,11 +40,12 @@ final class UserGiftsController {
                     requestInput: requestInput,
                     onlyUndonatedGifts: true,
                     onlyReviewedGifts: !(isAdmin || isOwner))
-        }
+            }
+            .outputArray
         
     }
     
-    func donatedGifts(_ req: Request) throws -> EventLoopFuture<[Gift]> {
+    func donatedGifts(_ req: Request) throws -> EventLoopFuture<[Gift.Output]> {
         
         let auth = try req.auth.require(User.self)
         let isAdmin = auth.isAdmin
@@ -64,10 +65,11 @@ final class UserGiftsController {
                     onlyUndonatedGifts: false,
                     onlyReviewedGifts: true)
                 
-        }
+            }
+            .outputArray
     }
     
-    func receivedGifts(_ req: Request) throws -> EventLoopFuture<[Gift]> {
+    func receivedGifts(_ req: Request) throws -> EventLoopFuture<[Gift.Output]> {
         
         let auth = try req.auth.require(User.self)
         let isAdmin = auth.isAdmin
@@ -86,7 +88,8 @@ final class UserGiftsController {
                     onlyUndonatedGifts: false,
                     onlyReviewedGifts: true)
                 
-        }
+            }
+            .outputArray
     }
     
 }

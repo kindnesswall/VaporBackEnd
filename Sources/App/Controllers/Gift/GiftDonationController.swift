@@ -11,7 +11,7 @@ import FluentPostgresDriver
 
 class GiftDonationController {
     
-    func giftsToDonate(_ req: Request) throws -> EventLoopFuture<[Gift]> {
+    func giftsToDonate(_ req: Request) throws -> EventLoopFuture<[Gift.Output]> {
         
         let auth = try req.auth.require(User.self)
         let authId = try auth.getId()
@@ -32,6 +32,7 @@ class GiftDonationController {
                 onlyUndonatedGifts: true,
                 onlyReviewedGifts: true)
         }
+        .outputArray
     }
     
     func donate(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {

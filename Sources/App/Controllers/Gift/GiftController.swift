@@ -13,7 +13,7 @@ import FluentPostgresDriver
 final class GiftController {
     
     /// Returns a list of all `Gift`s.
-    func index(_ req: Request) throws -> EventLoopFuture<[Gift]> {
+    func index(_ req: Request) throws -> EventLoopFuture<[Gift.Output]> {
         
         let requestInput = try req.content.decode(RequestInput.self)
         let query = Gift.query(on: req.db)
@@ -22,13 +22,15 @@ final class GiftController {
             requestInput: requestInput,
             onlyUndonatedGifts: true,
             onlyReviewedGifts: true)
+            .outputArray
     }
     
-    func itemAt(_ req: Request) throws -> EventLoopFuture<Gift> {
+    func itemAt(_ req: Request) throws -> EventLoopFuture<Gift.Output> {
         return Gift.getParameter(on: req).flatMapThrowing { gift in
             guard gift.isReviewed else { throw Abort(.unreviewedGift) }
             return gift
         }
+        .outputObject
     }
     
     

@@ -133,6 +133,35 @@ final class Gift : Model {
         self.isReviewed = false
     }
     
+    var outputObject: Output {
+        .init(
+            id: id,
+            userId: $user.id,
+            donatedToUserId: $donatedToUser.id,
+            isReviewed: isReviewed,
+            isRejected: isRejected,
+            isDeleted: isDeleted,
+            rejectReason: rejectReason,
+            categoryTitle: categoryTitle,
+            countryName: countryName,
+            provinceName: provinceName,
+            cityName: cityName,
+            regionName: regionName,
+            title: title,
+            description: description,
+            price: price,
+            categoryId: $category.id,
+            giftImages: giftImages,
+            isNew: isNew,
+            countryId: countryId,
+            provinceId: $province.id,
+            cityId: $city.id,
+            regionId: $region.id,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt)
+    }
+    
     
     final class Input : Codable {
         var title:String
@@ -145,6 +174,36 @@ final class Gift : Model {
         var provinceId:Int
         var cityId:Int
         var regionId:Int?
+    }
+    
+    struct Output: Content {
+        let id:Int?
+        let userId:Int?
+        let donatedToUserId:Int?
+        let isReviewed: Bool
+        let isRejected: Bool
+        let isDeleted: Bool
+        let rejectReason: String?
+        let categoryTitle:String?
+        let countryName: String?
+        let provinceName:String?
+        let cityName:String?
+        let regionName:String?
+        
+        let title:String
+        let description:String
+        let price:Double
+        let categoryId:Int
+        let giftImages:[String]
+        let isNew:Bool
+        let countryId: Int?
+        let provinceId:Int
+        let cityId:Int
+        let regionId:Int?
+        
+        let createdAt: Date?
+        let updatedAt: Date?
+        let deletedAt: Date?
     }
 }
 
@@ -314,3 +373,20 @@ extension Gift {
 /// Allows `Gift` to be encoded to and decoded from HTTP messages.
 extension Gift : Content {}
 
+extension Array where Element == Gift {
+    var outputArray: [Gift.Output] {
+        map { $0.outputObject }
+    }
+}
+
+extension EventLoopFuture where Value == Gift {
+    var outputObject: EventLoopFuture<Gift.Output> {
+        map { $0.outputObject }
+    }
+}
+
+extension EventLoopFuture where Value == [Gift] {
+    var outputArray: EventLoopFuture<[Gift.Output]> {
+        map { $0.outputArray }
+    }
+}
