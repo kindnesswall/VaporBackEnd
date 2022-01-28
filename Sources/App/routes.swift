@@ -30,6 +30,7 @@ public func routes(_ app: Application) throws {
     let pushNotificationController = PushNotificationController()
     let charityController = CharityController()
     let charityInfo = CharityInfoController()
+    let charityInfoAdmin = CharityInfoAdminController()
     let charityAdminController = CharityAdminController()
     let adminStatisticsController = AdminStatisticsController()
     let versionController = ApplicationVersionController()
@@ -154,8 +155,12 @@ public func routes(_ app: Application) throws {
     
     tokenProtected.get(uris.charity_info_user_id, use: charityInfo.show)
     tokenProtected.post(uris.charity_info_user_id, use: charityInfo.create)
-    tokenProtected.put(uris.charity_info_user_id, use: charityInfo.update)
-    tokenProtected.delete(uris.charity_info_user_id, use: charityInfo.delete)
+    
+    // charityInfoAdmin force create function affects these APIs
+//    tokenProtected.put(uris.charity_info_user_id, use: charityInfo.update)
+//    tokenProtected.delete(uris.charity_info_user_id, use: charityInfo.delete)
+    
+    adminProtected.post(uris.charity_info_force_user_id, use: charityInfoAdmin.forceCreate)
     
     //Routes Charity Admin
     adminProtected.get(uris.charity_review, use: charityAdminController.getUnreviewedList)
