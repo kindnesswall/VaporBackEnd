@@ -93,7 +93,7 @@ public func configure(_ app: Application) throws {
 //    }
     
     app.migrations.add(UserUniquePhoneNumberMigration())
-    app.migrations.add(DirectChatUniqueUserIdAndContactIdMigration())
+//    app.migrations.add(DirectChatUniqueUserIdAndContactIdMigration())
     app.migrations.add(RatingResultUniqueReviewedIdMigration())
     
     //Firebase
