@@ -95,7 +95,10 @@ public func routes(_ app: Application) throws {
     if configuration.main.stage == .development {
         adminProtected.post(uris.login_admin_access, use: userController.adminAccessActivationCode)
     }
-    
+
+    //Charity
+//    charityProtected.get(uris.madadjo_id, use: <#T##(Request) async throws -> AsyncResponseEncodable#>)
+
     //Routes User Profile
     tokenFetched.get(uris.profile_id, use: userProfileController.show)
     tokenProtected.post(uris.profile,use: userProfileController.update)

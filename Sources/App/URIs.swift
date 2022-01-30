@@ -21,7 +21,8 @@ class URIs {
     
     func makeAPI(path relativePath: [String]) -> [PathComponent] {
         append(to: apiPath.map { .init(stringLiteral: $0) },
-               path: relativePath)
+               path: relativePath
+        )
     }
     
     func append(to basePath: [PathComponent],
@@ -39,7 +40,7 @@ class URIs {
     }
     
     private let id = ":id"
-    
+
     var root: [PathComponent] {
         []
     }
@@ -344,5 +345,21 @@ class URIs {
     
     var smsURL: String {
         return "http://rest.ippanel.com/v1/messages/patterns/send"
+    }
+
+    var madadjo: [PathComponent] {
+        makeAPI(path: ["madadjo"])
+    }
+    var madadjo_id: [PathComponent] {
+        appendID(to: madadjo)
+    }
+    var madadjo_list: [PathComponent] {
+        append(to: madadjo, path: ["list"])
+    }
+    var madadjo_register: [PathComponent] {
+        append(to: madadjo, path: ["register"])
+    }
+    var madadjo_check_national_code: [PathComponent] {
+        append(to: madadjo, path: ["checkNationalCode"])
     }
 }
