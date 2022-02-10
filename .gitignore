@@ -6,7 +6,6 @@ DerivedData/
 .DS_Store
 Public/images
 contents.xcworkspacedata
-Public/landing/fonts
 certificates
 config
 log
