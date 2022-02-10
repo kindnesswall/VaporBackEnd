@@ -9,6 +9,7 @@ import Gatekeeper
 
 /// Called before your application initializes.
 public func configure(_ app: Application) throws {
+    
     /// Register providers first
     app.views.use(.leaf)
     
