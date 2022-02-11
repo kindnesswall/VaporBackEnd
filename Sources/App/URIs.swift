@@ -341,7 +341,9 @@ class URIs {
     var phone_visibility_setting_id: [PathComponent] {
         appendID(to: phone_visibility_setting)
     }
-    
+    var report_gift: [PathComponent] {
+        append(to: gifts, path: ["report"])
+    }
     var smsURL: String {
         return "http://rest.ippanel.com/v1/messages/patterns/send"
     }

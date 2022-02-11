@@ -38,6 +38,7 @@ public func routes(_ app: Application) throws {
     let rating = RatingController()
     let userPhone = UserPhoneController()
     let phoneVisibilitySetting = UserPhoneVisibilitySettingController()
+    let reportGiftController = ReportGiftController()
     
     //Middlewares
     let logMiddleware = LogMiddleware()
@@ -75,7 +76,8 @@ public func routes(_ app: Application) throws {
         guardAuthMiddleware,
         gatekeeperMiddleware,
         logMiddleware)
-    
+
+    tokenProtected.post(uris.report_gift, use: reportGiftController.report)
     //Home
     publicRouter.get(uris.root, use: landing.redirectHome)
     publicRouter.get(uris.home, use: landing.present)
