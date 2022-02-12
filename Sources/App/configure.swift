@@ -96,6 +96,7 @@ public func configure(_ app: Application) throws {
 //    app.migrations.add(DirectChatUniqueUserIdAndContactIdMigration())
     app.migrations.add(RatingResultUniqueReviewedIdMigration())
     app.migrations.add(ReportGiftMigration())
+    app.migrations.add(ReportCharityMigration())
     //Firebase
     let path = CertificatesPath.path(of: .firebase)
     app.fcm.configuration = .init(pathToServiceAccountKey: path)
