@@ -97,6 +97,7 @@ public func configure(_ app: Application) throws {
     app.migrations.add(RatingResultUniqueReviewedIdMigration())
     app.migrations.add(ReportGiftMigration())
     app.migrations.add(ReportCharityMigration())
+    app.migrations.add(ReportUserMigration())
     //Firebase
     let path = CertificatesPath.path(of: .firebase)
     app.fcm.configuration = .init(pathToServiceAccountKey: path)

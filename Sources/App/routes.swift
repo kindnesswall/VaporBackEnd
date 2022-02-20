@@ -40,6 +40,7 @@ public func routes(_ app: Application) throws {
     let phoneVisibilitySetting = UserPhoneVisibilitySettingController()
     let reportGiftController = ReportGiftController()
     let reportCharityController = ReportCharityController()
+    let reportUserController = ReportUserController()
 
     //Middlewares
     let logMiddleware = LogMiddleware()
@@ -64,22 +65,24 @@ public func routes(_ app: Application) throws {
         guardAuthMiddleware,
         guardAdminMiddleware,
         logMiddleware)
-    let charityProtected = app.grouped(
-        tokenAuthMiddleware,
-        guardAuthMiddleware,
-        guardCharityMiddleware,
-        logMiddleware)
+//    let charityProtected = app.grouped(
+//        tokenAuthMiddleware,
+//        guardAuthMiddleware,
+//        guardCharityMiddleware,
+//        logMiddleware)
     let gatekeeperProtected = app.grouped(
         gatekeeperMiddleware,
         logMiddleware)
-    let gatekeeperTokenProtected = app.grouped(
-        tokenAuthMiddleware,
-        guardAuthMiddleware,
-        gatekeeperMiddleware,
-        logMiddleware)
+//    let gatekeeperTokenProtected = app.grouped(
+//        tokenAuthMiddleware,
+//        guardAuthMiddleware,
+//        gatekeeperMiddleware,
+//        logMiddleware)
 
     tokenProtected.post(uris.report_gift, use: reportGiftController.report)
     tokenProtected.post(uris.report_charity, use: reportCharityController.report)
+    tokenProtected.post(uris.report_user, use: reportUserController.report)
+
     //Home
     publicRouter.get(uris.root, use: landing.redirectHome)
     publicRouter.get(uris.home, use: landing.present)

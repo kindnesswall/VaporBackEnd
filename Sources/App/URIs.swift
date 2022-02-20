@@ -347,6 +347,9 @@ class URIs {
     var report_charity : [PathComponent] {
         append(to: charity, path: ["report"])
     }
+    var report_user : [PathComponent] {
+        append(to: users, path: ["report"])
+    }
     var smsURL: String {
         return "http://rest.ippanel.com/v1/messages/patterns/send"
     }
