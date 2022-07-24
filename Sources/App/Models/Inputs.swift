@@ -68,4 +68,14 @@ class Inputs {
         var values: [String:String]
     }
     
+    struct GiftRequestStatus: Codable {
+        enum Status: String, Codable {
+            case wasReceived
+            case wasCenceled
+            case didNotResponse
+        }
+        
+        let status: Status
+        let statusDescription: String?
+    }
 }

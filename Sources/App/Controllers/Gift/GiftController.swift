@@ -70,4 +70,23 @@ final class GiftController {
         }
     }
     
+    func isDelivered(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
+        let db = req.db
+        let authId = try req.auth.require(User.self)
+            .getId()
+        let giftId = req.idParameter
+        
+        return Gift.findOrFail(giftId, on: db)
+            .flatMap { gift in
+                guard gift.$donatedToUser.id == authId
+                else {
+                    return db
+                        .makeFailedFuture(.notAcceptable)
+                }
+                gift.isDelivered = true
+                return gift.save(on: db)
+                    .transform(to: .ok)
+            }
+    }
+    
 }

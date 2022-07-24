@@ -14,7 +14,6 @@ public func routes(_ app: Application) throws {
     let userGifts = UserGiftsController()
     let imageController = ImageController()
     let giftAdminController = GiftAdminController()
-    let giftDonationController = GiftDonationController()
     let categoryController = CategoryController()
     let locationController = LocationController()
     let userController = UserController()
@@ -65,11 +64,11 @@ public func routes(_ app: Application) throws {
         guardAuthMiddleware,
         guardAdminMiddleware,
         logMiddleware)
-//    let charityProtected = app.grouped(
-//        tokenAuthMiddleware,
-//        guardAuthMiddleware,
-//        guardCharityMiddleware,
-//        logMiddleware)
+    let charityProtected = app.grouped(
+        tokenAuthMiddleware,
+        guardAuthMiddleware,
+        guardCharityMiddleware,
+        logMiddleware)
     let gatekeeperProtected = app.grouped(
         gatekeeperMiddleware,
         logMiddleware)
@@ -122,25 +121,19 @@ public func routes(_ app: Application) throws {
     tokenProtected.post(uris.gifts_userDonated_id, use: userGifts.donatedGifts)
     tokenProtected.post(uris.gifts_userReceived_id, use: userGifts.receivedGifts)
     
-    tokenProtected.post(uris.gifts_todonate_id, use: giftDonationController.giftsToDonate)
-    tokenProtected.post(uris.donate, use: giftDonationController.donate)
-    
     //Routes Gift Request
-    tokenProtected.get(uris.gifts_request_id, use: giftRequestController.requestGift)
-    tokenProtected.get(uris.gifts_request_status_id, use: giftRequestController.requestStatus)
-    
-    //Routes Chat
-    tokenProtected.get(uris.chat_start_id, use: chatRestfulController.startChat)
-    tokenProtected.get(uris.chat_contacts, use: chatRestfulController.fetchContacts)
-    tokenProtected.post(uris.chat_messages, use: chatRestfulController.fetchMessages)
-    tokenProtected.post(uris.chat_send, use: chatRestfulController.sendMessage)
-    tokenProtected.post(uris.chat_ack, use: chatRestfulController.ackMessage)
-    
-    //Routes Chat Block
-    tokenProtected.get(uris.chat_contacts_block, use: chatRestfulController.fetchBlockedContacts)
-    tokenProtected.put(uris.chat_block_id, use: chatBlockController.blockUser)
-    tokenProtected.put(uris.chat_unblock_id, use: chatBlockController.unblockUser)
-    
+    charityProtected.put(
+        uris.gifts_request_id,
+        use: giftRequestController.requestGift)
+    charityProtected.put(
+        uris.gifts_request_status_id,
+        use: giftRequestController.updateRequestStatus)
+    publicRouter.get(
+        uris.gifts_status_id,
+        use: giftRequestController.getGiftStatus)
+    charityProtected.put(
+        uris.gifts_isDelivered_id,
+        use: giftController.isDelivered)
     
     //Routes Admin
     adminProtected.put(uris.gifts_accept_id, use: giftAdminController.acceptGift)

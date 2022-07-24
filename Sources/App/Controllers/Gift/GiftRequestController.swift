@@ -8,12 +8,12 @@
 import Vapor
 import Fluent
 
-final class GiftRequestController: ChatInitializer {
+final class GiftRequestController {
     
-    public func requestGift(_ req: Request) throws -> EventLoopFuture<ContactMessage> {
+    func requestGift(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
         let db = req.db
-        let auth = try req.auth.require(User.self)
-        let authId = try auth.getId()
+        let authId = try req.auth.require(User.self)
+            .getId()
         let giftId = try req.requireIDParameter()
         
         return Gift.findOrFail(giftId, on: db).flatMap { gift in
@@ -34,97 +34,123 @@ final class GiftRequestController: ChatInitializer {
                 return db.makeFailedFuture(.giftIsAlreadyDonated)
             }
             
-            return GiftRequest.hasExisted(
-                requestUserId: authId,
+            return GiftRequest.findValidRequest(
                 giftId: giftId,
-                conn: db).flatMap { giftRequestHasExisted in
-                    
-                    //TODO: Code redundency reduction
-                    
-                    if giftRequestHasExisted {
-                        return self.findOrCreateChat(
-                            userId: authId,
-                            contactId: giftOwnerId,
-                            on: req)
+                db: db).flatMap { giftRequest in
+                    guard giftRequest == nil else {
+                        return db.makeFailedFuture(.giftHasRequest)
                     }
-                    else {
-                        return GiftRequest.create(
-                            requestUserId: authId,
-                            giftId: giftId,
-                            giftOwnerId: giftOwnerId,
-                            conn: db).flatMap { _ in
-                                return self.findOrCreateChat(
-                                    userId: authId,
-                                    contactId: giftOwnerId,
-                                    on: req)
+                    return GiftRequest.find(
+                        requestUserId: authId,
+                        giftId: giftId,
+                        db: db).flatMap { giftRequest in
+                            if let giftRequest = giftRequest {
+                                giftRequest.renew()
+                                return giftRequest
+                                    .save(on: db)
+                                    .transform(to: .ok)
+                            } else {
+                                return GiftRequest.create(
+                                    requestUserId: authId,
+                                    giftId: giftId,
+                                    giftOwnerId: giftOwnerId,
+                                    db: db)
+                                .transform(to: .ok)
+                            }
                         }
-                    }
-            }
+                }
             
         }
     }
     
-    public func requestStatus(_ req: Request) throws -> EventLoopFuture<GiftRequestStatus> {
+    func updateRequestStatus(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
         let db = req.db
-        let authId = try req.auth.require(User.self).getId()
+        let authId = try req.auth.require(User.self)
+            .getId()
         let giftId = try req.requireIDParameter()
+        let input = try req
+            .content
+            .decode(Inputs.GiftRequestStatus.self)
         
-        return Gift.findOrFail(giftId, on: db).flatMap { gift in
-            
-            guard let giftOwnerId = gift.$user.id else {
-                return db.makeFailedFuture(.nilGiftUserId)
+        return GiftRequest.findValidRequest(
+            requestUserId: authId,
+            giftId: giftId,
+            db: db)
+        .unwrap(or: Abort(.notFoundOrHasExpired))
+        .flatMap { giftRequest in
+            if let statusDescription = input.statusDescription {
+                giftRequest.statusDescription = statusDescription
             }
-            
-            if authId == giftOwnerId {
-                if let receiverId = gift.$donatedToUser.id {
-                    
-                    return self.findChat(
-                        userId: authId,
-                        contactId: receiverId,
-                        on: db).flatMapThrowing { chat in
-                        
-                        guard let chat = chat else {
-                            //Note: Throwing an error
-                            throw Abort(.chatNotFound)
-                        }
-                        
-                        return GiftRequestStatus(.donated(chat: chat))
-                    }
-                    
-                } else {
-                    return db.makeSucceededFuture(
-                        GiftRequestStatus(.notDonated))
+            switch input.status {
+            case .didNotResponse, .wasCenceled:
+                giftRequest.status = .wasCenceled
+                switch input.status {
+                case .didNotResponse:
+                    giftRequest.cancellationReason = .didNotResponse
+                case .wasCenceled:
+                    giftRequest.cancellationReason = .otherReasons
+                default:
+                    break
                 }
-                
-            }
-            
-            return GiftRequest.hasExisted(
-                requestUserId: authId,
-                giftId: giftId,
-                conn: db).flatMap { isRequested in
-                
-                if isRequested {
-                    
-                    return self.findChat(
-                        userId: authId,
-                        contactId: giftOwnerId,
-                        on: db).map { chat in
-                        
-                        guard let chat = chat else {
-                            //Note: Instead of throwing an error, we ask user to request again.
-                            return GiftRequestStatus(.notRequested)
+                return giftRequest.save(on: db)
+                    .transform(to: .ok)
+            case .wasReceived:
+                giftRequest.status = .wasReceived
+                return giftRequest.save(on: db).flatMap {
+                    return Gift
+                        .findOrFail(giftId, on: db)
+                        .flatMap { gift in
+                            do {
+                                return try gift
+                                    .wasReceived(
+                                        by: authId, on: db)
+                            }
+                            catch {
+                                return db.makeFailedFuture(error)
+                            }
                         }
-                        
-                        return GiftRequestStatus(.requested(chat: chat))
-                    }
-                    
-                } else {
-                    return db.makeSucceededFuture(
-                        GiftRequestStatus(.notRequested))
                 }
-                
             }
         }
     }
     
+    func getGiftStatus(_ req: Request) throws -> EventLoopFuture<Outputs.GiftStatus> {
+        let db = req.db
+        let giftId = try req.requireIDParameter()
+        return Gift
+            .findOrFail(giftId, on: db)
+            .flatMap { gift in
+                if let donatedToUserId = gift.$donatedToUser.id {
+                    return Charity.find(
+                        userId: donatedToUserId,
+                        on: db).map { charity in
+                            return Outputs.GiftStatus(
+                                status: .wasReceived,
+                                charity: charity)
+                        }
+                }
+                else {
+                    return GiftRequest
+                        .findValidRequest(
+                            giftId: giftId,
+                            db: db).flatMap { giftRequest in
+                                if let giftRequest = giftRequest {
+                                    return Charity
+                                        .find(
+                                            userId: giftRequest.requestUserId,
+                                            on: db).map { charity in
+                                                return Outputs.GiftStatus(
+                                                    status: .hasRequest,
+                                                    charity: charity)
+                                            }
+                                }
+                                else {
+                                    return db.makeSucceededFuture(Outputs.GiftStatus(
+                                        status: .isAvailable,
+                                        charity: nil))
+                                }
+                            }
+                }
+            }
+    }
 }

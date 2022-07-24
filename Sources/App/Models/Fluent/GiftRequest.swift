@@ -24,38 +24,114 @@ final class GiftRequest: Model {
     @Field(key: "giftOwnerId")
     var giftOwnerId:Int
     
+    @OptionalEnum(key: "status")
+    var status: Status?
+    
+    @OptionalField(key: "statusDescription")
+    var statusDescription: String?
+    
+    @OptionalEnum(key: "cancellationReason")
+    var cancellationReason: CancellationReason?
+    
+    @Timestamp(key: "createdAt", on: .create)
+    var createdAt: Date?
+    
+    @Timestamp(key: "updatedAt", on: .update)
+    var updatedAt: Date?
+    
+    @Timestamp(key: "deletedAt", on: .delete)
+    var deletedAt: Date?
+    
+    @Timestamp(key: "expiresAt", on: .none)
+    var expiresAt: Date?
+    
     init() {}
     
-    init(requestUserId:Int,giftId:Int,giftOwnerId:Int) {
-        self.requestUserId=requestUserId
-        self.giftId=giftId
-        self.giftOwnerId=giftOwnerId
+    init(requestUserId: Int,
+         giftId: Int,
+         giftOwnerId: Int
+    ) {
+        self.requestUserId = requestUserId
+        self.giftId = giftId
+        self.giftOwnerId = giftOwnerId
+        self.status = .isWaiting
+        self.expiresAt = Date().addingTimeInterval(86400)
+    }
+    
+    func renew() {
+        status = .isWaiting
+        expiresAt = Date().addingTimeInterval(86400)
+    }
+    
+    enum Status: String, Codable {
+        case isWaiting
+        case wasReceived
+        case wasCenceled
+    }
+    
+    enum CancellationReason: String, Codable {
+        case didNotResponse
+        case otherReasons
     }
 }
 
 extension GiftRequest {
-    static func hasExisted(requestUserId:Int,giftId:Int,conn:Database) -> EventLoopFuture<Bool> {
-        return GiftRequest.query(on: conn).filter(\.$requestUserId == requestUserId).filter(\.$giftId == giftId).count().map { count in
-            if count>0 {
-                return true
-            }
-            return false
+    
+    static func findValidRequest(
+        giftId: Int,
+        db: Database) -> EventLoopFuture<GiftRequest?> {
+            return GiftRequest
+                .query(on: db)
+                .filter(\.$giftId == giftId)
+                .filter(\.$status == .isWaiting)
+                .filter(\.$expiresAt > Date())
+                .first()
         }
+    
+    static func findQuery(requestUserId: Int,
+                     giftId: Int,
+                     db: Database) -> QueryBuilder<GiftRequest> {
+        return GiftRequest
+            .query(on: db)
+            .filter(\.$requestUserId == requestUserId)
+            .filter(\.$giftId == giftId)
     }
     
-    static func create(requestUserId:Int,giftId:Int,giftOwnerId:Int,conn:Database) -> EventLoopFuture<GiftRequest>{
-        let giftRequest = GiftRequest(requestUserId: requestUserId, giftId: giftId, giftOwnerId: giftOwnerId)
-        return giftRequest.save(on: conn).transform(to: giftRequest)
+    static func find(requestUserId: Int,
+                     giftId: Int,
+                     db: Database) -> EventLoopFuture<GiftRequest?> {
+        return findQuery(
+            requestUserId: requestUserId,
+            giftId: giftId,
+            db: db)
+        .first()
     }
     
-    static func getGiftsToDonate(
-        userGifts: QueryBuilder<Gift>,
-        userId: Int,
-        requestUserId: Int) -> QueryBuilder<Gift> {
-        return userGifts
-            .join(GiftRequest.self, on: \Gift.$id == \GiftRequest.$giftId)
-            .filter(GiftRequest.self, \.$giftOwnerId == userId)
-            .filter(GiftRequest.self, \.$requestUserId == requestUserId)
+    static func findValidRequest(
+        requestUserId: Int,
+        giftId: Int,
+        db: Database) -> EventLoopFuture<GiftRequest?> {
+            return findQuery(
+                requestUserId: requestUserId,
+                giftId: giftId,
+                db: db)
+            .filter(\.$status == .isWaiting)
+            .filter(\.$expiresAt > Date())
+            .first()
+        }
+    
+    static func create(requestUserId: Int,
+                       giftId: Int,
+                       giftOwnerId: Int,
+                       db: Database) -> EventLoopFuture<GiftRequest> {
+        let object = GiftRequest(
+            requestUserId: requestUserId,
+            giftId: giftId,
+            giftOwnerId: giftOwnerId
+        )
+        return object
+            .create(on: db)
+            .transform(to: object)
     }
 }
 

@@ -74,7 +74,7 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       launchStyle = "0"
       useCustomWorkingDirectory = "YES"
-      customWorkingDirectory = "/Users/amirhossein/Files/Codes/Application Code/Swift/VaporBackEnd"
+      customWorkingDirectory = "/Users/amirhossein/Files/Codes/VaporBackEnd"
       ignoresPersistentStateOnLaunch = "NO"
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"

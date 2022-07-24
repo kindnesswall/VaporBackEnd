@@ -157,12 +157,6 @@ class URIs {
     var gifts_userReceived_id : [PathComponent] {
         appendID(to: gifts_userReceived)
     }
-    var gifts_todonate : [PathComponent] {
-        append(to: gifts, path: ["todonate"])
-    }
-    var gifts_todonate_id : [PathComponent] {
-        appendID(to: gifts_todonate)
-    }
     var image_upload : [PathComponent] {
         makeAPI(path: ["image", "upload"])
     }
@@ -272,14 +266,23 @@ class URIs {
     var gifts_request_id : [PathComponent] {
         appendID(to: gifts_request)
     }
+    var gifts_status : [PathComponent] {
+        append(to: gifts, path: ["status"])
+    }
+    var gifts_status_id : [PathComponent] {
+        appendID(to: gifts_status)
+    }
     var gifts_request_status : [PathComponent] {
         append(to: gifts_request, path: ["status"])
     }
     var gifts_request_status_id : [PathComponent] {
         appendID(to: gifts_request_status)
     }
-    var donate : [PathComponent] {
-        makeAPI(path: ["donate"])
+    var gifts_isDelivered: [PathComponent] {
+        append(to: gifts, path: ["isDelivered"])
+    }
+    var gifts_isDelivered_id: [PathComponent] {
+        appendID(to: gifts_isDelivered)
     }
     var profile : [PathComponent] {
         makeAPI(path: ["profile"])
