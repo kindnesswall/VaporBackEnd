@@ -79,6 +79,9 @@ final class Gift : Model {
     @OptionalParent(key: "regionId")
     var region: Region?
     
+    @OptionalField(key: "isDelivered")
+    var isDelivered: Bool?
+    
     @Timestamp(key: "createdAt", on: .create)
     var createdAt: Date?
     
@@ -157,6 +160,7 @@ final class Gift : Model {
             provinceId: $province.id,
             cityId: $city.id,
             regionId: $region.id,
+            isDelivered: isDelivered,
             createdAt: createdAt,
             updatedAt: updatedAt,
             deletedAt: deletedAt)
@@ -200,6 +204,7 @@ final class Gift : Model {
         let provinceId:Int
         let cityId:Int
         let regionId:Int?
+        let isDelivered: Bool?
         
         let createdAt: Date?
         let updatedAt: Date?
@@ -247,20 +252,19 @@ extension Gift {
 }
 
 extension Gift {
-    func donate(to donatedToUserId: Int, authId: Int, on db: Database) throws -> EventLoopFuture<HTTPStatus> {
+    
+    func wasReceived(by userId: Int, on db: Database) throws -> EventLoopFuture<HTTPStatus> {
+        guard isReviewed == true
+        else { throw Abort(.unreviewedGift) }
         
-        guard $user.id == authId else { throw Abort(.unauthorizedGift) }
-        guard isReviewed == true else { throw Abort(.unreviewedGift) }
-        guard $donatedToUser.id == nil else {
-            throw Abort(.giftIsAlreadyDonated)
-        }
-        $donatedToUser.id = donatedToUserId
+        guard $donatedToUser.id == nil
+        else { throw Abort(.giftIsAlreadyDonated) }
+        
+        $donatedToUser.id = userId
         return save(on: db)
             .transform(to: .ok)
     }
-}
-
-extension Gift {
+    
     private func setNamesAndSave(on req: Request) ->  EventLoopFuture<Gift> {
         return getCountry(on: req).flatMap { country in
             self.countryName = country.name

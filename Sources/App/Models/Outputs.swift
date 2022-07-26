@@ -24,5 +24,15 @@ class Outputs {
     struct UserPhoneNumber: Content {
         var phoneNumber: String
     }
+    
+    struct GiftStatus: Content {
+        enum Status: String, Codable {
+            case wasReceived
+            case hasRequest
+            case isAvailable
+        }
+        let status: Status
+        let charity: Charity?
+    }
 
 }

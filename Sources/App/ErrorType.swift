@@ -47,6 +47,7 @@ enum ErrorType: String {
     case nilMessageId
     case nilCountryId
     case notFound
+    case notFoundOrHasExpired
     case userNotFound
     case giftNotFound
     case chatNotFound
@@ -71,6 +72,8 @@ enum ErrorType: String {
     case failedToSendFirebasePush
     case failedToLoginWithFirebase
     case phoneNumberIsNotAccessible
+    case giftHasRequest
+    case notAcceptable
 }
 
 extension ErrorType {
@@ -84,7 +87,8 @@ extension ErrorType {
              .unauthorizedMessage,
              .chatIsNotAllowed:
             return .methodNotAllowed
-        case .unreviewedGift,
+        case .notAcceptable,
+             .unreviewedGift,
              .unrequestedGift,
              .giftCannotBeDonatedToTheOwner,
              .giftIsAlreadyDonated,
@@ -101,7 +105,8 @@ extension ErrorType {
              .chatHasBlockedByUser,
              .invalidType,
              .invalid,
-             .phoneNumberIsNotAccessible:
+             .phoneNumberIsNotAccessible,
+             .giftHasRequest:
             return .notAcceptable
         case .nilUserId,
              .nilTokenId,
@@ -111,6 +116,7 @@ extension ErrorType {
              .nilMessageId,
              .nilCountryId,
              .notFound,
+             .notFoundOrHasExpired,
              .userNotFound,
              .giftNotFound,
              .chatNotFound,
@@ -206,6 +212,8 @@ extension ErrorType {
             return "Country id is nil"
         case .notFound:
             return "The item has not been found"
+        case .notFoundOrHasExpired:
+            return "The item has not been found or has expired"
         case .userNotFound:
             return "User not found"
         case .giftNotFound:
@@ -254,6 +262,10 @@ extension ErrorType {
             return "Failed to login with Firebase"
         case .phoneNumberIsNotAccessible:
             return "The phone number is not accessible"
+        case .giftHasRequest:
+            return "Gift has request"
+        case .notAcceptable:
+            return "Not acceptable"
         }
     }
 }

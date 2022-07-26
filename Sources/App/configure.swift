@@ -99,6 +99,12 @@ public func configure(_ app: Application) throws {
     app.migrations.add(ReportGiftMigration())
     app.migrations.add(ReportCharityMigration())
     app.migrations.add(ReportUserMigration())
+    app.migrations.add(GiftRequestUniqueFieldsMigration())
+    app.migrations.add(GiftRequestStatusMigration())
+    app.migrations.add(GiftRequestStatusEnumMigration())
+    app.migrations.add(GiftRequestDateMigration())
+    app.migrations.add(GiftIsDeliveredMigration())
+    
     //Firebase
     let path = CertificatesPath.path(of: .firebase)
     app.fcm.configuration = .init(pathToServiceAccountKey: path)
