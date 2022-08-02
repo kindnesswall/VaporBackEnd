@@ -28,14 +28,29 @@ final class Charity: Model {
     @Field(key: "name")
     var name: String
     
-    @OptionalField(key: "imageUrl")
-    var imageUrl: String?
+    @OptionalField(key: "images")
+    var images: [String]?
     
-    @OptionalField(key: "registerId")
-    var registerId: String?
+    @OptionalField(key: "logoImage")
+    var logoImage: String?
     
-    @OptionalField(key: "registerDate")
-    var registerDate: String?
+    @OptionalField(key: "countryId")
+    var countryId: Int?
+    
+    @OptionalField(key: "provinceId")
+    var provinceId: Int?
+    
+    @OptionalField(key: "cityId")
+    var cityId: Int?
+    
+    @OptionalField(key: "countryName")
+    var countryName: String?
+    
+    @OptionalField(key: "provinceName")
+    var provinceName:String?
+    
+    @OptionalField(key: "cityName")
+    var cityName:String?
     
     @OptionalField(key: "address")
     var address: String?
@@ -58,6 +73,33 @@ final class Charity: Model {
     @OptionalField(key: "telegram")
     var telegram: String?
     
+    @OptionalField(key: "whatsApp")
+    var whatsApp: String?
+    
+    @OptionalField(key: "managerName")
+    var managerName: String?
+    
+    @OptionalField(key: "licenseId")
+    var licenseId: String?
+    
+    @OptionalField(key: "licenseDate")
+    var licenseDate: Date?
+    
+    @OptionalField(key: "institutionIssuedLicense")
+    var institutionIssuedLicense: String?
+    
+    @OptionalField(key: "licenseImages")
+    var licenseImages: [String]?
+    
+    @OptionalField(key: "bankAccountNumber")
+    var bankAccountNumber: String?
+    
+    @OptionalField(key: "bankName")
+    var bankName: String?
+    
+    @OptionalField(key: "bankAccountOwner")
+    var bankAccountOwner: String?
+    
     @OptionalField(key: "description")
     var description: String?
     
@@ -72,30 +114,18 @@ final class Charity: Model {
     
     init() {}
     
-    init(input: Input, userId:Int) {
-        
+    init(userId: Int) {
         self.userId = userId
-        self.isRejected = false
-        
-        self.name = input.name
-        self.imageUrl = input.imageUrl
-        self.registerId = input.registerId
-        self.registerDate = input.registerDate
-        self.address = input.address
-        self.telephoneNumber = input.telephoneNumber
-        self.mobileNumber = input.mobileNumber
-        self.website = input.website
-        self.email = input.email
-        self.instagram = input.instagram
-        self.telegram = input.telegram
-        self.description = input.description
+        self.name = ""
     }
     
-    func update(input: Input) {
+    func set(_ input: Input) {
         self.name = input.name
-        self.imageUrl = input.imageUrl
-        self.registerId = input.registerId
-        self.registerDate = input.registerDate
+        self.images = input.images
+        self.logoImage = input.logoImage
+        self.countryId = input.countryId
+        self.provinceId = input.provinceId
+        self.cityId = input.cityId
         self.address = input.address
         self.telephoneNumber = input.telephoneNumber
         self.mobileNumber = input.mobileNumber
@@ -103,19 +133,55 @@ final class Charity: Model {
         self.email = input.email
         self.instagram = input.instagram
         self.telegram = input.telegram
+        self.whatsApp = input.whatsApp
+        self.managerName = input.managerName
+        self.licenseId = input.licenseId
+        self.institutionIssuedLicense = input.institutionIssuedLicense
+        self.licenseImages = input.licenseImages
+        self.bankAccountNumber = input.bankAccountNumber
+        self.bankName = input.bankName
+        self.bankAccountOwner = input.bankAccountOwner
         self.description = input.description
+        
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.timeZone = TimeZone(secondsFromGMT: 0)
+        self.licenseDate = formatter.date(from: input.licenseDate ?? "")
+    }
+    
+    static func create(userId: Int, _ input: Input, on db: Database) -> EventLoopFuture<Charity> {
+        let object = Charity(userId: userId)
+        object.set(input)
+        
+        object.isRejected = false
+        
+        return object.setNamesAndSave(on: db)
+            .flatMap {
+                object.create(on: db)
+                    .transform(to: object)
+            }
+    }
+    
+    func update(_ input: Input, on db: Database) -> EventLoopFuture<Void> {
+        set(input)
         
         self.isRejected = false
 //        self.rejectReason = nil // Note: Commented because the reason may be helpful for the next review
         
+        return self.setNamesAndSave(on: db)
+            .flatMap {
+                self.update(on: db)
+            }
     }
     
     
     final class Input : Codable {
         var name: String
-        var imageUrl: String?
-        var registerId: String?
-        var registerDate: String?
+        var images: [String]?
+        var logoImage: String?
+        var countryId: Int
+        var provinceId: Int
+        var cityId: Int
         var address: String?
         var telephoneNumber: String?
         var mobileNumber: String?
@@ -123,11 +189,42 @@ final class Charity: Model {
         var email: String?
         var instagram: String?
         var telegram: String?
+        var whatsApp: String?
+        var managerName: String?
+        var licenseId: String?
+        var licenseDate: String?
+        var institutionIssuedLicense: String?
+        var licenseImages: [String]?
+        var bankAccountNumber: String?
+        var bankName: String?
+        var bankAccountOwner: String?
         var description: String?
     }
 }
 
 extension Charity {
+    
+    private func setNamesAndSave(on db: Database) -> EventLoopFuture<Void> {
+        Country
+            .find(countryId, on: db)
+            .unwrap(or: Abort(.countryNotFound))
+            .flatMap { country in
+                self.countryName = country.name
+                return Province
+                    .find(self.provinceId, on: db)
+                    .unwrap(or: Abort(.provinceNotFound))
+                    .flatMap { province in
+                        self.provinceName = province.name
+                        return City
+                            .find(self.cityId, on: db)
+                            .unwrap(or: Abort(.cityNotFound))
+                            .flatMap { city in
+                                self.cityName = city.name
+                                return self.save(on: db)
+                            }
+                    }
+            }
+    }
     
     static func getAllCharities(conn:Database) -> EventLoopFuture<[Charity]> {
         return Charity.query(on: conn)

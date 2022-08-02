@@ -59,9 +59,8 @@ final class CharityInfoController {
             guard !hasFound else {
                 return req.db.makeFailedFuture(.charityInfoAlreadyExists)
             }
-            let charity = Charity(input: input, userId: userId)
-            return charity.save(on: req.db)
-                .transform(to: charity)
+            return Charity
+                .create(userId: userId, input, on: req.db)
         }
     }
     
@@ -71,18 +70,16 @@ final class CharityInfoController {
         let input = try req.content.decode(Charity.Input.self)
         
         return Charity.get(userId: userId, on: req.db).flatMap { charity in
-            charity.update(input: input)
-            return charity.save(on: req.db).flatMap { _ in
+            charity.update(input, on: req.db).flatMap {
                 return User.findOrFail(userId, on: req.db).flatMap { user in
                     if user.isCharity {
                         user.charityName = charity.name
-                        user.charityImage = charity.imageUrl
+                        user.charityImage = charity.logoImage
                     }
                     return user.save(on: req.db)
                         .transform(to: charity)
                 }
             }
-            
         }
     }
     

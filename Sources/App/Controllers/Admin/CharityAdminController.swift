@@ -29,7 +29,7 @@ final class CharityAdminController {
                 return foundCharity.save(on: req.db).flatMap({ _ in
                     user.isCharity = true
                     user.charityName = foundCharity.name
-                    user.charityImage = foundCharity.imageUrl
+                    user.charityImage = foundCharity.logoImage
                     return user.save(on: req.db)
                         .transform(to: .ok)
                 })

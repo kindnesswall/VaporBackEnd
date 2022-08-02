@@ -57,6 +57,8 @@ enum ErrorType: String {
     case charityInfoNotFound
     case activationCodeNotFound
     case countryNotFound
+    case provinceNotFound
+    case cityNotFound
     case userAccessIsDenied
     case chatHasBlocked
     case redundentAck
@@ -125,7 +127,9 @@ extension ErrorType {
              .chatNotificationNotFound,
              .charityInfoNotFound,
              .activationCodeNotFound,
-             .countryNotFound:
+             .countryNotFound,
+             .provinceNotFound,
+             .cityNotFound:
             return .notFound
         case .userAccessIsDenied,
              .chatHasBlocked:
@@ -232,6 +236,10 @@ extension ErrorType {
             return "Activation code not found"
         case .countryNotFound:
             return "Country not found"
+        case .provinceNotFound:
+            return "Province not found"
+        case .cityNotFound:
+            return "City not found"
         case .userAccessIsDenied:
             return "User access is denied"
         case .chatHasBlocked:

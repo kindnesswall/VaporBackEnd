@@ -15,9 +15,7 @@ final class CharityInfoAdminController {
         let userId = try req.requireIDParameter()
         let input = try req.content.decode(Charity.Input.self)
         
-        let charity = Charity(input: input, userId: userId)
-        
-        return charity.save(on: req.db)
-            .transform(to: charity)
+        return Charity
+            .create(userId: userId, input, on: req.db)
     }
 }
