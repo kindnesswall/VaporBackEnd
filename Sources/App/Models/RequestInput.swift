@@ -16,4 +16,6 @@ class RequestInput: Codable {
     var cityId:Int?
     var regionIds:[Int]? 
     var searchWord:String?
+    var isDonated: Bool?
+    var isDelivered: Bool?
 }

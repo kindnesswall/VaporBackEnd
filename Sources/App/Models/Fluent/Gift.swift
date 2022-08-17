@@ -351,6 +351,22 @@ extension Gift {
             }
         }
         
+        if let isDonated = requestInput?.isDonated {
+            if isDonated {
+                query.filter(\.$donatedToUser != nil)
+            } else {
+                query.filter(\.$donatedToUser == nil)
+            }
+        }
+        
+        if let isDelivered = requestInput?.isDelivered {
+            if isDelivered {
+                query.filter(\.$isDelivered == true)
+            } else {
+                query.filter(\.$isDelivered != true)
+            }
+        }
+        
         if let beforeId = requestInput?.beforeId {
             query.filter(\.$id < beforeId)
         }
