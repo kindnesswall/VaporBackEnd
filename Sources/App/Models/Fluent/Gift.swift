@@ -353,9 +353,9 @@ extension Gift {
         
         if let isDonated = requestInput?.isDonated {
             if isDonated {
-                query.filter(\.$donatedToUser != nil)
+                query.filter(\.$donatedToUser.$id != nil)
             } else {
-                query.filter(\.$donatedToUser == nil)
+                query.filter(\.$donatedToUser.$id == nil)
             }
         }
         
