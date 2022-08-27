@@ -54,7 +54,7 @@ class UserControllerCore: UserDemoAccountable {
     private func setActvatioCode(req: Request, foundItem: PhoneNumberActivationCode?, phoneNumber: String, activationCode: String) -> PhoneNumberActivationCode {
         
         if let foundItem = foundItem {
-            foundItem.activationCode = activationCode
+            foundItem.set(activationCode: activationCode)
             return foundItem
         }
         

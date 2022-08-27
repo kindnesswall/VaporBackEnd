@@ -42,6 +42,9 @@ final class UserPhoneNumberLog: Model {
     @Timestamp(key: "deletedAt", on: .delete)
     var deletedAt: Date?
     
+    @Timestamp(key: "activationCodeExpiresAt", on: .none)
+    var activationCodeExpiresAt: Date?
+    
     init() {}
     
     init(userId: Int, fromPhoneNumber: String, toPhoneNumber: String, status: ChangeStatus) {
@@ -81,6 +84,7 @@ final class UserPhoneNumberLog: Model {
     func set(activationCode: ActivationCode, on conn: Database) -> EventLoopFuture<HTTPStatus> {
         activationCode_from = activationCode.from
         activationCode_to = activationCode.to
+        activationCodeExpiresAt = Date().addingTimeInterval(60 * 2)
         return save(on: conn).transform(to: .ok)
     }
     
@@ -147,8 +151,9 @@ extension UserPhoneNumberLog {
                 throw Abort(.invalidPhoneNumber)
             }
             
-            guard item.updatedAt > Date().addingTimeInterval(-1 * 60 * 2) else {
-                return req.db.makeFailedFuture(.expiredActivationCode)
+            guard let expiresAt = item.activationCodeExpiresAt,
+                  expiresAt > Date() else {
+                throw Abort(.expiredActivationCode)
             }
             
             guard item.check(activationCode: activationCode) else {

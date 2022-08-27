@@ -30,11 +30,19 @@ final class PhoneNumberActivationCode: Model {
     @Timestamp(key: "deletedAt", on: .delete)
     var deletedAt: Date?
     
+    @Timestamp(key: "activationCodeExpiresAt", on: .none)
+    var activationCodeExpiresAt: Date?
+    
     init() {}
     
     init(phoneNumber:String, activationCode:String?) {
         self.phoneNumber = phoneNumber
+        self.set(activationCode: activationCode)
+    }
+    
+    func set(activationCode: String?) {
         self.activationCode = activationCode
+        self.activationCodeExpiresAt = Date().addingTimeInterval(60 * 2)
     }
     
 }
@@ -57,14 +65,16 @@ extension PhoneNumberActivationCode {
                 guard let item = item else {
                     return req.db.makeFailedFuture(.invalidActivationCode)
                 }
-                guard item.updatedAt > Date().addingTimeInterval(-1 * 60 * 2) else {
+                guard
+                    let expiresAt = item.activationCodeExpiresAt,
+                    expiresAt > Date() else {
                     return req.db.makeFailedFuture(.expiredActivationCode)
                 }
                 item.activationCode = nil
                 return item
                     .save(on: req.db)
                     .transform(to: .ok)
-        }
+            }
     }
 }
 
