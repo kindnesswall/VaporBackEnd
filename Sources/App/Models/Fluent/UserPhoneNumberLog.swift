@@ -147,6 +147,10 @@ extension UserPhoneNumberLog {
                 throw Abort(.invalidPhoneNumber)
             }
             
+            guard item.updatedAt > Date().addingTimeInterval(-1 * 60 * 2) else {
+                return req.db.makeFailedFuture(.expiredActivationCode)
+            }
+            
             guard item.check(activationCode: activationCode) else {
                 throw Abort(.invalidActivationCode)
             }

@@ -72,11 +72,11 @@ public func routes(_ app: Application) throws {
     let gatekeeperProtected = app.grouped(
         gatekeeperMiddleware,
         logMiddleware)
-//    let gatekeeperTokenProtected = app.grouped(
-//        tokenAuthMiddleware,
-//        guardAuthMiddleware,
-//        gatekeeperMiddleware,
-//        logMiddleware)
+    let gatekeeperTokenProtected = app.grouped(
+        tokenAuthMiddleware,
+        guardAuthMiddleware,
+        gatekeeperMiddleware,
+        logMiddleware)
 
     tokenProtected.post(uris.report_gift, use: reportGiftController.report)
     tokenProtected.post(uris.report_charity, use: reportCharityController.report)
@@ -88,10 +88,10 @@ public func routes(_ app: Application) throws {
     
     //Routes Login
     gatekeeperProtected.post(uris.register, use: userController.registerHandler)
-    publicRouter.post(uris.login, use: userController.loginHandler)
+    gatekeeperProtected.post(uris.login, use: userController.loginHandler)
     
-    gatekeeperProtected.post(uris.register_phoneNumberChange_request, use: phoneChangeController.changePhoneNumberRequest)
-    tokenProtected.post(uris.register_phoneNumberChange_validate, use: phoneChangeController.changePhoneNumberValidate)
+    gatekeeperTokenProtected.post(uris.register_phoneNumberChange_request, use: phoneChangeController.changePhoneNumberRequest)
+    gatekeeperTokenProtected.post(uris.register_phoneNumberChange_validate, use: phoneChangeController.changePhoneNumberValidate)
     
     tokenProtected.get(uris.logout, use: logoutController.logout)
     tokenProtected.get(uris.logout_allDevices, use: logoutController.logoutAllDevices)

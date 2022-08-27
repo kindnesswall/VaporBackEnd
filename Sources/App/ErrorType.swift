@@ -34,6 +34,7 @@ enum ErrorType: String {
     case invalidPhoneNumber
     case phoneNumberHasExisted
     case invalidActivationCode
+    case expiredActivationCode
     case pushPayloadIsNotValid
     case wrongPushNotificationType
     case chatHasBlockedByUser
@@ -102,6 +103,7 @@ extension ErrorType {
              .invalidPhoneNumber,
              .phoneNumberHasExisted,
              .invalidActivationCode,
+             .expiredActivationCode,
              .pushPayloadIsNotValid,
              .wrongPushNotificationType,
              .chatHasBlockedByUser,
@@ -190,6 +192,8 @@ extension ErrorType {
             return "Phone number has existed"
         case .invalidActivationCode:
             return "The activation code is invalid"
+        case .expiredActivationCode:
+            return "The activation code has been expired"
         case .pushPayloadIsNotValid:
             return "Push payload is not valid"
         case .wrongPushNotificationType:

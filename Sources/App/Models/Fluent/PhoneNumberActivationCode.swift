@@ -57,6 +57,9 @@ extension PhoneNumberActivationCode {
                 guard let item = item else {
                     return req.db.makeFailedFuture(.invalidActivationCode)
                 }
+                guard item.updatedAt > Date().addingTimeInterval(-1 * 60 * 2) else {
+                    return req.db.makeFailedFuture(.expiredActivationCode)
+                }
                 item.activationCode = nil
                 return item
                     .save(on: req.db)
