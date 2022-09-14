@@ -201,12 +201,13 @@ public func routes(_ app: Application) throws {
     tokenProtected.put(uris.rating, use: rating.update)
     tokenFetched.get(uris.rating_id, use: rating.get)
     
-    //Phone Visibility Access
-    tokenProtected.get(uris.phone_visibility_access_id, use: userPhone.getPhoneNumber)
+    //Phone number of a gift
+    tokenProtected.get(uris.phone_access_gift_id, use: userPhone.getPhoneNumberOfAGift)
     
     //Phone Visibility Setting
-    publicRouter.get(uris.phone_visibility_setting_id, use: phoneVisibilitySetting.getUserSetting)
-    tokenProtected.get(uris.phone_visibility_setting, use: phoneVisibilitySetting.getOwnerSetting)
-    tokenProtected.post(uris.phone_visibility_setting, use: phoneVisibilitySetting.set)
+    //These routes are no longer useful
+//    publicRouter.get(uris.phone_visibility_setting_id, use: phoneVisibilitySetting.getUserSetting)
+//    tokenProtected.get(uris.phone_visibility_setting, use: phoneVisibilitySetting.getOwnerSetting)
+//    tokenProtected.post(uris.phone_visibility_setting, use: phoneVisibilitySetting.set)
 }
 

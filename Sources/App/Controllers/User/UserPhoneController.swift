@@ -6,17 +6,18 @@
 //
 
 import Vapor
+import FluentKit
 
 final class UserPhoneController {
     
-    func getPhoneNumber(_ req: Request) throws -> EventLoopFuture<Outputs.UserPhoneNumber> {
+    func getPhoneNumberOfAGift(_ req: Request) throws -> EventLoopFuture<Outputs.UserPhoneNumber> {
         
-        let authId = try req.auth.require(User.self).getId()
+        let auth = try req.auth.require(User.self)
+        let authId = try auth.getId()
+        let giftId = try req.requireIDParameter()
         
-        return try getUserIfPhoneNumberIsAccessible(req)
-            .unwrap(or: Abort(.phoneNumberIsNotAccessible))
+        return try getUserIfPhoneNumberIsAccessible(giftId: giftId, auth: auth, on: req.db)
             .flatMap { user in
-                
                 guard let userId = user.id else {
                     return req.db.makeFailedFuture(.nilUserId)
                 }
@@ -30,23 +31,48 @@ final class UserPhoneController {
                 
                 return log.create(on: req.db)
                     .transform(to: output)
-        }
+            }
     }
     
-    private func getUserIfPhoneNumberIsAccessible(_ req: Request) throws -> EventLoopFuture<User?> {
-        let auth = try req.auth.require(User.self)
+    private func getUserIfPhoneNumberIsAccessible(
+        giftId: Int,
+        auth: User,
+        on db: Database) throws -> EventLoopFuture<User>
+    {
+        
+        try getUserIdIfPhoneNumberIsAccessible(
+            giftId: giftId,
+            auth: auth,
+            on: db).flatMap { userId in
+                User.findOrFail(
+                    userId,
+                    on: db)
+            }
+    }
+    
+    private func getUserIdIfPhoneNumberIsAccessible(
+        giftId: Int,
+        auth: User,
+        on db: Database) throws -> EventLoopFuture<Int>
+    {
+        let authId = try auth.getId()
         let isAdmin = auth.isAdmin
         let isCharity = auth.isCharity
-        
-        return User.getParameter(on: req).map { user in
-            
-            let isPhoneVisibleForAll = user.isPhoneVisibleForAll ?? false
-            let isPhoneVisibleForCharities = user.isPhoneVisibleForCharities ?? false
-            
-            guard isAdmin || isPhoneVisibleForAll || (isCharity && isPhoneVisibleForCharities) else {
-                return nil
-            }
-            return user
+        guard isAdmin || isCharity else {
+            throw Abort(.unauthorizedRequest)
+        }
+        if isAdmin {
+            return Gift
+                .findOrFail(giftId, on: db)
+                .map { $0.$user.id }
+                .unwrap(or: Abort(.nilGiftUserId))
+        } else {
+            return GiftRequest.findValidRequest(
+                requestUserId: authId,
+                giftId: giftId,
+                db: db)
+            .unwrap(or: Abort(.unauthorizedRequest))
+            .map { $0.giftOwnerId }
         }
     }
 }

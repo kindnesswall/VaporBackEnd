@@ -326,23 +326,20 @@ class URIs {
     var phone_visibility: [PathComponent] {
         makeAPI(path: ["phone", "visibility"])
     }
-    var phone_visibility_check: [PathComponent] {
-        append(to: phone_visibility, path: ["check"])
-    }
-    var phone_visibility_check_id: [PathComponent] {
-        appendID(to: phone_visibility_check)
-    }
-    var phone_visibility_access: [PathComponent] {
-        append(to: phone_visibility, path: ["access"])
-    }
-    var phone_visibility_access_id: [PathComponent] {
-        appendID(to: phone_visibility_access)
-    }
     var phone_visibility_setting: [PathComponent] {
         append(to: phone_visibility, path: ["setting"])
     }
     var phone_visibility_setting_id: [PathComponent] {
         appendID(to: phone_visibility_setting)
+    }
+    var phone_access: [PathComponent] {
+        makeAPI(path: ["phone", "access"])
+    }
+    var phone_access_gift: [PathComponent] {
+        append(to: phone_access, path: ["gift"])
+    }
+    var phone_access_gift_id: [PathComponent] {
+        appendID(to: phone_access_gift)
     }
     var report_gift: [PathComponent] {
         append(to: gifts, path: ["report"])
