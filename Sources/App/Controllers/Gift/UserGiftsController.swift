@@ -38,7 +38,6 @@ final class UserGiftsController {
                 return Gift.getGiftsWithRequestFilter(
                     query: query,
                     requestInput: requestInput,
-                    onlyUndonatedGifts: true,
                     onlyReviewedGifts: !(isAdmin || isOwner))
             }
             .outputArray
@@ -62,7 +61,6 @@ final class UserGiftsController {
                 return Gift.getGiftsWithRequestFilter(
                     query: query,
                     requestInput: requestInput,
-                    onlyUndonatedGifts: false,
                     onlyReviewedGifts: true)
                 
             }
@@ -85,7 +83,6 @@ final class UserGiftsController {
                 return Gift.getGiftsWithRequestFilter(
                     query: query,
                     requestInput: requestInput,
-                    onlyUndonatedGifts: false,
                     onlyReviewedGifts: true)
                 
             }

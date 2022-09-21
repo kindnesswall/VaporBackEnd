@@ -20,7 +20,6 @@ final class GiftController {
         return Gift.getGiftsWithRequestFilter(
             query: query,
             requestInput: requestInput,
-            onlyUndonatedGifts: true,
             onlyReviewedGifts: true)
             .outputArray
     }

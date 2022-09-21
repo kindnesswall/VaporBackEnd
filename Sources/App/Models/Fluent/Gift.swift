@@ -313,7 +313,7 @@ extension Gift {
 
 extension Gift {
     
-    static func getGiftsWithRequestFilter(query:QueryBuilder<Gift>,requestInput:RequestInput?,onlyUndonatedGifts:Bool,onlyReviewedGifts:Bool)->EventLoopFuture<[Gift]>{
+    static func getGiftsWithRequestFilter(query:QueryBuilder<Gift>,requestInput:RequestInput?, onlyReviewedGifts:Bool)->EventLoopFuture<[Gift]>{
         
         if let searchWord = requestInput?.searchWord {
             query.group(.or) { query in
@@ -369,10 +369,6 @@ extension Gift {
         
         if let beforeId = requestInput?.beforeId {
             query.filter(\.$id < beforeId)
-        }
-        
-        if onlyUndonatedGifts {
-            query.filter(\.$donatedToUser.$id == nil)
         }
         
         if onlyReviewedGifts {
