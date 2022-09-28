@@ -236,12 +236,6 @@ class URIs {
     var charity_info_user_id : [PathComponent] {
         appendID(to: charity_info_user)
     }
-    var charity_info_force_user : [PathComponent] {
-        append(to: charity, path: ["info", "force", "user"])
-    }
-    var charity_info_force_user_id : [PathComponent] {
-        appendID(to: charity_info_force_user)
-    }
     var charity_user : [PathComponent] {
         append(to: charity, path: ["user"])
     }
