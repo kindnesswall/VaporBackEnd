@@ -89,4 +89,11 @@ final class UserGiftsController {
             .outputArray
     }
     
+    func requestedGifts(_ req: Request) throws -> EventLoopFuture<[Gift.Output]> {
+        let userId = try req.requireIDParameter()
+        return GiftRequest
+            .getUserRequestedGifts(requestUserId: userId, db: req.db)
+            .outputArray
+    }
+    
 }

@@ -89,8 +89,8 @@ extension GiftRequest {
         }
     
     static func findQuery(requestUserId: Int,
-                     giftId: Int,
-                     db: Database) -> QueryBuilder<GiftRequest> {
+                          giftId: Int,
+                          db: Database) -> QueryBuilder<GiftRequest> {
         return GiftRequest
             .query(on: db)
             .filter(\.$requestUserId == requestUserId)
@@ -133,6 +133,22 @@ extension GiftRequest {
             .create(on: db)
             .transform(to: object)
     }
+}
+
+extension GiftRequest {
+    
+    static func getUserRequestedGifts(requestUserId: Int,
+                                      db: Database) -> EventLoopFuture<[Gift]> {
+        return Gift
+            .query(on: db)
+            .filter(\.$deletedAt == nil) //TODO: Is it needed?
+            .join(GiftRequest.self, on: \Gift.$id == \GiftRequest.$giftId)
+            .filter(GiftRequest.self, \.$requestUserId == requestUserId)
+            .filter(GiftRequest.self, \GiftRequest.$status == .isWaiting)
+            .filter(GiftRequest.self, \GiftRequest.$expiresAt > Date())
+            .all()
+    }
+    
 }
 
 //extension GiftRequest : Migration {}

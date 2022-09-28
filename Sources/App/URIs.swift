@@ -157,6 +157,12 @@ class URIs {
     var gifts_userReceived_id : [PathComponent] {
         appendID(to: gifts_userReceived)
     }
+    var gifts_userRequested: [PathComponent] {
+        append(to: gifts, path: ["userRequested"])
+    }
+    var gifts_userRequested_id: [PathComponent] {
+        appendID(to: gifts_userRequested)
+    }
     var image_upload : [PathComponent] {
         makeAPI(path: ["image", "upload"])
     }
