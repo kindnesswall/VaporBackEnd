@@ -117,9 +117,9 @@ public func routes(_ app: Application) throws {
     
     tokenProtected.on(.POST, uris.image_upload, body: .collect(maxSize: "20mb"), use: imageController.uploadImage)
     
-    tokenProtected.post(uris.gifts_userRegistered_id, use: userGifts.registeredGifts)
-    tokenProtected.post(uris.gifts_userDonated_id, use: userGifts.donatedGifts)
-    tokenProtected.post(uris.gifts_userReceived_id, use: userGifts.receivedGifts)
+    tokenFetched.post(uris.gifts_userRegistered_id, use: userGifts.registeredGifts)
+    tokenFetched.post(uris.gifts_userDonated_id, use: userGifts.donatedGifts)
+    tokenFetched.post(uris.gifts_userReceived_id, use: userGifts.receivedGifts)
     publicRouter.get(uris.gifts_userRequested_id, use: userGifts.requestedGifts)
     
     //Routes Gift Request
