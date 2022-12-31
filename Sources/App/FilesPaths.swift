@@ -1,5 +1,5 @@
 //
-//  ConfigurationsPath.swift
+//  FilesPaths.swift
 //  App
 //
 //  Created by Amir Hossein on 2/7/21.
@@ -7,30 +7,12 @@
 
 import Foundation
 
-struct ConfigurationsPath: AppDirectoryDetector {
+struct ConfigurationsPaths {
     
-    private static var mainDirPath: String { return "\(appDirectory)/config/main/" }
-    private static var replicaDirPath: String { return "\(appDirectory)/config/replica/" }
-    private static var sharedDirPath: String { return "\(appDirectory)/config/shared/" }
+    private static let secretsDirPath = "/run/secrets/"
     
     static func path(of file: FileType) -> String {
-        
-        let dirPath: String
-        switch file {
-        case .main:
-            dirPath = mainDirPath
-        case .replica:
-            dirPath = replicaDirPath
-        case .sms,
-             .apns,
-             .firebase,
-             .googleIdentityToolkit,
-             .demoAccount,
-             .applicationStoreLinks:
-            dirPath = sharedDirPath
-        }
-        
-        return "\(dirPath)\(file.name)"
+        return "\(secretsDirPath)\(file.name)"
     }
     
     enum FileType {
@@ -46,9 +28,9 @@ struct ConfigurationsPath: AppDirectoryDetector {
         fileprivate var name: String {
             switch self {
             case .main:
-                return "config.json"
+                return "main_config.json"
             case .replica:
-                return "replica.json"
+                return "replica_config.json"
             case .sms:
                 return "sms_config.json"
             case .apns:
@@ -66,11 +48,12 @@ struct ConfigurationsPath: AppDirectoryDetector {
     }
 }
 
-struct CertificatesPath: AppDirectoryDetector {
-    private static let dirPath = "\(appDirectory)/certificates/"
+struct CertificatesPaths: AppDirectoryDetector {
+    
+    private static let secretsDirPath = "/run/secrets/"
     
     static func path(of file: FileType) -> String {
-        return "\(dirPath)\(file.name)"
+        return "\(secretsDirPath)\(file.name)"
     }
     
     enum FileType {
@@ -80,7 +63,7 @@ struct CertificatesPath: AppDirectoryDetector {
         var name: String {
             switch self {
             case .firebase:
-                return "firebase.json"
+                return "firebase_certificate.json"
             }
         }
     }

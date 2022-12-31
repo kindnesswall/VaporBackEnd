@@ -27,8 +27,8 @@ public func readConfigurations() {
     configuration.applicationStoreLinks = try? load(path: .applicationStoreLinks, type: ApplicationStoreLinks.self)
 }
 
-private func load<T: Codable>(path: ConfigurationsPath.FileType, type: T.Type) throws -> T {
-    let path = ConfigurationsPath.path(of: path)
+private func load<T: Codable>(path: ConfigurationsPaths.FileType, type: T.Type) throws -> T {
+    let path = ConfigurationsPaths.path(of: path)
     let url = URL(fileURLWithPath: path)
     let data = try Data(contentsOf: url)
     return try JSONDecoder().decode(type, from: data)

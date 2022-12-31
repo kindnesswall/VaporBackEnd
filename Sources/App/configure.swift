@@ -111,7 +111,7 @@ public func configure(_ app: Application) throws {
     app.migrations.add(UserPhoneNumberLogExpiresAtMigration())
     
     //Firebase
-    let path = CertificatesPath.path(of: .firebase)
+    let path = CertificatesPaths.path(of: .firebase)
     app.fcm.configuration = .init(pathToServiceAccountKey: path)
     
     app.gatekeeper.config = .init(maxRequests: 3, per: .minute)
