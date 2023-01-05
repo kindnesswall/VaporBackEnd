@@ -16,6 +16,11 @@ final class UserProfileController {
         }
     }
     
+    func showAuthenticatedUser(_ req: Request) throws -> UserProfile {
+        let auth = try req.auth.require(User.self)
+        return try auth.userProfile(req: req)
+    }
+    
     func update(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
         let auth = try req.auth.require(User.self)
         let userProfile = try req.content.decode(UserProfile.Input.self)

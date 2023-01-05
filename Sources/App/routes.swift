@@ -103,6 +103,8 @@ public func routes(_ app: Application) throws {
     
     //Routes User Profile
     tokenFetched.get(uris.profile_id, use: userProfileController.show)
+    tokenProtected.get(uris.profile,
+                       use: userProfileController.showAuthenticatedUser)
     tokenProtected.post(uris.profile,use: userProfileController.update)
     
     
