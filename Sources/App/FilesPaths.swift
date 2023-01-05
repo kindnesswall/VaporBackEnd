@@ -13,6 +13,7 @@ struct ConfigurationsPaths {
     
     static func path(of file: FileType) -> String {
         return "\(secretsDirPath)\(file.name)"
+//        return "configurations/\(file.name)"
     }
     
     enum FileType {
@@ -54,6 +55,7 @@ struct CertificatesPaths: AppDirectoryDetector {
     
     static func path(of file: FileType) -> String {
         return "\(secretsDirPath)\(file.name)"
+//        return "certificates/\(file.name)"
     }
     
     enum FileType {
