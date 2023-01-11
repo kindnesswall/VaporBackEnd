@@ -82,6 +82,9 @@ final class Gift : Model {
     @OptionalField(key: "isDelivered")
     var isDelivered: Bool?
     
+    @OptionalField(key: "previousCopyId")
+    var previousCopyId: Int?
+    
     @Timestamp(key: "createdAt", on: .create)
     var createdAt: Date?
     
@@ -100,8 +103,9 @@ final class Gift : Model {
         return id
     }
     
-    private init(input: Gift.Input, authId: Int) {
+    private init(input: Gift.Input, authId: Int, previousCopyId: Int?) {
         self.$user.id = authId
+        self.previousCopyId = previousCopyId
         self.isRejected = false
         self.isDeleted = false
         self.isReviewed = false
@@ -116,24 +120,6 @@ final class Gift : Model {
         self.$province.id=input.provinceId
         self.$city.id=input.cityId
         self.$region.id=input.regionId
-    }
-    
-    private func update(input: Gift.Input) {
-        
-        self.title=input.title
-        self.description=input.description
-        self.price=input.price
-        self.$category.id=input.categoryId
-        self.giftImages=input.giftImages
-        self.isNew=input.isNew
-        self.countryId=input.countryId
-        self.$province.id=input.provinceId
-        self.$city.id=input.cityId
-        self.$region.id=input.regionId
-
-        self.isRejected = false
-//        self.rejectReason = nil // Note: Commented because the reason may help for the next review
-        self.isReviewed = false
     }
     
     var outputObject: Output {
@@ -221,21 +207,25 @@ extension Gift {
 
 extension Gift {
     
-    static func create(input: Gift.Input, authId: Int, on req: Request) -> EventLoopFuture<Gift> {
-        let gift = Gift(input: input, authId: authId)
+    static func create(input: Gift.Input, authId: Int, previousCopyId: Int? = nil, on req: Request) -> EventLoopFuture<Gift> {
+        let gift = Gift(input: input, authId: authId, previousCopyId: previousCopyId)
         return gift.setNamesAndSave(on: req)
     }
     
-    func update(input: Gift.Input, authId: Int, on req: Request) throws -> EventLoopFuture<Gift> {
+    func update(input: Gift.Input, authId: Int, on req: Request) -> EventLoopFuture<Gift> {
         
-        guard $user.id == authId else { throw Abort(.unauthorizedGift) }
-        guard !self.isDeleted else { throw Abort(.deletedGift) }
-        guard !isDonated else { throw Abort(.donatedGiftUnaccepted) }
+        guard $user.id == authId else { return req.db.makeFailedFuture(.unauthorizedGift) }
+        guard !isDeleted else { return req.db.makeFailedFuture(.deletedGift) }
+        guard !isDonated else { return req.db.makeFailedFuture(.donatedGiftUnaccepted) }
         
-        //TODO: Restore it only when it is deleted.
-        return self.restore(on: req.db).flatMap {
-            self.update(input: input)
-            return self.setNamesAndSave(on: req)
+        //TODO: Previous reject reason may be helpful for the next review
+        
+        return delete(authId: authId, on: req.db).flatMap {
+            return Self.create(
+                input: input,
+                authId: authId,
+                previousCopyId: self.id,
+                on: req)
         }
     }
     

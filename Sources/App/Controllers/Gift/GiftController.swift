@@ -42,18 +42,16 @@ final class GiftController {
     }
     
     func update(_ req: Request) throws -> EventLoopFuture<Gift.Output> {
-        let authId = try req.auth.require(User.self).getId()
-        let giftId = req.idParameter
+        let authId = try req.getAuthId()
         let input = try req.content.decode(Gift.Input.self)
         
-        return Gift.findOrFail(giftId, withSoftDeleted: true, on: req.db).flatMap { gift in
-            do {
-                return try gift.update(input: input, authId: authId, on: req)
-            } catch(let error) {
-                return req.db.makeFailedFuture(error)
-            }
+        return Gift.findOrFail(req.idParameter,
+                               withSoftDeleted: true,
+                               on: req.db)
+        .flatMap { gift in
+            return gift.update(input: input, authId: authId, on: req)
+                .outputObject
         }
-        .outputObject
     }
     
     /// Deletes a parameterized `Gift`.
