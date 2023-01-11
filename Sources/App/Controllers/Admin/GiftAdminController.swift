@@ -44,7 +44,7 @@ final class GiftAdminController {
         return Gift.getGiftsWithRequestFilter(
             query: query,
             requestInput: requestInput,
-            onlyReviewedGifts: false)
+            onlyReviewerAcceptedGifts: false)
             .outputArray
     }
     

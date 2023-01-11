@@ -26,7 +26,7 @@ final class GiftRequestController {
                 return db.makeFailedFuture(.giftCannotBeDonatedToTheOwner)
             }
             
-            guard gift.isReviewed == true else {
+            guard gift.isAcceptedByReviewer else {
                 return db.makeFailedFuture(.unreviewedGift)
             }
             
@@ -120,6 +120,9 @@ final class GiftRequestController {
         return Gift
             .findOrFail(giftId, on: db)
             .flatMap { gift in
+                guard gift.isAcceptedByReviewer else {
+                    return db.makeFailedFuture(.unreviewedGift)
+                }
                 if let donatedToUserId = gift.$donatedToUser.id {
                     return Charity.find(
                         userId: donatedToUserId,

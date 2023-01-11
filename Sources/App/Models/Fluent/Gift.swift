@@ -216,6 +216,7 @@ extension Gift {
     var isDonated: Bool {
         return $donatedToUser.id != nil
     }
+    var isAcceptedByReviewer: Bool { isReviewed && !isRejected }
 }
 
 extension Gift {
@@ -254,7 +255,7 @@ extension Gift {
 extension Gift {
     
     func wasReceived(by userId: Int, on db: Database) throws -> EventLoopFuture<HTTPStatus> {
-        guard isReviewed == true
+        guard isAcceptedByReviewer
         else { throw Abort(.unreviewedGift) }
         
         guard $donatedToUser.id == nil
@@ -313,7 +314,10 @@ extension Gift {
 
 extension Gift {
     
-    static func getGiftsWithRequestFilter(query:QueryBuilder<Gift>,requestInput:RequestInput?, onlyReviewedGifts:Bool)->EventLoopFuture<[Gift]>{
+    static func getGiftsWithRequestFilter(
+        query: QueryBuilder<Gift>,
+        requestInput: RequestInput?,
+        onlyReviewerAcceptedGifts: Bool) -> EventLoopFuture<[Gift]> {
         
         if let searchWord = requestInput?.searchWord {
             query.group(.or) { query in
@@ -371,8 +375,10 @@ extension Gift {
             query.filter(\.$id < beforeId)
         }
         
-        if onlyReviewedGifts {
-            query.filter(\.$isReviewed == true)
+        if onlyReviewerAcceptedGifts {
+            query
+                .filter(\.$isReviewed == true)
+                .filter(\.$isRejected == false)
         }
         
         let count = Constants.maxFetchCount(bound: requestInput?.count)

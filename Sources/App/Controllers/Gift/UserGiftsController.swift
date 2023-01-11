@@ -29,16 +29,13 @@ final class UserGiftsController {
                 
                 if isAdmin || isOwner {
                     query.withDeleted()
-                }
-                
-                if isOwner && !isAdmin {
                     query.filter(\.$isDeleted == false)
                 }
                 
                 return Gift.getGiftsWithRequestFilter(
                     query: query,
                     requestInput: requestInput,
-                    onlyReviewedGifts: !(isAdmin || isOwner))
+                    onlyReviewerAcceptedGifts: !(isAdmin || isOwner))
             }
             .outputArray
         
@@ -61,7 +58,7 @@ final class UserGiftsController {
                 return Gift.getGiftsWithRequestFilter(
                     query: query,
                     requestInput: requestInput,
-                    onlyReviewedGifts: true)
+                    onlyReviewerAcceptedGifts: true)
                 
             }
             .outputArray
@@ -83,7 +80,7 @@ final class UserGiftsController {
                 return Gift.getGiftsWithRequestFilter(
                     query: query,
                     requestInput: requestInput,
-                    onlyReviewedGifts: true)
+                    onlyReviewerAcceptedGifts: true)
                 
             }
             .outputArray

@@ -142,6 +142,8 @@ extension GiftRequest {
         return Gift
             .query(on: db)
             .filter(\.$deletedAt == nil) //TODO: Is it needed?
+            .filter(\.$isReviewed == true)
+            .filter(\.$isRejected == false)
             .join(GiftRequest.self, on: \Gift.$id == \GiftRequest.$giftId)
             .filter(GiftRequest.self, \.$requestUserId == requestUserId)
             .filter(GiftRequest.self, \GiftRequest.$status == .isWaiting)

@@ -20,13 +20,13 @@ final class GiftController {
         return Gift.getGiftsWithRequestFilter(
             query: query,
             requestInput: requestInput,
-            onlyReviewedGifts: true)
+            onlyReviewerAcceptedGifts: true)
             .outputArray
     }
     
     func itemAt(_ req: Request) throws -> EventLoopFuture<Gift.Output> {
         return Gift.getParameter(on: req).flatMapThrowing { gift in
-            guard gift.isReviewed else { throw Abort(.unreviewedGift) }
+            guard gift.isAcceptedByReviewer else { throw Abort(.unreviewedGift) }
             return gift
         }
         .outputObject
