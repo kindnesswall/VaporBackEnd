@@ -239,16 +239,26 @@ extension Gift {
         }
     }
     
-    func delete(authId: Int, on db: Database) throws -> EventLoopFuture<HTTPStatus> {
+    func delete(authId: Int, on db: Database) -> EventLoopFuture<Void> {
         
-        guard $user.id == authId else { throw Abort(.unauthorizedGift) }
-        guard !isDonated else { throw Abort(.donatedGiftUnaccepted) }
-        isDeleted = true
-        return save(on: db).flatMap {
-            return self.delete(on: db)
-                .transform(to: .ok)
+        guard $user.id == authId else { return db.makeFailedFuture(.unauthorizedGift) }
+        guard !isDonated else { return db.makeFailedFuture(.donatedGiftUnaccepted) }
+        
+        if deletedAt == nil {
+            isDeleted = true
+            return update(on: db).flatMap {
+                return self.delete(on: db)
+            }
+        } else {
+            return db.transaction { db in
+                return self.restore(on: db).flatMap {
+                    self.isDeleted = true
+                    return self.update(on: db).flatMap {
+                        return self.delete(on: db)
+                    }
+                }
+            }
         }
-        
     }
 }
 
