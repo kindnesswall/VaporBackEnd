@@ -155,7 +155,7 @@ final class Charity: Model {
         
         object.isRejected = false
         
-        return object.setNamesAndSave(on: db)
+        return object.setNames(on: db)
             .flatMap {
                 object.create(on: db)
                     .transform(to: object)
@@ -168,7 +168,7 @@ final class Charity: Model {
         self.isRejected = false
 //        self.rejectReason = nil // Note: Commented because the reason may be helpful for the next review
         
-        return self.setNamesAndSave(on: db)
+        return self.setNames(on: db)
             .flatMap {
                 self.update(on: db)
             }
@@ -204,7 +204,7 @@ final class Charity: Model {
 
 extension Charity {
     
-    private func setNamesAndSave(on db: Database) -> EventLoopFuture<Void> {
+    private func setNames(on db: Database) -> EventLoopFuture<Void> {
         Country
             .find(countryId, on: db)
             .unwrap(or: Abort(.countryNotFound))
@@ -218,9 +218,8 @@ extension Charity {
                         return City
                             .find(self.cityId, on: db)
                             .unwrap(or: Abort(.cityNotFound))
-                            .flatMap { city in
+                            .map { city in
                                 self.cityName = city.name
-                                return self.save(on: db)
                             }
                     }
             }

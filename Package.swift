@@ -1,10 +1,11 @@
-// swift-tools-version:5.2
+
+// swift-tools-version:5.5
 import PackageDescription
 
 let package = Package(
     name: "VaporBackEnd",
     platforms: [
-        .macOS(.v10_15),
+        .macOS(.v12),
     ],
     dependencies: [
         // 💧 A server-side Swift web framework.
@@ -27,7 +28,7 @@ let package = Package(
             .product(name: "APNS", package: "apns"),
             .product(name: "Gatekeeper", package: "gatekeeper")
         ]),
-        .target(name: "Run", dependencies: [
+        .executableTarget(name: "Run", dependencies: [
             .target(name: "App"),
         ]),
         .testTarget(name: "AppTests", dependencies: [

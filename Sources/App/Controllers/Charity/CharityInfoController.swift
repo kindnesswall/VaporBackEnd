@@ -70,14 +70,17 @@ final class CharityInfoController {
         let input = try req.content.decode(Charity.Input.self)
         
         return Charity.get(userId: userId, on: req.db).flatMap { charity in
-            charity.update(input, on: req.db).flatMap {
-                return User.findOrFail(userId, on: req.db).flatMap { user in
-                    if user.isCharity {
-                        user.charityName = charity.name
-                        user.charityImage = charity.logoImage
+            let log = CharityLog(charityId: charity.id, charity: charity)
+            return log.create(on: req.db).flatMap {
+                return charity.update(input, on: req.db).flatMap {
+                    return User.findOrFail(userId, on: req.db).flatMap { user in
+                        if user.isCharity {
+                            user.charityName = charity.name
+                            user.charityImage = charity.logoImage
+                        }
+                        return user.update(on: req.db)
+                            .transform(to: charity)
                     }
-                    return user.save(on: req.db)
-                        .transform(to: charity)
                 }
             }
         }
@@ -87,16 +90,20 @@ final class CharityInfoController {
         
         let userId = try validate(req)
         
-        return User.findOrFail(userId, on: req.db).flatMap { user in
-            
-            user.isCharity = false
-            user.charityName = nil
-            user.charityImage = nil
-            
-            return user.save(on: req.db).flatMap { _ in
-                return Charity.get(userId: userId, on: req.db).flatMap { foundCharity in
-                    return foundCharity.delete(on: req.db)
-                        .transform(to: .ok)
+        return Charity.get(userId: userId, on: req.db).flatMap { charity in
+            let log = CharityLog(charityId: charity.id, charity: charity)
+            return log.create(on: req.db).flatMap {
+                return User.findOrFail(userId, on: req.db).flatMap { user in
+                    
+                    user.isCharity = false
+                    user.charityName = nil
+                    user.charityImage = nil
+                    
+                    return user.update(on: req.db).flatMap {
+                        return charity
+                            .delete(force: true, on: req.db)
+                            .transform(to: .ok)
+                    }
                 }
             }
         }
