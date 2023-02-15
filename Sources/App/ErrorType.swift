@@ -36,7 +36,6 @@ enum ErrorType: String {
     case invalidActivationCode
     case expiredActivationCode
     case pushPayloadIsNotValid
-    case wrongPushNotificationType
     case chatHasBlockedByUser
     case invalidType
     case invalid
@@ -105,7 +104,6 @@ extension ErrorType {
              .invalidActivationCode,
              .expiredActivationCode,
              .pushPayloadIsNotValid,
-             .wrongPushNotificationType,
              .chatHasBlockedByUser,
              .invalidType,
              .invalid,
@@ -196,8 +194,6 @@ extension ErrorType {
             return "The activation code has been expired"
         case .pushPayloadIsNotValid:
             return "Push payload is not valid"
-        case .wrongPushNotificationType:
-            return "Push Notification Type is wrong"
         case .chatHasBlockedByUser:
             return "Chat has blocked by user"
         case .invalidType:

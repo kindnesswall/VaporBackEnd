@@ -1,3 +1,4 @@
+
 //
 //  UserPushNotification.swift
 //  App
@@ -10,38 +11,52 @@ import Fluent
 
 final class UserPushNotification: Model {
     
-    static let schema = "UserPushNotification"
+    static let schema = "UserPushNotificationV2"
     
-    @ID(custom: .id)
-    var id: Int?
+    @ID(key: .id)
+    var id: UUID?
     
     @Field(key: "userId")
     var userId: Int
     
     @Field(key: "userTokenId")
-    var userTokenId: Int
+    var userTokenId: UUID
     
-    @Field(key: "type")
-    var type: String
+    @Enum(key: "type")
+    var type: PushNotificationType
     
     @Field(key: "devicePushToken")
     var devicePushToken: String
     
+    @Timestamp(key: "createdAt", on: .create)
+    var createdAt: Date?
+    
+    @Timestamp(key: "updatedAt", on: .update)
+    var updatedAt: Date?
+    
     init() {}
     
-    init(userId: Int, userTokenId: Int, input: Inputs.UserPushNotification) {
+    init(userId: Int, userTokenId: UUID, input: Inputs.UserPushNotification) {
         self.userId = userId
         self.userTokenId = userTokenId
         self.type = input.type
         self.devicePushToken = input.devicePushToken
     }
     
-    static func hasFound(input: Inputs.UserPushNotification, conn: Database)->EventLoopFuture<UserPushNotification?> {
-        return query(on: conn)
-            .filter(\.$type == input.type)
-            .filter(\.$devicePushToken == input.devicePushToken)
-            .first()
-    }
+    static func find(
+        with userTokenId: UUID,
+        or input: Inputs.UserPushNotification,
+        on db: Database) -> EventLoopFuture<[UserPushNotification]> {
+            return query(on: db)
+                .group(.or) { query in
+                    query.filter(\.$userTokenId == userTokenId)
+                    query.group(.and) { query in
+                        query.filter(\.$type == input.type)
+                        query.filter(\.$devicePushToken == input.devicePushToken)
+                    }
+                }
+                .all()
+        }
     
     static func findAllTokens(userId:Int, conn: Database) -> EventLoopFuture<[UserPushNotification]>{
         return query(on: conn)
@@ -56,7 +71,7 @@ final class UserPushNotification: Model {
             .transform(to: .ok)
     }
     
-    static func delete(userTokenId: Int, conn: Database) -> EventLoopFuture<HTTPStatus> {
+    static func delete(userTokenId: UUID, conn: Database) -> EventLoopFuture<HTTPStatus> {
         return query(on: conn)
             .filter(\.$userTokenId == userTokenId)
             .delete()

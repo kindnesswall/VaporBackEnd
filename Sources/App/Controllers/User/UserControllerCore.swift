@@ -9,7 +9,7 @@ import Vapor
 import Fluent
 import FluentPostgresDriver
 
-class UserControllerCore: UserDemoAccountable {
+class UserControllerCore: UserDemoAccountable, PushRegisterable {
     
     func findOrCreateUser(req: Request, phoneNumber: String) -> EventLoopFuture<User> {
         
@@ -79,20 +79,37 @@ class UserControllerCore: UserDemoAccountable {
             activationCode: activationCode)
     }
     
-    func getToken(req: Request, user: User) -> EventLoopFuture<AuthOutput> {
-        
+    func generateTokenAndRegisterPush(
+        user: User,
+        inputPushNotification: Inputs.UserPushNotification?,
+        on db: Database) -> EventLoopFuture<AuthOutput>
+    {
         guard let userId = user.id else {
-            return req.db.makeFailedFuture(.nilUserId)
+            return db.makeFailedFuture(.nilUserId)
         }
-        
+        return generateToken(for: userId, on: db).flatMap { token in
+            
+            let output = AuthOutput(
+                token: token.outputObject,
+                isAdmin: user.isAdmin,
+                isCharity: user.isCharity)
+            
+            if let inputPushNotification = inputPushNotification {
+                return self.registerPush(userId: userId,
+                                    userToken: token,
+                                    input: inputPushNotification,
+                                    on: db)
+                .transform(to: output)
+            } else {
+                return db.makeSucceededFuture(output)
+            }
+        }
+    }
+    
+    func generateToken(for userId: Int, on db: Database) -> EventLoopFuture<Token> {
         let token = Token.generate(for: userId)
-        
-        return token.save(on: req.db)
-            .map {
-                return AuthOutput(
-                    token: token.outputObject,
-                    isAdmin: user.isAdmin,
-                    isCharity: user.isCharity)
-        }
-    }    
+        return token
+            .create(on: db)
+            .transform(to: token)
+    }
 }

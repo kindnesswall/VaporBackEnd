@@ -38,7 +38,7 @@ class LogoutController {
     }
     
     static func logout(req: Request, userToken: Token) throws -> EventLoopFuture<HTTPStatus> {
-        let userTokenId = try userToken.getId()
+        let userTokenId = try userToken.requireID()
         return userToken.delete(on: req.db).flatMap { _ in
             return UserPushNotification.delete(userTokenId: userTokenId, conn: req.db)
         }

@@ -22,14 +22,17 @@ class UserFirebaseController: UserControllerCore {
             }
             
             return self.findOrCreateUser(req: req, phoneNumber: phoneNumber).flatMap { user in
-                return self.getToken(req: req, user: user)
+                return self.generateTokenAndRegisterPush(
+                    user: user,
+                    inputPushNotification: input.pushNotification,
+                    on: req.db)
             }
         }
     }
     
     private func sendFirebaseRequest(_ req: Request, idToken:String) -> EventLoopFuture<String?> {
         
-        let apiInput = Inputs.FirebaseLogin(idToken: idToken)
+        let apiInput = Inputs.FirebaseRequest(idToken: idToken)
         guard let configuration = configuration.googleIdentityToolkit else {
             return req.db.makeFailedFuture(.failedToLoginWithFirebase)
         }

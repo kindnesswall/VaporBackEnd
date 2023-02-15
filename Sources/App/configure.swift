@@ -111,6 +111,8 @@ public func configure(_ app: Application) throws {
     app.migrations.add(UserPhoneNumberLogExpiresAtMigration())
     app.migrations.add(GiftPreviousCopyIdMigration())
     app.migrations.add(CharityLogMigration())
+    app.migrations.add(TokenV2Migration())
+    app.migrations.add(UserPushNotificationV2Migration())
     
     //Firebase
     let path = CertificatesPaths.path(of: .firebase)

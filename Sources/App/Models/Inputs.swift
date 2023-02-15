@@ -1,3 +1,4 @@
+
 //
 //  Inputs.swift
 //  App
@@ -13,17 +14,19 @@ class Inputs {
         var rejectReason: String
     }
     
-    final class Login : Content {
-        var phoneNumber:String
-        var activationCode:String?
+    struct Login: Content {
+        let phoneNumber: String
+        let activationCode: String?
+        let pushNotification: UserPushNotification?
     }
     
-    final class FirebaseLogin: Content {
-        var idToken: String
-        
-        init(idToken: String) {
-            self.idToken = idToken
-        }
+    struct FirebaseLogin: Content {
+        let idToken: String
+        let pushNotification: UserPushNotification?
+    }
+    
+    struct FirebaseRequest: Codable {
+        let idToken: String
     }
     
     final class ChangePhoneNumber: Content {
@@ -36,9 +39,9 @@ class Inputs {
         var countryId: Int
     }
     
-    final class UserPushNotification : Content {
-        var type: String
-        var devicePushToken: String
+    struct UserPushNotification : Content {
+        let type: PushNotificationType
+        let devicePushToken: String
     }
     
     struct ApplicationVersion: Content {

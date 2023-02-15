@@ -1,3 +1,4 @@
+
 //
 //  UserController.swift
 //  App
@@ -47,7 +48,10 @@ final class UserController: UserControllerCore, PhoneNumberValidator {
         
         let phoneNumber = try self.validate(phoneNumber: inputUser.phoneNumber)
         
-        guard let activationCode = inputUser.activationCode else {
+        guard
+            let activationCode = inputUser.activationCode,
+            activationCode != ""
+        else {
             throw Abort(.invalidActivationCode)
         }
         
@@ -55,13 +59,16 @@ final class UserController: UserControllerCore, PhoneNumberValidator {
             req: req,
             phoneNumber: phoneNumber,
             activationCode: activationCode)
-            .flatMap { _ in
-                return self.findOrCreateUser(
-                    req: req,
-                    phoneNumber: phoneNumber)
-                    .flatMap { user in
-                        return self.getToken(req: req, user: user)
-                }
+        .flatMap { _ in
+            return self.findOrCreateUser(
+                req: req,
+                phoneNumber: phoneNumber)
+            .flatMap { user in
+                return self.generateTokenAndRegisterPush(
+                    user: user,
+                    inputPushNotification: inputUser.pushNotification,
+                    on: req.db)
+            }
         }
         
     }

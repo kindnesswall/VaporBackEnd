@@ -1,3 +1,4 @@
+
 //
 //  Token.swift
 //  App
@@ -10,17 +11,16 @@ import Fluent
 
 final class Token: Model {
     
-    static let schema = "Token"
+    static let schema = "TokenV2"
     
-    @ID(custom: .id)
-    var id: Int?
+    @ID(key: .id)
+    var id: UUID?
     
     @Field(key: "token")
     var token: String
     
-    @Parent(key: "userID")
+    @Parent(key: "userId")
     var user: User
-    
     
     @Timestamp(key: "createdAt", on: .create)
     var createdAt: Date?
@@ -33,39 +33,26 @@ final class Token: Model {
     
     init() {}
     
-    init(token: String, userID: User.IDValue) {
+    init(token: String, userId: User.IDValue) {
         self.token = token
-        self.$user.id = userID
+        self.$user.id = userId
     }
     
     var outputObject: Output {
         .init(
-            id: id,
             token: token,
             userID: $user.id,
             createdAt: createdAt,
-            updatedAt: updatedAt,
-            deletedAt: deletedAt)
+            updatedAt: updatedAt)
     }
     
     struct Output: Content {
-        let id: Int?
+        //TODO: question: is id required for front end?
         let token: String
+        //TODO: rename userID to userId
         let userID: Int?
-        
         let createdAt: Date?
         let updatedAt: Date?
-        let deletedAt: Date?
-    }
-
-}
-
-extension Token {
-    func getId() throws -> Int {
-        guard let id = self.id else {
-            throw Abort(.nilTokenId)
-        }
-        return id
     }
 }
 
@@ -73,7 +60,7 @@ extension Token {
     static func generate(for userId: Int) -> Token {
         return Token(
             token: [UInt8].random(count: 16).base64,
-            userID: userId)
+            userId: userId)
     }
 }
 

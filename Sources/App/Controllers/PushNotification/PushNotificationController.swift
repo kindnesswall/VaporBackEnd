@@ -1,3 +1,4 @@
+
 //
 //  PushNotificationController.swift
 //  App
@@ -9,38 +10,17 @@ import Vapor
 import FCM
 import APNS
 
-class PushNotificationController {
+class PushNotificationController: PushRegisterable {
     
     func registerPush(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
-        let user = try req.auth.require(User.self)
-        let userId = try user.getId()
-        let userToken = try req.auth.require(Token.self)
-        let userTokenId = try userToken.getId()
-        
+        let userId = try req.auth.require(User.self).getId()
+        let tokenId = try req.auth.require(Token.self).requireID()
         let input = try req.content.decode(Inputs.UserPushNotification.self)
         
-        guard let _ = PushNotificationType(rawValue: input.type) else {
-            throw Abort(.wrongPushNotificationType)
-        }
-        
-        return UserPushNotification.hasFound(
-            input: input,
-            conn: req.db).flatMap { found in
-            
-            if let found = found {
-                found.userId = userId
-                found.userTokenId = userTokenId
-                return found.save(on: req.db)
-                    .transform(to: .ok)
-            } else {
-                let item = UserPushNotification(
-                    userId: userId,
-                    userTokenId: userTokenId,
-                    input: input)
-                return item.save(on: req.db)
-                    .transform(to: .ok)
-            }
-        }
+        return registerPush(userId: userId,
+                     userTokenId: tokenId,
+                     input: input,
+                     on: req.db)
     }
     
     func sendPush(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
@@ -62,21 +42,19 @@ class PushNotificationController {
                     token: token,
                     title: title,
                     body: body,
-                    payload: payload)?
+                    payload: payload)
                     .whenFailure { print($0) }
             }
         }
         .whenFailure { print($0) }
     }
     
-    static func sendPush<T: PushPayloadable>(_ req: Request, token: UserPushNotification, title:String?, body:String, payload: T) throws -> EventLoopFuture<HTTPStatus>? {
+    static func sendPush<T: PushPayloadable>(_ req: Request, token: UserPushNotification, title:String?, body:String, payload: T) throws -> EventLoopFuture<HTTPStatus> {
         
-        guard let pushType = PushNotificationType(rawValue: token.type) else { return nil }
-        
-        let click_action = try payload.getClickAction(type: pushType)
+        let click_action = try payload.getClickAction(type: token.type)
         
         return payload.getContent(on: req).flatMap { content in
-            switch pushType {
+            switch token.type {
             case .APNS:
                 return sendAPNSPush(req, token: token.devicePushToken, title: title, body: body, content: content)
             case .Firebase:
