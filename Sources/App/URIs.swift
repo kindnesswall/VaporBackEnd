@@ -100,6 +100,18 @@ class URIs {
     var logout_allDevices : [PathComponent] {
         append(to: logout, path: ["allDevices"])
     }
+    var logout_oldTokens : [PathComponent] {
+        append(to: logout, path: ["oldTokens"])
+    }
+    var logout_oldTokens_all : [PathComponent] {
+        append(to: logout_oldTokens, path: ["all"])
+    }
+    var logout_oldTokens_admins : [PathComponent] {
+        append(to: logout_oldTokens, path: ["admins"])
+    }
+    var allInvalidDevicePushTokens_forceDelete : [PathComponent] {
+        makeAPI(path: ["allInvalidDevicePushTokens", "forceDelete"])
+    }
     var chat : [PathComponent] {
         makeAPI(path: ["chat"])
     }

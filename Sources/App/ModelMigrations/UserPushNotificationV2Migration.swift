@@ -20,7 +20,7 @@ struct UserPushNotificationV2Migration: AsyncMigration {
         try await database.schema(schema)
             .id()
             .field("userId", .int, .required, .references("User", "id"))
-            .field("userTokenId", .uuid, .required, .references("TokenV2", "id"))
+            .field("userTokenId", .uuid, .required, .references("TokenV2", "id", onDelete: .cascade))
             .unique(on: "userTokenId")
             .field("type", userPushNotificationType, .required)
             .field("devicePushToken", .string, .required)

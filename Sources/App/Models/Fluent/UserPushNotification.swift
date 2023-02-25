@@ -78,6 +78,13 @@ final class UserPushNotification: Model {
             .transform(to: .ok)
     }
     
+    static func getAllDevicePushTokensOfSoftDeletedTokensQuery(on db: Database) -> QueryBuilder<UserPushNotification> {
+        return query(on: db)
+            .withDeleted()
+            .join(Token.self,
+                  on: \UserPushNotification.$userTokenId == \Token.$id)
+            .filter(Token.self, \Token.$deletedAt != nil)
+    }
 }
 
 final class SendPushInput : Content {

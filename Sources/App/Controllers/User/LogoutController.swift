@@ -43,4 +43,24 @@ class LogoutController {
             return UserPushNotification.delete(userTokenId: userTokenId, conn: req.db)
         }
     }
+    
+    func logoutAllOldTokens(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
+        Token
+            .getAllOldTokensQuery(on: req.db)
+            .all().flatMap{ $0.delete(on: req.db)}
+            .transform(to: .ok)
+    }
+    
+    func logoutAdminsOldTokens(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
+        Token
+            .getAdminsOldTokensQuery(on: req.db)
+            .all().flatMap{ $0.delete(on: req.db)}
+            .transform(to: .ok)
+    }
+    
+    func forceDeleteAllDevicePushTokensOfSoftDeletedTokens(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
+        UserPushNotification.getAllDevicePushTokensOfSoftDeletedTokensQuery(on: req.db)
+            .all().flatMap{ $0.delete(on: req.db)}
+            .transform(to: .ok)
+    }
 }

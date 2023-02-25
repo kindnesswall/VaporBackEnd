@@ -202,6 +202,10 @@ public func routes(_ app: Application) throws {
     //Phone number of a gift
     tokenProtected.get(uris.phone_access_gift_id, use: userPhone.getPhoneNumberOfAGift)
     
+    adminProtected.delete(uris.logout_oldTokens_all, use: logoutController.logoutAllOldTokens)
+    adminProtected.delete(uris.logout_oldTokens_admins, use: logoutController.logoutAdminsOldTokens)
+    adminProtected.delete(uris.allInvalidDevicePushTokens_forceDelete, use: logoutController.forceDeleteAllDevicePushTokensOfSoftDeletedTokens)
+    
     //Phone Visibility Setting
     //These routes are no longer useful
 //    publicRouter.get(uris.phone_visibility_setting_id, use: phoneVisibilitySetting.getUserSetting)

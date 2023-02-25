@@ -57,6 +57,27 @@ final class Token: Model {
 }
 
 extension Token {
+    
+    static func getAllOldTokensQuery(on db: Database) -> QueryBuilder<Token> {
+        let timeInterval = TimeInterval(-1 * 60 * 60 * 24 * 365)
+        let date = Date()
+            .addingTimeInterval(timeInterval)
+        return query(on: db)
+            .filter(\.$createdAt < date)
+    }
+    
+    static func getAdminsOldTokensQuery(on db: Database) -> QueryBuilder<Token> {
+        let timeInterval = TimeInterval(-1 * 60 * 60 * 24)
+        let date = Date()
+            .addingTimeInterval(timeInterval)
+        return query(on: db)
+            .filter(\.$createdAt < date)
+            .join(User.self, on: \Token.$user.$id == \User.$id)
+            .filter(User.self, \User.$isAdmin == true)
+    }
+}
+
+extension Token {
     static func generate(for userId: Int) -> Token {
         return Token(
             token: [UInt8].random(count: 16).base64,
