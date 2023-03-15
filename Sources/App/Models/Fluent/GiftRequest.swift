@@ -137,8 +137,8 @@ extension GiftRequest {
 
 extension GiftRequest {
     
-    static func getUserRequestedGifts(requestUserId: Int,
-                                      db: Database) -> EventLoopFuture<[Gift]> {
+    static func getUserRequestedGiftsQuery(requestUserId: Int,
+                                      db: Database) -> QueryBuilder<Gift> {
         return Gift
             .query(on: db)
             .filter(\.$deletedAt == nil) //TODO: Is it needed?
@@ -148,7 +148,6 @@ extension GiftRequest {
             .filter(GiftRequest.self, \.$requestUserId == requestUserId)
             .filter(GiftRequest.self, \GiftRequest.$status == .isWaiting)
             .filter(GiftRequest.self, \GiftRequest.$expiresAt > Date())
-            .all()
     }
     
 }

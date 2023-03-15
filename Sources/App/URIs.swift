@@ -38,6 +38,10 @@ class URIs {
         append(to: basePath, path: [id])
     }
     
+    func appendPaginate(to basePath: [PathComponent]) -> [PathComponent] {
+        append(to: basePath, path: ["paginate"])
+    }
+    
     private let id = ":id"
     
     var root: [PathComponent] {
@@ -51,6 +55,9 @@ class URIs {
     }
     var gifts_id : [PathComponent] {
         appendID(to: gifts)
+    }
+    var gifts_paginate: [PathComponent] {
+        appendPaginate(to: gifts)
     }
     var categories : [PathComponent] {
         makeAPI(path: ["categories"])
@@ -157,11 +164,17 @@ class URIs {
     var gifts_userRegistered_id : [PathComponent] {
         appendID(to: gifts_userRegistered)
     }
+    var gifts_userRegistered_id_paginate : [PathComponent] {
+        appendPaginate(to: gifts_userRegistered_id)
+    }
     var gifts_userDonated: [PathComponent] {
         append(to: gifts, path: ["userDonated"])
     }
     var gifts_userDonated_id: [PathComponent] {
         appendID(to: gifts_userDonated)
+    }
+    var gifts_userDonated_id_paginate: [PathComponent] {
+        appendPaginate(to: gifts_userDonated_id)
     }
     var gifts_userReceived : [PathComponent] {
         append(to: gifts, path: ["userReceived"])
@@ -169,11 +182,17 @@ class URIs {
     var gifts_userReceived_id : [PathComponent] {
         appendID(to: gifts_userReceived)
     }
+    var gifts_userReceived_id_paginate : [PathComponent] {
+        appendPaginate(to: gifts_userReceived_id)
+    }
     var gifts_userRequested: [PathComponent] {
         append(to: gifts, path: ["userRequested"])
     }
     var gifts_userRequested_id: [PathComponent] {
         appendID(to: gifts_userRequested)
+    }
+    var gifts_userRequested_id_paginate: [PathComponent] {
+        appendPaginate(to: gifts_userRequested_id)
     }
     var image_upload : [PathComponent] {
         makeAPI(path: ["image", "upload"])
@@ -192,6 +211,9 @@ class URIs {
     }
     var gifts_review : [PathComponent] {
         append(to: gifts, path: ["review"])
+    }
+    var gifts_review_paginate : [PathComponent] {
+        appendPaginate(to: gifts_review)
     }
     var users : [PathComponent] {
         makeAPI(path: ["users"])

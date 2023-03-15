@@ -314,12 +314,21 @@ extension Gift {
 
 extension Gift {
     
-    static func getGiftsWithRequestFilter(
+    static func filterGifts(
+        giftQuery: GiftQuery
+    ) {
+        filterGifts(
+            query: giftQuery.query,
+            requestInput: giftQuery.requestInput,
+            onlyReviewerAcceptedGifts: giftQuery.onlyReviewerAcceptedGifts)
+    }
+    
+    static func filterGifts(
         query: QueryBuilder<Gift>,
-        requestInput: RequestInput?,
-        onlyReviewerAcceptedGifts: Bool) -> EventLoopFuture<[Gift]> {
-        
-        if let searchWord = requestInput?.searchWord {
+        requestInput: RequestInput,
+        onlyReviewerAcceptedGifts: Bool
+    ) {
+        if let searchWord = requestInput.searchWord {
             query.group(.or) { query in
                 query
                     .filter(\.$title ~~ searchWord)
@@ -327,7 +336,7 @@ extension Gift {
             }
         }
         
-        if let categoryIds = requestInput?.categoryIds {
+        if let categoryIds = requestInput.categoryIds {
             query.group(.or) { query in
                 for categoryId in categoryIds {
                     query.filter(\.$category.$id == categoryId)
@@ -335,27 +344,27 @@ extension Gift {
             }
         }
         
-        if let regionIds = requestInput?.regionIds {
+        if let regionIds = requestInput.regionIds {
             query.group(.or) { query in
                 for regionId in regionIds {
                     query.filter(\.$region.$id == regionId)
                 }
             }
         } else {
-            if let cityId = requestInput?.cityId {
+            if let cityId = requestInput.cityId {
                 query.filter(\.$city.$id == cityId)
             } else {
-                if let provinceId = requestInput?.provinceId {
+                if let provinceId = requestInput.provinceId {
                     query.filter(\.$province.$id == provinceId)
                 } else {
-                    if let countryId = requestInput?.countryId {
+                    if let countryId = requestInput.countryId {
                         query.filter(\.$countryId == countryId)
                     }
                 }
             }
         }
         
-        if let isDonated = requestInput?.isDonated {
+        if let isDonated = requestInput.isDonated {
             if isDonated {
                 query.filter(\.$donatedToUser.$id != nil)
             } else {
@@ -363,7 +372,7 @@ extension Gift {
             }
         }
         
-        if let isDelivered = requestInput?.isDelivered {
+        if let isDelivered = requestInput.isDelivered {
             if isDelivered {
                 query.filter(\.$isDelivered == true)
             } else {
@@ -371,22 +380,45 @@ extension Gift {
             }
         }
         
-        if let beforeId = requestInput?.beforeId {
-            query.filter(\.$id < beforeId)
-        }
-        
         if onlyReviewerAcceptedGifts {
             query
                 .filter(\.$isReviewed == true)
                 .filter(\.$isRejected == false)
         }
-        
-        let count = Constants.maxFetchCount(bound: requestInput?.count)
-        
-        return query.sort(\.$id, .descending).range(0..<count).all()
     }
     
+    static func getGifts(
+        giftQuery: GiftQuery
+    ) -> EventLoopFuture<[Gift.Output]> {
+        
+        filterGifts(giftQuery: giftQuery)
+        let query = giftQuery.query
+        let count = giftQuery.requestInput.getCount()
+        let beforeId = giftQuery.requestInput.beforeId
+        
+        if let beforeId = beforeId {
+            query.filter(\.$id < beforeId)
+        }
+        return query
+            .sort(\.$id, .descending)
+            .range(0..<count)
+            .all()
+            .outputArray
+    }
     
+    static func getPaginatedGifts(
+        giftQuery: GiftQuery
+    ) -> EventLoopFuture<Page<Gift.Output>> {
+        
+        filterGifts(giftQuery: giftQuery)
+        let query = giftQuery.query
+        let count = giftQuery.requestInput.getCount()
+        let page = giftQuery.requestInput.page ?? 1
+        
+        return query
+            .paginate(PageRequest(page: page, per: count))
+            .outputPage
+    }
 }
 
 /// Allows `Gift` to be used as a dynamic migration.
@@ -410,5 +442,11 @@ extension EventLoopFuture where Value == Gift {
 extension EventLoopFuture where Value == [Gift] {
     var outputArray: EventLoopFuture<[Gift.Output]> {
         map { $0.outputArray }
+    }
+}
+
+extension EventLoopFuture where Value == Page<Gift> {
+    var outputPage: EventLoopFuture<Page<Gift.Output>> {
+        map { $0.map { $0.outputObject } }
     }
 }

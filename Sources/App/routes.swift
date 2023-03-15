@@ -11,9 +11,14 @@ public func routes(_ app: Application) throws {
     //Controllers
     let landing = LandingController()
     let giftController = GiftController()
-    let userGifts = UserGiftsController()
+    let giftsListController = GiftsListController()
+    let userRegisteredGifts = UserRegisteredGiftsListController()
+    let userReceivedGifts = UserReceivedGiftsListController()
+    let userDonatedGifts = UserDonatedGiftsListController()
+    let userRequestedGifts = UserRequestedGiftsListController()
     let imageController = ImageController()
     let giftAdminController = GiftAdminController()
+    let adminUnreviewedGifts = AdminUnreviewedGiftsListController()
     let categoryController = CategoryController()
     let locationController = LocationController()
     let userController = UserController()
@@ -109,7 +114,8 @@ public func routes(_ app: Application) throws {
     
     
     //Routes Gifts
-    publicRouter.post(uris.gifts,use: giftController.index)
+    publicRouter.get(uris.gifts, use: giftsListController.index)
+    publicRouter.get(uris.gifts_paginate, use: giftsListController.paginatedIndex)
     publicRouter.get(uris.gifts_id, use: giftController.itemAt)
     
     tokenProtected.post(uris.gifts_register,use: giftController.create)
@@ -118,10 +124,15 @@ public func routes(_ app: Application) throws {
     
     tokenProtected.on(.POST, uris.image_upload, body: .collect(maxSize: "20mb"), use: imageController.uploadImage)
     
-    tokenFetched.post(uris.gifts_userRegistered_id, use: userGifts.registeredGifts)
-    tokenFetched.post(uris.gifts_userDonated_id, use: userGifts.donatedGifts)
-    tokenFetched.post(uris.gifts_userReceived_id, use: userGifts.receivedGifts)
-    publicRouter.get(uris.gifts_userRequested_id, use: userGifts.requestedGifts)
+    tokenFetched.get(uris.gifts_userRegistered_id, use: userRegisteredGifts.index)
+    tokenFetched.get(uris.gifts_userDonated_id, use: userDonatedGifts.index)
+    tokenFetched.get(uris.gifts_userReceived_id, use: userReceivedGifts.index)
+    publicRouter.get(uris.gifts_userRequested_id, use: userRequestedGifts.index)
+    
+    tokenFetched.get(uris.gifts_userRegistered_id_paginate, use: userRegisteredGifts.paginatedIndex)
+    tokenFetched.get(uris.gifts_userDonated_id_paginate, use: userDonatedGifts.paginatedIndex)
+    tokenFetched.get(uris.gifts_userReceived_id_paginate, use: userReceivedGifts.paginatedIndex)
+    publicRouter.get(uris.gifts_userRequested_id_paginate, use: userRequestedGifts.paginatedIndex)
     
     //Routes Gift Request
     charityProtected.put(
@@ -140,7 +151,8 @@ public func routes(_ app: Application) throws {
     //Routes Admin
     adminProtected.put(uris.gifts_accept_id, use: giftAdminController.acceptGift)
     adminProtected.put(uris.gifts_reject_id, use: giftAdminController.rejectGift)
-    adminProtected.post(uris.gifts_review, use: giftAdminController.unreviewedGifts)
+    adminProtected.get(uris.gifts_review, use: adminUnreviewedGifts.index)
+    adminProtected.get(uris.gifts_review_paginate, use: adminUnreviewedGifts.paginatedIndex)
     adminProtected.put(uris.users_allowAccess, use: adminUserList.userAllowAccess)
     adminProtected.delete(uris.users_denyAccess_id, use: adminUserList.userDenyAccess)
     adminProtected.post(uris.users_list_active, use: adminUserList.usersActiveList)

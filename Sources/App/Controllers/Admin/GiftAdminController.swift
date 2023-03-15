@@ -35,17 +35,4 @@ final class GiftAdminController {
                 .transform(to: .ok)
         }
     }
-    
-    func unreviewedGifts(_ req: Request) throws -> EventLoopFuture<[Gift.Output]> {
-        
-        let requestInput = try req.content.decode(RequestInput.self)
-        let query = Gift.query(on: req.db)
-            .filter(\.$isReviewed == false)
-        return Gift.getGiftsWithRequestFilter(
-            query: query,
-            requestInput: requestInput,
-            onlyReviewerAcceptedGifts: false)
-            .outputArray
-    }
-    
 }

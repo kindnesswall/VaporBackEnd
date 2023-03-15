@@ -12,18 +12,6 @@ import FluentPostgresDriver
 /// Controls basic CRUD operations on `Gift`s.
 final class GiftController {
     
-    /// Returns a list of all `Gift`s.
-    func index(_ req: Request) throws -> EventLoopFuture<[Gift.Output]> {
-        
-        let requestInput = try req.content.decode(RequestInput.self)
-        let query = Gift.query(on: req.db)
-        return Gift.getGiftsWithRequestFilter(
-            query: query,
-            requestInput: requestInput,
-            onlyReviewerAcceptedGifts: true)
-            .outputArray
-    }
-    
     func itemAt(_ req: Request) throws -> EventLoopFuture<Gift.Output> {
         return Gift.getParameter(on: req).flatMapThrowing { gift in
             guard gift.isAcceptedByReviewer else { throw Abort(.unreviewedGift) }

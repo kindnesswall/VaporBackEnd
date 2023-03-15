@@ -7,15 +7,21 @@
 
 import Vapor
 
-class RequestInput: Codable {
-    var beforeId:Int?
-    var count:Int?
-    var categoryIds:[Int]?
-    var countryId: Int?
-    var provinceId:Int?
-    var cityId:Int?
-    var regionIds:[Int]? 
-    var searchWord:String?
-    var isDonated: Bool?
-    var isDelivered: Bool?
+class RequestInput: Codable, FetchCountProtocol {
+    let beforeId: Int?
+    let page: Int?
+    let count: Int?
+    let categoryIds: [Int]?
+    let countryId: Int?
+    let provinceId: Int?
+    let cityId: Int?
+    let regionIds: [Int]?
+    let searchWord: String?
+    let isDonated: Bool?
+    let isDelivered: Bool?
+}
+
+class PaginationRequestInput: Codable, FetchCountProtocol {
+    let page: Int?
+    let count: Int?
 }
