@@ -12,7 +12,7 @@ final class RatingController {
     func get(_ req: Request) throws -> EventLoopFuture<Outputs.Rating> {
         
         let reviewedId = try req.requireIDParameter()
-        let authId = try? req.getAuthId()
+        let authId = try? req.requireAuthID()
         
         return RatingResult.get(
             reviewedId: reviewedId,
@@ -39,7 +39,7 @@ final class RatingController {
     
     func create(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
         
-        let authId = try req.getAuthId()
+        let authId = try req.requireAuthID()
         let input = try req.content.decode(Rating.Input.self)
         return Rating.create(
             authId: authId,
@@ -49,7 +49,7 @@ final class RatingController {
     
     func update(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
         
-        let authId = try req.getAuthId()
+        let authId = try req.requireAuthID()
         let input = try req.content.decode(Rating.Input.self)
         
         return Rating.find(

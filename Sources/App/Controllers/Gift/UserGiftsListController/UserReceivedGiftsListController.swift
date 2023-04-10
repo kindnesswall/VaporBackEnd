@@ -11,22 +11,23 @@ import Fluent
 class UserReceivedGiftsListController: ListControllerProtocol {
     
     func index(_ req: Request) throws -> EventLoopFuture<[Gift.Output]> {
-        return try getGiftQuery(req).flatMap { giftQuery in
+        let userId = try req.idParameter ?? req.requireAuthID()
+        return try getGiftQuery(req, userId: userId).flatMap { giftQuery in
             Gift.getGifts(giftQuery: giftQuery)
         }
     }
     
     func paginatedIndex(_ req: Request) throws -> EventLoopFuture<Page<Gift.Output>> {
-        return try getGiftQuery(req).flatMap { giftQuery in
+        let userId = try req.idParameter ?? req.requireAuthID()
+        return try getGiftQuery(req, userId: userId).flatMap { giftQuery in
             Gift.getPaginatedGifts(giftQuery: giftQuery)
         }
     }
     
-    func getGiftQuery(_ req: Request) throws -> EventLoopFuture<GiftQuery> {
+    func getGiftQuery(_ req: Request, userId: Int) throws -> EventLoopFuture<GiftQuery> {
         
         let auth = req.auth.get(User.self)
         let isAdmin = auth?.isAdmin ?? false
-        let userId = try req.requireIDParameter()
         let requestInput = try req.query.decode(RequestInput.self)
         
         return User.findOrFail(

@@ -164,6 +164,9 @@ class URIs {
     var gifts_userRegistered_id : [PathComponent] {
         appendID(to: gifts_userRegistered)
     }
+    var gifts_userRegistered_paginate : [PathComponent] {
+        appendPaginate(to: gifts_userRegistered)
+    }
     var gifts_userRegistered_id_paginate : [PathComponent] {
         appendPaginate(to: gifts_userRegistered_id)
     }
@@ -172,6 +175,9 @@ class URIs {
     }
     var gifts_userDonated_id: [PathComponent] {
         appendID(to: gifts_userDonated)
+    }
+    var gifts_userDonated_paginate: [PathComponent] {
+        appendPaginate(to: gifts_userDonated)
     }
     var gifts_userDonated_id_paginate: [PathComponent] {
         appendPaginate(to: gifts_userDonated_id)
@@ -182,6 +188,9 @@ class URIs {
     var gifts_userReceived_id : [PathComponent] {
         appendID(to: gifts_userReceived)
     }
+    var gifts_userReceived_paginate : [PathComponent] {
+        appendPaginate(to: gifts_userReceived)
+    }
     var gifts_userReceived_id_paginate : [PathComponent] {
         appendPaginate(to: gifts_userReceived_id)
     }
@@ -190,6 +199,9 @@ class URIs {
     }
     var gifts_userRequested_id: [PathComponent] {
         appendID(to: gifts_userRequested)
+    }
+    var gifts_userRequested_paginate: [PathComponent] {
+        appendPaginate(to: gifts_userRequested)
     }
     var gifts_userRequested_id_paginate: [PathComponent] {
         appendPaginate(to: gifts_userRequested_id)

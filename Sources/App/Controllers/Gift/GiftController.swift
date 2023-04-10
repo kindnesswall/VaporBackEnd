@@ -30,7 +30,7 @@ final class GiftController {
     }
     
     func update(_ req: Request) throws -> EventLoopFuture<Gift.Output> {
-        let authId = try req.getAuthId()
+        let authId = try req.requireAuthID()
         let input = try req.content.decode(Gift.Input.self)
         
         return Gift.findOrFail(req.idParameter,
@@ -44,7 +44,7 @@ final class GiftController {
     
     /// Deletes a parameterized `Gift`.
     func delete(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
-        let authId = try req.getAuthId()
+        let authId = try req.requireAuthID()
         return Gift.findOrFail(req.idParameter,
                                withSoftDeleted: true,
                                on: req.db)

@@ -124,10 +124,20 @@ public func routes(_ app: Application) throws {
     
     tokenProtected.on(.POST, uris.image_upload, body: .collect(maxSize: "20mb"), use: imageController.uploadImage)
     
+    tokenFetched.get(uris.gifts_userRegistered, use: userRegisteredGifts.index)
+    tokenFetched.get(uris.gifts_userDonated, use: userDonatedGifts.index)
+    tokenFetched.get(uris.gifts_userReceived, use: userReceivedGifts.index)
+    publicRouter.get(uris.gifts_userRequested, use: userRequestedGifts.index)
+    
     tokenFetched.get(uris.gifts_userRegistered_id, use: userRegisteredGifts.index)
     tokenFetched.get(uris.gifts_userDonated_id, use: userDonatedGifts.index)
     tokenFetched.get(uris.gifts_userReceived_id, use: userReceivedGifts.index)
     publicRouter.get(uris.gifts_userRequested_id, use: userRequestedGifts.index)
+    
+    tokenFetched.get(uris.gifts_userRegistered_paginate, use: userRegisteredGifts.paginatedIndex)
+    tokenFetched.get(uris.gifts_userDonated_paginate, use: userDonatedGifts.paginatedIndex)
+    tokenFetched.get(uris.gifts_userReceived_paginate, use: userReceivedGifts.paginatedIndex)
+    publicRouter.get(uris.gifts_userRequested_paginate, use: userRequestedGifts.paginatedIndex)
     
     tokenFetched.get(uris.gifts_userRegistered_id_paginate, use: userRegisteredGifts.paginatedIndex)
     tokenFetched.get(uris.gifts_userDonated_id_paginate, use: userDonatedGifts.paginatedIndex)
