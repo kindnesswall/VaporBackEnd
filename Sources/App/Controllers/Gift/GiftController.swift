@@ -13,11 +13,31 @@ import FluentPostgresDriver
 final class GiftController {
     
     func itemAt(_ req: Request) throws -> EventLoopFuture<Gift.Output> {
-        return Gift.getParameter(on: req).flatMapThrowing { gift in
-            guard gift.isAcceptedByReviewer else { throw Abort(.unreviewedGift) }
-            return gift
-        }
-        .outputObject
+        
+        let auth = req.auth.get(User.self)
+        
+        return Gift.findOrFail(req.idParameter,
+                               withSoftDeleted: true,
+                               on: req.db)
+        .flatMapThrowing { gift in
+            if gift.deletedAt == nil,
+               !gift.isDeleted,
+               gift.isAcceptedByReviewer {
+                return gift
+            } else {
+                if let auth = auth,
+                   let authID = auth.id,
+                   (authID == gift.$user.id || auth.isAdmin) {
+                    return gift
+                } else {
+                    if !gift.isAcceptedByReviewer {
+                        throw Abort(.unreviewedGift)
+                    } else {
+                        throw Abort(.notFound)
+                    }
+                }
+            }
+        }.outputObject
     }
     
     

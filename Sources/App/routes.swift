@@ -116,7 +116,8 @@ public func routes(_ app: Application) throws {
     //Routes Gifts
     publicRouter.get(uris.gifts, use: giftsListController.index)
     publicRouter.get(uris.gifts_paginate, use: giftsListController.paginatedIndex)
-    publicRouter.get(uris.gifts_id, use: giftController.itemAt)
+    
+    tokenFetched.get(uris.gifts_id, use: giftController.itemAt)
     
     tokenProtected.post(uris.gifts_register,use: giftController.create)
     tokenProtected.put(uris.gifts_id, use: giftController.update)
