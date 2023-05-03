@@ -35,11 +35,6 @@ final class AdminStatisticsController {
             .withDeleted()
             .filter(\.$deletedAt != nil)
             .count()
-        let chatBlockedUsers = ChatBlock.query(on: db).all().map { chatBlocks -> Int in
-            return chatBlocks.reduce(into: [Int:Int](), { (result, chatBlock) in
-                result[chatBlock.blockedUserId, default: 0] += 1
-            }).count
-        }
         
         return getStatistics(registeredGifts: registeredGifts,
                              donatedGifts: donatedGifts,
@@ -47,8 +42,7 @@ final class AdminStatisticsController {
                              rejectedGifts: rejectedGifts,
                              deletedGifts: deletedGifts,
                              activeUsers: activeUsers,
-                             blockedUsers: blockedUsers,
-                             chatBlockedUsers: chatBlockedUsers)
+                             blockedUsers: blockedUsers)
     }
     
     
@@ -58,8 +52,8 @@ final class AdminStatisticsController {
                        rejectedGifts:EventLoopFuture<Int>,
                        deletedGifts:EventLoopFuture<Int>,
                        activeUsers:EventLoopFuture<Int>,
-                       blockedUsers:EventLoopFuture<Int>,
-                       chatBlockedUsers:EventLoopFuture<Int>)->EventLoopFuture<Statistics>{
+                       blockedUsers:EventLoopFuture<Int>)
+    -> EventLoopFuture<Statistics> {
         
         return registeredGifts.flatMap { registeredGifts in
         return donatedGifts.flatMap { donatedGifts in
@@ -67,8 +61,7 @@ final class AdminStatisticsController {
         return rejectedGifts.flatMap { rejectedGifts in
         return deletedGifts.flatMap { deletedGifts in
         return activeUsers.flatMap { activeUsers in
-        return blockedUsers.flatMap { blockedUsers in
-        return chatBlockedUsers.map { chatBlockedUsers in
+        return blockedUsers.map { blockedUsers in
             let statistics = Statistics()
             statistics.registeredGifts = registeredGifts
             statistics.donatedGifts = donatedGifts
@@ -77,9 +70,7 @@ final class AdminStatisticsController {
             statistics.deletedGifts = deletedGifts
             statistics.activeUsers = activeUsers
             statistics.blockedUsers = blockedUsers
-            statistics.chatBlockedUsers = chatBlockedUsers
             return statistics }}}}}}}
-        }
     }
     
     

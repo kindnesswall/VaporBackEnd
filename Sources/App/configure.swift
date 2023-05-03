@@ -55,14 +55,11 @@ public func configure(_ app: Application) throws {
 //    migrations.add(model: UserPhoneNumberLog.self, database: DatabaseIdentifier<UserPhoneNumberLog.Database>.psql)
 //    migrations.add(model: PhoneNumberActivationCode.self, database: DatabaseIdentifier<PhoneNumberActivationCode.Database>.psql)
 //    migrations.add(model: Token.self, database: DatabaseIdentifier<Token.Database>.psql)
-//    migrations.add(model: TextMessage.self, database: DatabaseIdentifier<TextMessage.Database>.psql)
 //    migrations.add(model: Country.self, database: DatabaseIdentifier<Country.Database>.psql)
 //    migrations.add(model: Province.self, database: DatabaseIdentifier<Province.Database>.psql)
 //    migrations.add(model: County.self, database: DatabaseIdentifier<County.Database>.psql)
 //    migrations.add(model: City.self, database: DatabaseIdentifier<City.Database>.psql)
 //    migrations.add(model: Region.self, database: DatabaseIdentifier<Region.Database>.psql)
-//    migrations.add(model: DirectChat.self, database: DatabaseIdentifier<DirectChat.Database>.psql)
-//    migrations.add(model: ChatBlock.self, database: DatabaseIdentifier<ChatBlock.Database>.psql)
 //    migrations.add(model: GiftRequest.self, database: DatabaseIdentifier<GiftRequest.Database>.psql)
 //    migrations.add(model: UserPushNotification.self, database: DatabaseIdentifier<UserPushNotification.Database>.psql)
 //    migrations.add(model: Charity.self, database: DatabaseIdentifier<Charity.Database>.psql)
@@ -94,7 +91,6 @@ public func configure(_ app: Application) throws {
 //    }
     
     app.migrations.add(UserUniquePhoneNumberMigration())
-//    app.migrations.add(DirectChatUniqueUserIdAndContactIdMigration())
     app.migrations.add(RatingResultUniqueReviewedIdMigration())
     app.migrations.add(ReportGiftMigration())
     app.migrations.add(ReportCharityMigration())

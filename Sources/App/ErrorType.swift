@@ -19,9 +19,7 @@ extension Abort {
 enum ErrorType: String {
     case tryOneMinuteLater
     case unauthorizedRequest
-    case unauthorizedSocket
     case unauthorizedGift
-    case unauthorizedMessage
     case unreviewedGift
     case unrequestedGift
     case giftCannotBeDonatedToTheOwner
@@ -36,36 +34,25 @@ enum ErrorType: String {
     case invalidActivationCode
     case expiredActivationCode
     case pushPayloadIsNotValid
-    case chatHasBlockedByUser
     case invalidType
     case invalid
     case nilUserId
     case nilTokenId
     case nilGiftId
     case nilGiftUserId
-    case messageNotFound
-    case nilMessageId
     case nilCountryId
     case notFound
     case notFoundOrHasExpired
     case userNotFound
     case giftNotFound
-    case chatNotFound
-    case nilChatId
     case profileNotFound
-    case chatNotificationNotFound
     case charityInfoNotFound
     case activationCodeNotFound
     case countryNotFound
     case provinceNotFound
     case cityNotFound
     case userAccessIsDenied
-    case chatHasBlocked
-    case redundentAck
-    case userWasAlreadyBlocked
-    case userWasAlreadyUnblocked
     case userIsNotCharity
-    case chatIsNotAllowed
     case serverThrowsException
     case objectEncodingFailed
     case transactionFailed
@@ -84,10 +71,7 @@ extension ErrorType {
         case .tryOneMinuteLater:
             return .tooManyRequests
         case .unauthorizedRequest,
-             .unauthorizedSocket,
-             .unauthorizedGift,
-             .unauthorizedMessage,
-             .chatIsNotAllowed:
+             .unauthorizedGift:
             return .methodNotAllowed
         case .notAcceptable,
              .unreviewedGift,
@@ -104,7 +88,6 @@ extension ErrorType {
              .invalidActivationCode,
              .expiredActivationCode,
              .pushPayloadIsNotValid,
-             .chatHasBlockedByUser,
              .invalidType,
              .invalid,
              .phoneNumberIsNotAccessible,
@@ -114,30 +97,20 @@ extension ErrorType {
              .nilTokenId,
              .nilGiftId,
              .nilGiftUserId,
-             .messageNotFound,
-             .nilMessageId,
              .nilCountryId,
              .notFound,
              .notFoundOrHasExpired,
              .userNotFound,
              .giftNotFound,
-             .chatNotFound,
-             .nilChatId,
              .profileNotFound,
-             .chatNotificationNotFound,
              .charityInfoNotFound,
              .activationCodeNotFound,
              .countryNotFound,
              .provinceNotFound,
              .cityNotFound:
             return .notFound
-        case .userAccessIsDenied,
-             .chatHasBlocked:
+        case .userAccessIsDenied:
             return .forbidden
-        case .redundentAck,
-             .userWasAlreadyBlocked,
-             .userWasAlreadyUnblocked:
-            return .alreadyReported
         case .userIsNotCharity:
             return .badRequest
         case .serverThrowsException,
@@ -160,12 +133,8 @@ extension ErrorType {
             return "Please try one minute later"
         case .unauthorizedRequest:
             return "Request is unauthorized"
-        case .unauthorizedSocket:
-            return "Socket is unauthorized"
         case .unauthorizedGift:
             return "Gift is unauthorized for this operation"
-        case .unauthorizedMessage:
-            return "Message is unauthorized for this operation"
         case .unreviewedGift:
             return "Gift is not reviewed"
         case .unrequestedGift:
@@ -194,8 +163,6 @@ extension ErrorType {
             return "The activation code has been expired"
         case .pushPayloadIsNotValid:
             return "Push payload is not valid"
-        case .chatHasBlockedByUser:
-            return "Chat has blocked by user"
         case .invalidType:
             return "The input type is invalid"
         case .invalid:
@@ -208,10 +175,6 @@ extension ErrorType {
             return "Gift id is nil"
         case .nilGiftUserId:
             return "Gift user id is nil"
-        case .messageNotFound:
-            return "Message not found"
-        case .nilMessageId:
-            return "Message id is nil"
         case .nilCountryId:
             return "Country id is nil"
         case .notFound:
@@ -222,14 +185,8 @@ extension ErrorType {
             return "User not found"
         case .giftNotFound:
             return "Gift not found"
-        case .chatNotFound:
-            return "Chat not found"
-        case .nilChatId:
-            return "Chat id is nil"
         case .profileNotFound:
             return "Profile not found"
-        case .chatNotificationNotFound:
-            return "Chat's Notification not found"
         case .charityInfoNotFound:
             return "Charity information not found"
         case .activationCodeNotFound:
@@ -242,18 +199,8 @@ extension ErrorType {
             return "City not found"
         case .userAccessIsDenied:
             return "User access is denied"
-        case .chatHasBlocked:
-            return "Chat has blocked"
-        case .redundentAck:
-            return "Ack is redundent"
-        case .userWasAlreadyBlocked:
-            return "User was already blocked"
-        case .userWasAlreadyUnblocked:
-            return "User was already unblocked"
         case .userIsNotCharity:
             return "User is not charity"
-        case .chatIsNotAllowed:
-            return "Chat is not allowed"
         case .serverThrowsException:
             return "Server throws exception"
         case .objectEncodingFailed:

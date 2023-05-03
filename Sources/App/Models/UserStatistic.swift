@@ -14,7 +14,6 @@ final class UserStatistic : Content{
     var rejectedGifts:Int?
     var donatedGifts:Int?
     var receivedGifts:Int?
-    var blockedChats:Int?
     
     init(user:User) {
         self.user = user

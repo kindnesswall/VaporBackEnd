@@ -119,42 +119,6 @@ class URIs {
     var allInvalidDevicePushTokens_forceDelete : [PathComponent] {
         makeAPI(path: ["allInvalidDevicePushTokens", "forceDelete"])
     }
-    var chat : [PathComponent] {
-        makeAPI(path: ["chat"])
-    }
-    var chat_start : [PathComponent] {
-        append(to: chat, path: ["start"])
-    }
-    var chat_start_id : [PathComponent] {
-        appendID(to: chat_start)
-    }
-    var chat_contacts : [PathComponent] {
-        append(to: chat, path: ["contacts"])
-    }
-    var chat_contacts_block : [PathComponent] {
-        append(to: chat_contacts, path: ["block"])
-    }
-    var chat_messages : [PathComponent] {
-        append(to: chat, path: ["messages"])
-    }
-    var chat_send : [PathComponent] {
-        append(to: chat, path: ["send"])
-    }
-    var chat_ack : [PathComponent] {
-        append(to: chat, path: ["ack"])
-    }
-    var chat_block : [PathComponent] {
-        append(to: chat, path: ["block"])
-    }
-    var chat_block_id : [PathComponent] {
-        appendID(to: chat_block)
-    }
-    var chat_unblock : [PathComponent] {
-        append(to: chat, path: ["unblock"])
-    }
-    var chat_unblock_id : [PathComponent] {
-        appendID(to: chat_unblock)
-    }
     var gifts_register : [PathComponent] {
         append(to: gifts, path: ["register"])
     }
@@ -248,9 +212,6 @@ class URIs {
     var users_list_blocked : [PathComponent] {
         append(to: users_list, path: ["blocked"])
     }
-    var users_list_chatBlocked : [PathComponent] {
-        append(to: users_list, path: ["chatBlocked"])
-    }
     var users_statistics : [PathComponent] {
         append(to: users, path: ["statistics"])
     }
@@ -266,9 +227,6 @@ class URIs {
 
     var users_statistics_list_blocked : [PathComponent] {
         append(to: users_statistics_list, path: ["blocked"])
-    }
-    var users_statistics_list_chatBlocked : [PathComponent] {
-        append(to: users_statistics_list, path: ["chatBlocked"])
     }
     var charity : [PathComponent] {
         makeAPI(path: ["charity"])

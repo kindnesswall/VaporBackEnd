@@ -34,8 +34,4 @@ final class AdminUserListController {
         let queryParam = try req.content.decode(Inputs.UserQuery.self)
         return User.allBlockedUsers(on: req.db, queryParam: queryParam)
     }
-    
-    func usersChatBlockedList(_ req: Request) throws -> EventLoopFuture<[User_BlockedReport]> {
-        return User.allChatBlockedUsers(on: req.db)
-    }
 }

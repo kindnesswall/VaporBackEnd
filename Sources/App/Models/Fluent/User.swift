@@ -168,20 +168,6 @@ extension User {
 }
 
 extension User {
-    static func allChatBlockedUsers(on conn: Database) -> EventLoopFuture<[User_BlockedReport]> {
-        
-        return User.query(on: conn)
-            .join(ChatBlock.self,
-                  on: \User.$id == \ChatBlock.$blockedUserId)
-            .all()
-            .flatMapThrowing {
-                try $0.map { ($0, try $0.joined(ChatBlock.self)) }
-                    .getStandard()
-        }
-    }
-}
-
-extension User {
     
     static func getUsersWithRequestFilter(query: QueryBuilder<User>, queryParam: Inputs.UserQuery?) -> EventLoopFuture<[User]> {
         

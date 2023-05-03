@@ -15,6 +15,5 @@ final class Statistics: Content {
     var deletedGifts: Int?
     var activeUsers: Int?
     var blockedUsers: Int?
-    var chatBlockedUsers: Int?
     
 }

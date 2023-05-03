@@ -29,8 +29,6 @@ public func routes(_ app: Application) throws {
     let userStatistics = UserStatisticsController()
     let adminUserList = AdminUserListController()
     let giftRequestController = GiftRequestController()
-    let chatRestfulController = ChatRestfulController()
-    let chatBlockController = ChatBlockController()
     let pushNotificationController = PushNotificationController()
     let charityController = CharityController()
     let charityInfo = CharityInfoController()
@@ -168,11 +166,9 @@ public func routes(_ app: Application) throws {
     adminProtected.delete(uris.users_denyAccess_id, use: adminUserList.userDenyAccess)
     adminProtected.post(uris.users_list_active, use: adminUserList.usersActiveList)
     adminProtected.post(uris.users_list_blocked, use: adminUserList.usersBlockedList)
-    adminProtected.get(uris.users_list_chatBlocked, use: adminUserList.usersChatBlockedList)
     adminProtected.get(uris.users_statistics_id, use: userStatistics.userStatistics)
     adminProtected.post(uris.users_statistics_list_active, use: userStatistics.usersActiveList)
     adminProtected.post(uris.users_statistics_list_blocked, use: userStatistics.usersBlockedList)
-    adminProtected.get(uris.users_statistics_list_chatBlocked, use: userStatistics.usersChatBlockedList)
     
     //Routes Charity
     publicRouter.get(uris.charity_user_id, use: charityController.getCharityOfUser)

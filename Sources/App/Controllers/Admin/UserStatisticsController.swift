@@ -32,15 +32,6 @@ final class UserStatisticsController {
             return self.getUserStatistic(req: req, user: user)
         })
     }
-    
-    func usersChatBlockedList(_ req: Request) throws -> EventLoopFuture<[UserStatistic]> {
-        
-        return User.allChatBlockedUsers(on: req.db).map { list in
-            return list.map { $0.user }
-        }.flatMap({ users in
-            return self.getUserStatistics(req: req, users: users)
-        })
-    }
 }
 
 extension UserStatisticsController {
@@ -80,16 +71,12 @@ extension UserStatisticsController {
         let receivedGifts = user.$receivedGifts.query(on: req.db)
             .count()
         
-        let blockedChats = ChatBlock.query(on: req.db)
-            .filter(\.$blockedUserId == userId)
-            .count()
         
         return self.getUserStatistic(user: user,
                                      registeredGifts: registeredGifts,
                                      rejectedGifts: rejectedGifts,
                                      donatedGifts: donatedGifts,
-                                     receivedGifts: receivedGifts,
-                                     blockedChats: blockedChats)
+                                     receivedGifts: receivedGifts)
         
     }
     
@@ -97,17 +84,14 @@ extension UserStatisticsController {
                           registeredGifts:EventLoopFuture<Int>,
                           rejectedGifts:EventLoopFuture<Int>,
                           donatedGifts:EventLoopFuture<Int>,
-                          receivedGifts:EventLoopFuture<Int>,
-                          blockedChats:EventLoopFuture<Int>
+                          receivedGifts:EventLoopFuture<Int>
         )->EventLoopFuture<UserStatistic> {
         let userStatistic = UserStatistic(user: user)
         return registeredGifts.flatMap { userStatistic.registeredGifts = $0
             return rejectedGifts.flatMap({ userStatistic.rejectedGifts = $0
                 return donatedGifts.flatMap({ userStatistic.donatedGifts = $0
-                    return receivedGifts.flatMap({ userStatistic.receivedGifts = $0
-                        return blockedChats.map({ userStatistic.blockedChats = $0
-                            return userStatistic
-                        })
+                    return receivedGifts.map({ userStatistic.receivedGifts = $0
+                        return userStatistic
                     })
                 })
             })

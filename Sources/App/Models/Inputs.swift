@@ -52,12 +52,6 @@ class Inputs {
         var downloadLink: String?
     }
     
-    struct TextMessage : Content {
-        var chatId:Int
-        var text:String
-        var type: String?
-    }
-    
     struct UserQuery: Content {
         var beforeId:Int?
         var count:Int?
