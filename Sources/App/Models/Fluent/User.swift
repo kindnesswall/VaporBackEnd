@@ -93,29 +93,10 @@ final class User : Model {
 extension User: Authenticatable {}
 
 extension User {
-    func userProfile(req:Request) throws -> UserProfile {
-        let id = try self.getId()
-        let auth = try? req.auth.require(User.self)
-        let phoneNumber = (auth?.isAdmin == true || id == auth?.id) ? self.phoneNumber : nil
-        let isAdmin = (auth?.isAdmin == true) ? self.isAdmin : nil
-        
-        let charityName = self.isCharity ? self.charityName : nil
-        let charityImage = self.isCharity ? self.charityImage : nil
-        
-        let isSupporter = self.isAdmin
-        
-        let userProfile = UserProfile(
-            id: id,
+    var userProfile: UserProfile {
+        return .init(
             name: self.name,
-            image: self.image,
-            phoneNumber: phoneNumber,
-            isCharity: self.isCharity,
-            charityName: charityName,
-            charityImage: charityImage,
-            isSupporter: isSupporter,
-            isAdmin: isAdmin)
-        
-        return userProfile
+            image: self.image)
     }
 }
 

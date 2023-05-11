@@ -11,14 +11,14 @@ import Vapor
 final class UserProfileController {
     
     func show(_ req: Request) throws -> EventLoopFuture<UserProfile> {
-        return User.getParameter(on: req).flatMapThrowing { user in
-            return try user.userProfile(req: req)
+        return User.getParameter(on: req).map { user in
+            return user.userProfile
         }
     }
     
     func showAuthenticatedUser(_ req: Request) throws -> UserProfile {
         let auth = try req.auth.require(User.self)
-        return try auth.userProfile(req: req)
+        return auth.userProfile
     }
     
     func update(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {

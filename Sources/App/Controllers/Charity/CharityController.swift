@@ -13,14 +13,17 @@ final class CharityController {
         return Charity.getAllCharities(conn: req.db)
     }
     
-    func getCharityOfUser(_ req: Request) throws -> EventLoopFuture<Charity> {
+    func getCharityOfUser(_ req: Request) throws -> EventLoopFuture<CharityStatus> {
         
-        let userId = try req.requireIDParameter()
+        let userId = try req.idParameter ?? req.requireAuthID()
         return User.findOrFail(userId, on: req.db).flatMap { user in
-            guard user.isCharity else {
-                return req.db.makeFailedFuture(.userIsNotCharity)
+            if !user.isCharity {
+                return req.db.makeSucceededFuture(.init(isCharity: false))
+            } else {
+                return Charity.get(userId: userId, on: req.db).map { charity in
+                    return .init(charity: charity, isCharity: true)
+                }
             }
-            return Charity.get(userId: userId, on: req.db)
         }
     }
 }

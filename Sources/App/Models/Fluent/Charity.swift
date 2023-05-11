@@ -268,23 +268,3 @@ extension Charity {
 //extension Charity : Migration {}
 
 extension Charity : Content {}
-
-
-
-final class Charity_Status: Content {
-    
-    var charity: Charity?
-    var status: CharityStatus
-    
-    init(charity: Charity?, status: CharityStatus) {
-        self.charity = charity
-        self.status = status
-    }
-}
-
-enum CharityStatus: String, Content {
-    case notRequested
-    case pending
-    case rejected
-    case isCharity
-}

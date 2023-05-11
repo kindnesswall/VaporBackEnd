@@ -20,34 +20,15 @@ final class CharityInfoController {
         return userId
     }
     
-    func show(_ req: Request) throws -> EventLoopFuture<Charity_Status> {
+    func show(_ req: Request) throws -> EventLoopFuture<CharityDetailedStatus> {
         
         let userId = try validate(req)
         
         return User.findOrFail(userId, on: req.db).flatMap { user in
             return Charity.find(userId: userId, on: req.db).map { charity in
-                let status = self.getCharityStatus(user: user, charity: charity)
-                return Charity_Status(charity: charity, status: status)
+                return .init(user: user, charity: charity)
             }
         }
-    }
-    
-    private func getCharityStatus(user: User, charity: Charity?) -> CharityStatus {
-        
-        if let charity = charity {
-            if user.isCharity {
-                return .isCharity
-            } else {
-                if charity.isRejected == true {
-                    return .rejected
-                } else {
-                    return .pending
-                }
-            }
-        } else {
-            return .notRequested
-        }
-        
     }
     
     func create(_ req: Request) throws -> EventLoopFuture<Charity> {

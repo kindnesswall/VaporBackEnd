@@ -171,6 +171,7 @@ public func routes(_ app: Application) throws {
     adminProtected.post(uris.users_statistics_list_blocked, use: userStatistics.usersBlockedList)
     
     //Routes Charity
+    tokenProtected.get(uris.charity_user, use: charityController.getCharityOfUser)
     publicRouter.get(uris.charity_user_id, use: charityController.getCharityOfUser)
     publicRouter.get(uris.charity_list, use: charityController.getCharityList)
     
