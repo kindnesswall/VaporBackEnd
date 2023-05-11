@@ -37,8 +37,6 @@ public func routes(_ app: Application) throws {
     let versionController = ApplicationVersionController()
     let sponsor = SponsorController()
     let rating = RatingController()
-    let userPhone = UserPhoneController()
-    let phoneVisibilitySetting = UserPhoneVisibilitySettingController()
     let reportGiftController = ReportGiftController()
     let reportCharityController = ReportCharityController()
     let reportUserController = ReportUserController()
@@ -218,9 +216,6 @@ public func routes(_ app: Application) throws {
     tokenProtected.post(uris.rating, use: rating.create)
     tokenProtected.put(uris.rating, use: rating.update)
     tokenFetched.get(uris.rating_id, use: rating.get)
-    
-    //Phone number of a gift
-    tokenProtected.get(uris.phone_access_gift_id, use: userPhone.getPhoneNumberOfAGift)
     
     adminProtected.delete(uris.logout_oldTokens_all, use: logoutController.logoutAllOldTokens)
     adminProtected.delete(uris.logout_oldTokens_admins, use: logoutController.logoutAdminsOldTokens)
