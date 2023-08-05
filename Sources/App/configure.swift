@@ -22,13 +22,13 @@ public func configure(_ app: Application) throws {
     try routes(app)
 
     /// Register middleware
-    let corsConfiguration = CORSMiddleware.Configuration(
-        allowedOrigin: .all,
-        allowedMethods: [.GET, .POST, .PUT, .OPTIONS, .DELETE, .PATCH],
-        allowedHeaders: [.accept, .authorization, .contentType, .origin, .xRequestedWith, .userAgent, .accessControlAllowOrigin]
-    )
-    let corsMiddleware = CORSMiddleware(configuration: corsConfiguration)
-    app.middleware.use(corsMiddleware)
+//    let corsConfiguration = CORSMiddleware.Configuration(
+//        allowedOrigin: .all,
+//        allowedMethods: [.GET, .POST, .PUT, .OPTIONS, .DELETE, .PATCH],
+//        allowedHeaders: [.accept, .authorization, .contentType, .origin, .xRequestedWith, .userAgent, .accessControlAllowOrigin]
+//    )
+//    let corsMiddleware = CORSMiddleware(configuration: corsConfiguration)
+//    app.middleware.use(corsMiddleware)
     
     let file = FileMiddleware(publicDirectory: app.directory.publicDirectory)
     app.middleware.use(file)
